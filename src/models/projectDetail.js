@@ -1,5 +1,5 @@
 const table = {
-    TABLE: "PROJECT_DETAIL",
+    TABLE: "project_detail",
     COLUMN: {
         ID: "ID",
         PROJECT_ID: "PROJECT_ID",
