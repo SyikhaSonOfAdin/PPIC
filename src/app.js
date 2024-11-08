@@ -20,11 +20,11 @@ const app = express();
 const port = 3000;
 
 const corsOptions = {
-    origin: '*',
+    origin: ['https://ppic.syikha.com'],
     optionsSuccessStatus: 200
 };
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '')));
