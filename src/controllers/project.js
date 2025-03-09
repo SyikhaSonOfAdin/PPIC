@@ -110,12 +110,10 @@ const projectControllers = {
                     const projects = await Promise.all(data.map(async (item) => {
                         const actual = await actualServices.get(item.ID, connection)
                         const plans = await plansServices.get(item.ID, connection)
-                        const tempActual = actual.reduce((total, item) => {
-                            return total + parseFloat(item.AMOUNT) || 0;
-                        }, 0)
-                        const tempPlans = plans.reduce((total, item) => {
-                            return total + parseFloat(item.AMOUNT) || 0;
-                        }, 0)
+                        
+                        const tempActual = parseFloat(actual[actual.length - 1]?.AMOUNT ?? 0)
+                        const tempPlans = parseFloat(plans[plans.length - 1]?.AMOUNT ?? 0)
+
                         return {
                             ...item,
                             progress: {
@@ -153,20 +151,19 @@ const projectControllers = {
                     const projectDetail = await projectDetailServices.get(projectId, connection)
                     const actual = await actualServices.get(projectId, connection)
                     const plans = await plansServices.get(projectId, connection)
+
                     await connection.commit()
-                    const tempActual = actual.reduce((total, item) => {
-                        return total + parseFloat(item.AMOUNT) || 0;
-                    }, 0)
-                    const tempPlans = plans.reduce((total, item) => {
-                        return total + parseFloat(item.AMOUNT) || 0;
-                    }, 0)
+
+                    const tempActual = parseFloat(actual[actual.length - 1]?.AMOUNT ?? 0)
+                    const tempPlans = parseFloat(plans[plans.length - 1]?.AMOUNT ?? 0)
+
                     return res.status(200).json({
                         message: "Get Project successfully",
                         data: [{
                             project,
                             projectDetail,
                             progress: {
-                                PERCENTAGE: tempPlans > 0 ? ((tempActual / projectDetail.CAPACITY) * 100).toFixed(2) + "%" : "0%",
+                                PERCENTAGE: tempPlans > 0 && tempActual > 0 ? ((tempActual / projectDetail.CAPACITY) * 100).toFixed(2) + "%" : "0%",
                                 ACTUAL: `${new Intl.NumberFormat("id-ID").format(
                                     tempPlans
                                 )} / ${new Intl.NumberFormat("id-ID").format(
@@ -192,7 +189,7 @@ const projectControllers = {
         summary: async (req, res, next) => {
             const companyId = req.params.companyId
             const year = req.query.y
-            console.log(year)
+            
             if (!companyId || !year) return res.status(400).json({ message: "Invalid Parameter" })
 
             const months = [
@@ -273,15 +270,15 @@ const projectControllers = {
                             }),
                             PLANS: uniqueLabels.map((label) => {
                                 const [year, month] = label.split(" / ");
-    
+
                                 const planItem = plansData.flat().filter(
                                     (item) => item.PERIOD_YEAR == year && months[parseInt(item.PERIOD_MONTH.split("-")[0], 10) - 1] === month
                                 );
-    
+
                                 const totalAmount = planItem.reduce((total, item) => {
                                     return total + (parseInt(item.AMOUNT) || 0);
                                 }, null);
-    
+
                                 return {
                                     x: label,
                                     y: totalAmount,
@@ -289,15 +286,15 @@ const projectControllers = {
                             }),
                             ACTUAL: uniqueLabels.map((label) => {
                                 const [year, month] = label.split(" / ");
-    
+
                                 const actualItem = actualData.flat().filter(
                                     (item) => item.PERIOD_YEAR == year && months[parseInt(item.PERIOD_MONTH.split("-")[0], 10) - 1] === month
                                 );
-    
+
                                 const totalAmount = actualItem.reduce((total, item) => {
                                     return total + (parseInt(item.AMOUNT) || 0);
                                 }, null);
-    
+
                                 return {
                                     x: label,
                                     y: totalAmount,
