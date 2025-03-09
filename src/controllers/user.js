@@ -1,6 +1,6 @@
-const { PPIC } = require("../config/db");
 const { permissionServices } = require("../services/permission");
 const { userServices } = require("../services/user")
+const { PPIC } = require("../config/db");
 const jwt = require('jsonwebtoken');
 
 const userControllers = {
