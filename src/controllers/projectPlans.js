@@ -1,3 +1,4 @@
+const { actualServices } = require("../services/projectActual")
 const { plansServices } = require("../services/projectPlans")
 
 const projectPlansController = {
@@ -5,11 +6,15 @@ const projectPlansController = {
         const { projectId, userId, periodYear, periodMonth, amount } = req.body
         if (!projectId || !userId || !periodYear || !periodMonth || !amount) return res.status(400).json({ message: "Invalid Parameters" })
         try {
-            const id = await plansServices.add(projectId, userId, periodYear, periodMonth, amount)
+            const numberOfRows = await plansServices.get.numberOfRows(projectId)
+            const plansId = await plansServices.add(projectId, userId, periodYear, periodMonth, amount, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`)
+            const actualId = await actualServices.add(projectId, userId, periodYear, periodMonth, 0, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`)
+
             return res.status(200).json({
                 message: "Project Plans added successfully",
                 data: [{
-                    plansId: id,
+                    plansId: plansId,
+                    actualId: actualId,
                 }]
             })
         } catch (error) {
@@ -69,7 +74,7 @@ const projectPlansController = {
         const projectId = req.params.projectId
         if (!projectId) return res.status(400).json({ message: "Invalid Parameters" })
         try {
-            const data = await plansServices.get(projectId)
+            const data = await plansServices.get.all(projectId)
             return res.status(200).json({
                 message: "Project Plans Detail get successfully",
                 data: data

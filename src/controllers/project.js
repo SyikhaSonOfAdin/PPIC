@@ -1,11 +1,11 @@
-const { PPIC } = require("../config/db");
-const { othersQuerys } = require("../models/others");
-const { categoryServices } = require("../services/category");
-const { projectServices } = require("../services/project");
-const { actualServices } = require("../services/projectActual");
 const { projectDetailServices } = require("../services/projectDetail");
+const { actualServices } = require("../services/projectActual");
 const { plansServices } = require("../services/projectPlans");
 const { workLoadServices } = require("../services/workLoad");
+const { categoryServices } = require("../services/category");
+const { projectServices } = require("../services/project");
+const { othersQuerys } = require("../models/others");
+const { PPIC } = require("../config/db");
 
 const projectControllers = {
     add: async (req, res, next) => {
@@ -108,9 +108,9 @@ const projectControllers = {
                     await connection.beginTransaction()
                     const data = await projectServices.get.all(companyId)
                     const projects = await Promise.all(data.map(async (item) => {
-                        const actual = await actualServices.get(item.ID, connection)
-                        const plans = await plansServices.get(item.ID, connection)
-                        
+                        const actual = await actualServices.get.all(item.ID, connection)
+                        const plans = await plansServices.get.all(item.ID, connection)
+
                         const tempActual = parseFloat(actual[actual.length - 1]?.AMOUNT ?? 0)
                         const tempPlans = parseFloat(plans[plans.length - 1]?.AMOUNT ?? 0)
 
@@ -149,8 +149,8 @@ const projectControllers = {
                     await connection.beginTransaction()
                     const project = await projectServices.get.onlyOne(projectId, connection)
                     const projectDetail = await projectDetailServices.get(projectId, connection)
-                    const actual = await actualServices.get(projectId, connection)
-                    const plans = await plansServices.get(projectId, connection)
+                    const actual = await actualServices.get.all(projectId, connection)
+                    const plans = await plansServices.get.all(projectId, connection)
 
                     await connection.commit()
 
@@ -186,10 +186,94 @@ const projectControllers = {
                 })
             }
         },
+        // summary: async (req, res, next) => {
+        //     const companyId = req.params.companyId
+        //     const year = req.query.y
+
+        //     if (!companyId || !year) return res.status(400).json({ message: "Invalid Parameter" })
+
+        //     try {
+        //         const connection = await PPIC.getConnection()
+        //         try {
+        //             await connection.beginTransaction()
+
+        //             const [periodYear] = await connection.query(othersQuerys.select.distinct.period.year, [companyId, companyId])
+
+        //             const categories = await categoryServices.get(companyId, connection)
+
+        //             const groupedProjects = await Promise.all(categories.map(async (category) => {
+        //                 const workLoad = await workLoadServices.get.onlyOne.byYear(category.ID, year, connection)
+
+        //                 const projectsAtributes = await projectServices.get.byCategoryId(category.ID, connection)
+        //                 const plansData = await Promise.all(projectsAtributes.map(async (project) => {
+        //                     const plans = await plansServices.get.data(project.ID, year, connection)
+        //                     return plans
+        //                 }))
+
+        //                 const actualData = await Promise.all(projectsAtributes.map(async (project) => {
+        //                     const actual = await actualServices.get.data(project.ID, year, connection)
+        //                     return actual
+        //                 }))
+
+        //                 return {
+        //                     CATEGORY_NAME: category.NAME,
+        //                     CATEGORY_ID: category.ID,
+        //                     UOM: category.UOM,
+        //                     WORK_LOAD: workLoad[0]?.WORK_LOAD,
+        //                     PLANS: Object.values(
+        //                         plansData.flat().reduce((accumulator, current) => {
+        //                             const date = current.PERIOD_MONTH;
+        //                             const amount = parseFloat(current.AMOUNT);
+
+        //                             if (!accumulator[date]) {
+        //                                 accumulator[date] = [date, amount];
+        //                             } else {
+        //                                 accumulator[date][1] += amount;
+        //                             }
+        //                             return accumulator;
+        //                         }, {})
+        //                     ).sort((a, b) => new Date(a[0]) - new Date(b[0])),
+        //                     ACTUAL: Object.values(
+        //                         actualData.flat().reduce((accumulator, current) => {
+        //                             const date = current.PERIOD_MONTH;
+        //                             const amount = parseFloat(current.AMOUNT);
+
+        //                             if (!accumulator[date]) {
+        //                                 accumulator[date] = [date, amount];
+        //                             } else {
+        //                                 accumulator[date][1] += amount;
+        //                             }
+        //                             return accumulator;
+        //                         }, {})
+        //                     ).sort((a, b) => new Date(a[0]) - new Date(b[0]))
+        //                 }
+        //             }))
+        //             await connection.commit()
+        //             return res.status(200).json({
+        //                 message: "Get Project successfully",
+        //                 data: {
+        //                     period: periodYear,
+        //                     data: groupedProjects
+        //                 }
+        //             })
+        //         } catch (error) {
+        //             await connection.rollback()
+        //             return res.status(500).json({
+        //                 message: error.message
+        //             })
+        //         } finally {
+        //             connection.release()
+        //         }
+        //     } catch (error) {
+        //         res.status(500).json({
+        //             message: error.message
+        //         })
+        //     }
+        // },
         summary: async (req, res, next) => {
             const companyId = req.params.companyId
             const year = req.query.y
-            
+
             if (!companyId || !year) return res.status(400).json({ message: "Invalid Parameter" })
 
             const months = [
@@ -223,11 +307,11 @@ const projectControllers = {
 
                         const projectsAtributes = await projectServices.get.byCategoryId(category.ID, connection)
                         const plansData = await Promise.all(projectsAtributes.map(async (project) => {
-                            const plans = await plansServices.get(project.ID, connection)
+                            const plans = await plansServices.get.all(project.ID, connection)
                             return plans
                         }))
                         const actualData = await Promise.all(projectsAtributes.map(async (project) => {
-                            const actual = await actualServices.get(project.ID, connection)
+                            const actual = await actualServices.get.all(project.ID, connection)
                             return actual
                         }))
 

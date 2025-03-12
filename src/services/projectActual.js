@@ -41,7 +41,7 @@ var projectActual_1 = require("../models/projectActual");
 var db_1 = require("../config/db");
 var uuid_1 = require("uuid");
 exports.actualServices = {
-    add: function (projectId, userId, start, end, amount, connection) { return __awaiter(void 0, void 0, void 0, function () {
+    add: function (projectId, userId, start, end, amount, week, connection) { return __awaiter(void 0, void 0, void 0, function () {
         var CONNECTION, _a, id, error_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -58,7 +58,7 @@ exports.actualServices = {
                 case 3:
                     _b.trys.push([3, 5, 6, 7]);
                     id = (0, uuid_1.v7)();
-                    return [4 /*yield*/, CONNECTION.query(projectActual_1.actualQuerys.insert, [id, projectId, userId, start, end, amount])];
+                    return [4 /*yield*/, CONNECTION.query(projectActual_1.actualQuerys.insert, [id, projectId, userId, start, end, week, amount])];
                 case 4:
                     _b.sent();
                     return [2 /*return*/, id];
@@ -172,36 +172,102 @@ exports.actualServices = {
             }
         });
     }); },
-    get: function (projectId, connection) { return __awaiter(void 0, void 0, void 0, function () {
-        var CONNECTION, _a, data, error_5;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _a = connection;
-                    if (_a) return [3 /*break*/, 2];
-                    return [4 /*yield*/, db_1.PPIC.getConnection()];
-                case 1:
-                    _a = (_b.sent());
-                    _b.label = 2;
-                case 2:
-                    CONNECTION = _a;
-                    _b.label = 3;
-                case 3:
-                    _b.trys.push([3, 5, 6, 7]);
-                    return [4 /*yield*/, CONNECTION.query(projectActual_1.actualQuerys.select, [projectId])];
-                case 4:
-                    data = (_b.sent())[0];
-                    return [2 /*return*/, data];
-                case 5:
-                    error_5 = _b.sent();
-                    throw error_5;
-                case 6:
-                    if (!connection && CONNECTION) {
-                        CONNECTION.release();
-                    }
-                    return [7 /*endfinally*/];
-                case 7: return [2 /*return*/];
-            }
-        });
-    }); }
+    get: {
+        all: function (projectId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, data, error_5;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(projectActual_1.actualQuerys.select.all, [projectId])];
+                    case 4:
+                        data = (_b.sent())[0];
+                        return [2 /*return*/, data];
+                    case 5:
+                        error_5 = _b.sent();
+                        throw error_5;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+        data: function (projectId, year, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, data, error_6;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(projectActual_1.actualQuerys.select.data, [projectId, year])];
+                    case 4:
+                        data = (_b.sent())[0];
+                        return [2 /*return*/, data];
+                    case 5:
+                        error_6 = _b.sent();
+                        throw error_6;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+        numberOfRows: function (projectId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, data, error_7;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(projectActual_1.actualQuerys.select.rowsData, [projectId])];
+                    case 4:
+                        data = (_b.sent())[0];
+                        return [2 /*return*/, data];
+                    case 5:
+                        error_7 = _b.sent();
+                        throw error_7;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+    }
 };

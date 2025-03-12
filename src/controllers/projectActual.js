@@ -5,7 +5,8 @@ const projectActualController = {
         const { projectId, userId, periodYear, periodMonth, amount } = req.body
         if (!projectId || !userId || !periodYear || !periodMonth || !amount) return res.status(400).json({ message: "Invalid Parameters" })
         try {
-            const id = await actualServices.add(projectId, userId, periodYear, periodMonth, amount)
+            const numberOfRows = await actualServices.get.numberOfRows(projectId)
+            const id = await actualServices.add(projectId, userId, periodYear, periodMonth, amount, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`)
             return res.status(200).json({
                 message: "Project Actual added successfully",
                 data: [{
@@ -69,7 +70,7 @@ const projectActualController = {
         const projectId = req.params.projectId
         if (!projectId) return res.status(400).json({ message: "Invalid Parameters" })
         try {
-            const data = await actualServices.get(projectId)
+            const data = await actualServices.get.all(projectId)
             return res.status(200).json({
                 message: "Project Actual Detail get successfully",
                 data: data
