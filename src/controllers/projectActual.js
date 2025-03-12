@@ -2,11 +2,11 @@ const { actualServices } = require("../services/projectActual")
 
 const projectActualController = {
     add: async (req, res, next) => {
-        const { projectId, userId, periodYear, periodMonth, amount } = req.body
-        if (!projectId || !userId || !periodYear || !periodMonth || !amount) return res.status(400).json({ message: "Invalid Parameters" })
+        const { projectId, userId, periodYear, periodMonth, percentage, amount } = req.body
+        if (!projectId || !userId || !periodYear || !periodMonth || !percentage || !amount) return res.status(400).json({ message: "Invalid Parameters" })
         try {
             const numberOfRows = await actualServices.get.numberOfRows(projectId)
-            const id = await actualServices.add(projectId, userId, periodYear, periodMonth, amount, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`)
+            const id = await actualServices.add(projectId, userId, periodYear, periodMonth, percentage, amount, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`)
             return res.status(200).json({
                 message: "Project Actual added successfully",
                 data: [{
@@ -52,10 +52,10 @@ const projectActualController = {
         },
     },
     edit: async (req, res, next) => {
-        const { rowId, userId, periodYear, periodMonth, amount } = req.body
-        if (!rowId || !userId || !periodYear || !periodMonth || !amount) return res.status(400).json({ message: "Invalid Parameters" })
+        const { rowId, userId, periodYear, periodMonth, percentage, amount } = req.body
+        if (!rowId || !userId || !periodYear || !periodMonth || !percentage || !amount) return res.status(400).json({ message: "Invalid Parameters" })
         try {
-            await actualServices.edit(rowId, userId, periodYear, periodMonth, amount)
+            await actualServices.edit(rowId, userId, periodYear, periodMonth, percentage, amount)
             return res.status(200).json({
                 message: "Project Actual edited successfully",
                 data: []

@@ -41,7 +41,7 @@ var projectPlans_1 = require("../models/projectPlans");
 var db_1 = require("../config/db");
 var uuid_1 = require("uuid");
 exports.plansServices = {
-    add: function (projectId, userId, start, end, amount, week, connection) { return __awaiter(void 0, void 0, void 0, function () {
+    add: function (projectId, userId, start, end, percentage, amount, week, connection) { return __awaiter(void 0, void 0, void 0, function () {
         var CONNECTION, _a, id, error_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -58,7 +58,7 @@ exports.plansServices = {
                 case 3:
                     _b.trys.push([3, 5, 6, 7]);
                     id = (0, uuid_1.v7)();
-                    return [4 /*yield*/, CONNECTION.query(projectPlans_1.plansQuerys.insert, [id, projectId, userId, start, end, week, amount])];
+                    return [4 /*yield*/, CONNECTION.query(projectPlans_1.plansQuerys.insert, [id, projectId, userId, start, end, week, percentage, amount])];
                 case 4:
                     _b.sent();
                     return [2 /*return*/, id];
@@ -140,7 +140,7 @@ exports.plansServices = {
             });
         }); }
     },
-    edit: function (plansId, userId, start, end, amount, connection) { return __awaiter(void 0, void 0, void 0, function () {
+    edit: function (plansId, userId, start, end, percentage, amount, connection) { return __awaiter(void 0, void 0, void 0, function () {
         var CONNECTION, _a, error_4;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -156,7 +156,7 @@ exports.plansServices = {
                     _b.label = 3;
                 case 3:
                     _b.trys.push([3, 5, 6, 7]);
-                    return [4 /*yield*/, CONNECTION.query(projectPlans_1.plansQuerys.update, [userId, start, end, amount, plansId])];
+                    return [4 /*yield*/, CONNECTION.query(projectPlans_1.plansQuerys.update, [userId, start, end, percentage, amount, plansId])];
                 case 4:
                     _b.sent();
                     return [3 /*break*/, 7];
