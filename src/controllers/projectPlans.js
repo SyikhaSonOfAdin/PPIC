@@ -1,3 +1,4 @@
+const { PPIC } = require("../config/db")
 const { actualServices } = require("../services/projectActual")
 const { plansServices } = require("../services/projectPlans")
 
@@ -7,17 +8,29 @@ const projectPlansController = {
         if (!projectId || !userId || !periodYear || !periodMonth || !percentage || !amount) return res.status(400).json({ message: "Invalid Parameters" })
 
         try {
-            const numberOfRows = await plansServices.get.numberOfRows(projectId)
-            const plansId = await plansServices.add(projectId, userId, periodYear, periodMonth, percentage, amount, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`)
-            const actualId = await actualServices.add(projectId, userId, periodYear, periodMonth, 0, 0, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`)
-
-            return res.status(200).json({
-                message: "Project Plans added successfully",
-                data: [{
-                    plansId: plansId,
-                    actualId: actualId,
-                }]
-            })
+            const connection = await PPIC.getConnection()
+            try {
+                await connection.beginTransaction()
+                const numberOfRows = await plansServices.get.numberOfRows(projectId, connection)
+                const plansId = await plansServices.add(projectId, userId, periodYear, periodMonth, percentage, amount, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`, connection)
+                const actualId = await actualServices.add(projectId, userId, periodYear, periodMonth, 0, 0, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`, connection)
+                await connection.commit()
+                
+                return res.status(200).json({
+                    message: "Project Plans added successfully",
+                    data: [{
+                        plansId: plansId,
+                        actualId: actualId,
+                    }]
+                })
+            } catch (error) {
+                await connection.rollback()
+                return res.status(500).json({
+                    message: error.message
+                })
+            } finally {
+                connection.release()
+            }
         } catch (error) {
             res.status(500).json({
                 message: error.message

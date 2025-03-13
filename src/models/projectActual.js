@@ -1,3 +1,4 @@
+const { projectDetailTable } = require("./projectDetail")
 const { userTable } = require("./user")
 
 const table = {
@@ -22,7 +23,16 @@ const QUERY = {
         all: `DELETE FROM ${table.TABLE} WHERE ${table.COLUMN.PROJECT_ID} = ?`,
         onlyOne: `DELETE FROM ${table.TABLE} WHERE ${table.COLUMN.ID} = ?`,
     },
-    update: `UPDATE ${table.TABLE} SET ${table.COLUMN.INPUT_BY} = ?, ${table.COLUMN.INPUT_DATE} = NOW(), ${table.COLUMN.PERIOD_YEAR} = ?, ${table.COLUMN.PERIOD_MONTH} = ?, ${table.COLUMN.PERCENTAGE} = ?, ${table.COLUMN.AMOUNT} = ? WHERE ${table.COLUMN.ID} = ?`,
+    update: {
+        single: {
+            all: `UPDATE ${table.TABLE} SET ${table.COLUMN.INPUT_BY} = ?, ${table.COLUMN.INPUT_DATE} = NOW(), ${table.COLUMN.PERIOD_YEAR} = ?, ${table.COLUMN.PERIOD_MONTH} = ?, ${table.COLUMN.PERCENTAGE} = ?, ${table.COLUMN.AMOUNT} = ? WHERE ${table.COLUMN.ID} = ?`,
+        },
+        byProjectId: {
+            percentage: `UPDATE ${table.TABLE} pp
+            JOIN ${projectDetailTable.TABLE} p ON pp.${table.COLUMN.PROJECT_ID} = p.${projectDetailTable.COLUMN.PROJECT_ID}
+            SET pp.${table.COLUMN.PERCENTAGE} = (pp.${table.COLUMN.AMOUNT} / p.${projectDetailTable.COLUMN.CAPACITY}) * 100 WHERE p.${projectDetailTable.COLUMN.PROJECT_ID} = ?`
+        }
+    },
     select: {
         all: `SELECT PP.${table.COLUMN.ID}, 
                 U.${userTable.COLUMN.USERNAME} AS INPUT_BY,

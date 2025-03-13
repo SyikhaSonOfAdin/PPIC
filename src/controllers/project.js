@@ -41,7 +41,7 @@ const projectControllers = {
     },
     edit: async (req, res, next) => {
         const { projectId, categoryId, projectNo, client, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
-        if (!projectId || !categoryId || !projectNo || !client || !userId || !name || !capacity || !workPlace || !startDate || !dueDate || !finishDate) return res.status(400).json({ message: "Invalid Parameter" })
+        if (!projectId || !categoryId || !projectNo || !client || !userId || !name || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
 
         try {
             const connection = await PPIC.getConnection()
@@ -49,6 +49,8 @@ const projectControllers = {
                 await connection.beginTransaction()
                 await projectServices.edit(projectId, categoryId, projectNo, client, userId, connection)
                 await projectDetailServices.edit(projectId, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, connection)
+                await plansServices.update.percentage(projectId, connection)
+                await actualServices.update.percentage(projectId, connection)
                 await connection.commit()
                 return res.status(200).json({
                     message: "Project edited successfully",
@@ -109,15 +111,12 @@ const projectControllers = {
                     const data = await projectServices.get.all(companyId)
                     const projects = await Promise.all(data.map(async (item) => {
                         const actual = await actualServices.get.all(item.ID, connection)
-                        const plans = await plansServices.get.all(item.ID, connection)
-
-                        const tempActual = parseFloat(actual[actual.length - 1]?.AMOUNT ?? 0)
-                        const tempPlans = parseFloat(plans[plans.length - 1]?.AMOUNT ?? 0)
+                        const tempActual = actual.reduce((sum, item) => sum + item.AMOUNT, 0);
 
                         return {
                             ...item,
                             progress: {
-                                PERCENTAGE: tempPlans > 0 ? ((tempActual / item.CAPACITY) * 100).toFixed(2) + "%" : "0%",
+                                PERCENTAGE: tempActual > 0 ? ((tempActual / item.CAPACITY) * 100).toFixed(2) + "%" : "0%",
                             }
                         }
                     }))
@@ -154,7 +153,7 @@ const projectControllers = {
 
                     await connection.commit()
 
-                    const tempActual = parseFloat(actual[actual.length - 1]?.AMOUNT ?? 0)
+                    const tempActual = actual.reduce((sum, item) => sum + item.AMOUNT, 0);
                     const tempPlans = parseFloat(plans[plans.length - 1]?.AMOUNT ?? 0)
 
                     return res.status(200).json({
