@@ -111,12 +111,12 @@ const projectControllers = {
                     const data = await projectServices.get.all(companyId)
                     const projects = await Promise.all(data.map(async (item) => {
                         const actual = await actualServices.get.all(item.ID, connection)
-                        const tempActual = actual.reduce((sum, item) => sum + item.AMOUNT, 0);
+                        const tempActual = actual.reduce((sum, item) => sum + parseFloat(item.AMOUNT), 0);
 
                         return {
                             ...item,
                             progress: {
-                                PERCENTAGE: tempActual > 0 ? ((tempActual / item.CAPACITY) * 100).toFixed(2) + "%" : "0%",
+                                PERCENTAGE: tempActual > 0 ? ((tempActual / parseFloat(item.CAPACITY)) * 100).toFixed(2) + "%" : "0%",
                             }
                         }
                     }))
@@ -152,8 +152,7 @@ const projectControllers = {
                     const plans = await plansServices.get.all(projectId, connection)
 
                     await connection.commit()
-
-                    const tempActual = actual.reduce((sum, item) => sum + item.AMOUNT, 0);
+                    const tempActual = actual.reduce((sum, item) => sum + parseFloat(item.AMOUNT), 0);
                     const tempPlans = parseFloat(plans[plans.length - 1]?.AMOUNT ?? 0)
 
                     return res.status(200).json({
@@ -162,7 +161,7 @@ const projectControllers = {
                             project,
                             projectDetail,
                             progress: {
-                                PERCENTAGE: tempPlans > 0 && tempActual > 0 ? ((tempActual / projectDetail.CAPACITY) * 100).toFixed(2) + "%" : "0%",
+                                PERCENTAGE: tempActual > 0 ? ((tempActual / parseFloat(projectDetail.CAPACITY)) * 100).toFixed(2) + "%" : "0%",
                                 ACTUAL: `${new Intl.NumberFormat("id-ID").format(
                                     tempPlans
                                 )} / ${new Intl.NumberFormat("id-ID").format(
