@@ -7,13 +7,14 @@ const table = {
         PROJECT_ID: "PROJECT_ID",
         INPUT_BY: "INPUT_BY",
         INPUT_DATE: "INPUT_DATE",
+        LABEL: "LABEL",
         FILE_NAME: "FILE_NAME",
         DESCRIPTION: "DESCRIPTION",
     }
 }
 
 const QUERY = {
-    insert: `INSERT INTO ${table.TABLE} (${table.COLUMN.ID}, ${table.COLUMN.PROJECT_ID}, ${table.COLUMN.INPUT_BY}, ${table.COLUMN.FILE_NAME}, ${table.COLUMN.DESCRIPTION}, ${table.COLUMN.INPUT_DATE}) VALUES (?,?,?,?,?, NOW())`,
+    insert: `INSERT INTO ${table.TABLE} (${table.COLUMN.ID}, ${table.COLUMN.PROJECT_ID}, ${table.COLUMN.INPUT_BY}, ${table.COLUMN.LABEL}, ${table.COLUMN.FILE_NAME}, ${table.COLUMN.DESCRIPTION}, ${table.COLUMN.INPUT_DATE}) VALUES (?,?,?,?,?,?, NOW())`,
     select: {
         byProjectId: `
             SELECT 
@@ -25,7 +26,7 @@ const QUERY = {
                 u.${userTable.COLUMN.USERNAME} AS INPUT_BY
             FROM ${table.TABLE} a
             JOIN ${userTable.TABLE} u ON a.${table.COLUMN.INPUT_BY} = u.${userTable.COLUMN.ID}
-            WHERE a.${table.COLUMN.PROJECT_ID} = ?
+            WHERE a.${table.COLUMN.PROJECT_ID} = ? AND a.${table.COLUMN.LABEL} = ?
         `,
         byRowId: `SELECT ${table.COLUMN.FILE_NAME} FROM ${table.TABLE} WHERE ${table.COLUMN.ID} = ?`
     },

@@ -6,11 +6,11 @@ const { PPIC } = require("../config/db");
 const attachmentControllers = {
     add: async (req, res, next) => {
         const fileName = req.file?.filename
-        const { projectId, userId, description } = req.body
-        if (!projectId || !userId || !fileName) return res.status(400).json({ message: "Invalid Parameter" })
+        const { projectId, userId, description, label } = req.body
+        if (!projectId || !userId || !fileName || !label) return res.status(400).json({ message: "Invalid Parameter" })
 
         try {
-            const id = await attachmentServices.add(projectId, userId, fileName, description)
+            const id = await attachmentServices.add(projectId, userId, fileName, description, label)
             return res.status(200).json({
                 message: "Attachment saved successfully",
                 data: [{
@@ -75,9 +75,10 @@ const attachmentControllers = {
     },
     get: async (req, res, next) => {
         const projectId = req.params.projectId
-        if (!projectId) return res.status(400).json({ message: "Invalid Parameter" })
+        const label = req.query.label
+        if (!projectId || !label) return res.status(400).json({ message: "Invalid Parameter" })
         try {
-            const data = await attachmentServices.get.all(projectId)
+            const data = await attachmentServices.get.all(projectId, label)
             return res.status(200).json({
                 message: "Get Attachments data successfully",
                 data: data
