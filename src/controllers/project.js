@@ -103,12 +103,13 @@ const projectControllers = {
     get: {
         all: async (req, res, next) => {
             const companyId = req.params.companyId
+            const s = req.query.s
             if (!companyId) return res.status(400).json({ message: "Invalid Parameter" })
             try {
                 const connection = await PPIC.getConnection()
                 try {
                     await connection.beginTransaction()
-                    const data = await projectServices.get.all(companyId)
+                    const data = await projectServices.get.all(companyId, s, connection)
                     const projects = await Promise.all(data.map(async (item) => {
                         const actual = await actualServices.get.all(item.ID, connection)
                         const tempActual = actual.reduce((sum, item) => sum + parseFloat(item.AMOUNT), 0);
