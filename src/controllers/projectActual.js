@@ -2,8 +2,8 @@ const { actualServices } = require("../services/projectActual")
 
 const projectActualController = {
     add: async (req, res, next) => {
-        const { projectId, userId, periodYear, periodMonth, percentage, amount } = req.body
-        if (!projectId || !userId || !periodYear || !periodMonth || !percentage || !amount) return res.status(400).json({ message: "Invalid Parameters" })
+        const { projectId, userId, periodYear, periodMonth, percentage, amount } = req.body        
+        if (!projectId || !userId || !periodYear || !periodMonth || percentage == null || amount == null) return res.status(400).json({ message: "Invalid Parameters" })
         try {
             const numberOfRows = await actualServices.get.numberOfRows(projectId)
             const id = await actualServices.add(projectId, userId, periodYear, periodMonth, percentage, amount, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`)
@@ -53,7 +53,7 @@ const projectActualController = {
     },
     edit: async (req, res, next) => {
         const { rowId, userId, periodYear, periodMonth, percentage, amount } = req.body
-        if (!rowId || !userId || !periodYear || !periodMonth || !percentage || !amount) return res.status(400).json({ message: "Invalid Parameters" })
+        if (!rowId || !userId || !periodYear || !periodMonth || percentage == null || amount == null) return res.status(400).json({ message: "Invalid Parameters" })
         try {
             await actualServices.edit(rowId, userId, periodYear, periodMonth, percentage, amount)
             return res.status(200).json({
