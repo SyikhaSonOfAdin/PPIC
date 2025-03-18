@@ -1,7 +1,7 @@
 const { attachmentServices } = require("../services/attachment")
+const { PPIC } = require("../config/db");
 const path = require("path")
 const fs = require('fs');
-const { PPIC } = require("../config/db");
 
 const attachmentControllers = {
     add: async (req, res, next) => {
