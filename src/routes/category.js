@@ -6,7 +6,8 @@ const router = express.Router();
 router.post('/add', categoryControllers.add)
 router.post('/edit', jwtServices.verifyToken.byHeader, categoryControllers.edit)
 router.post('/delete-one', jwtServices.verifyToken.byHeader, categoryControllers.delete.onlyOne)
-router.get('/get/:companyId', jwtServices.verifyToken.byHeader, categoryControllers.get)
+router.get('/get/:companyId', jwtServices.verifyToken.byHeader, categoryControllers.get.all)
+router.get('/get/:companyId/:categoryId', jwtServices.verifyToken.byHeader, categoryControllers.get.detail)
 
 module.exports = {
     categoryRouter: router

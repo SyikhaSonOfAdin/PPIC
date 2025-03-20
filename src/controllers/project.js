@@ -297,7 +297,7 @@ const projectControllers = {
 
                     const [periodYear] = await connection.query(othersQuerys.select.distinct.period.year, [companyId, companyId])
 
-                    const categories = await categoryServices.get(companyId, connection)
+                    const categories = await categoryServices.get.all(companyId, connection)
 
                     const groupedProjects = await Promise.all(categories.map(async (category) => {
                         const periods = new Set();
