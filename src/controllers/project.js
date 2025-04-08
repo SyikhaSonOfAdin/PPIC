@@ -102,29 +102,108 @@ const projectControllers = {
     },
     get: {
         all: async (req, res, next) => {
+            /**
+             * @param companyId contains the company identifier of assigned user
+             */
             const companyId = req.params.companyId
+            /**
+             * @param s is an @alias searchQuery
+             */
             const s = req.query.s
+            /**
+             * @param m is an @alias monthIndex
+             */
+            const m = req.query.m
+            /**
+             * @param y is an @alias year
+             */
+            const y = req.query.y
+
             if (!companyId) return res.status(400).json({ message: "Invalid Parameter" })
+
             try {
                 const connection = await PPIC.getConnection()
+                const [periodYear] = await connection.query(othersQuerys.select.distinct.period.year, [companyId, companyId])
                 try {
                     await connection.beginTransaction()
                     const data = await projectServices.get.all(companyId, s, connection)
-                    const projects = await Promise.all(data.map(async (item) => {
-                        const actual = await actualServices.get.all(item.ID, connection)
-                        const tempActual = actual.reduce((sum, item) => sum + parseFloat(item.AMOUNT), 0);
+                    const projects = (
+                        await Promise.all(
+                            data.map(async (item) => {
+                                const actual = await actualServices.get.all(item.ID, connection);
+                                const totalActual = actual.reduce(
+                                    (sum, item) => sum + parseFloat(item.AMOUNT),
+                                    0
+                                );
 
-                        return {
-                            ...item,
-                            progress: {
-                                PERCENTAGE: tempActual > 0 ? ((tempActual / parseFloat(item.CAPACITY)) * 100).toFixed(2) + "%" : "0%",
-                            }
-                        }
-                    }))
+                                if (m && y) {
+                                    let actualCheck = 0 ;
+                                    let plansCheck = 0 ;
+
+                                    const plans = await plansServices.get.all(item.ID, connection);
+
+                                    const tempActual = actual.reduce((sum, item) => {
+                                        if (parseInt(item.PERIOD_YEAR) == y) {
+                                            if (parseInt(item.PERIOD_MONTH.split('-')[0], 10) <= m) {
+                                                if (parseInt(item.PERIOD_MONTH.split('-')[0], 10) == m) {
+                                                    actualCheck += parseFloat(item.PERCENTAGE);
+                                                    return sum + parseFloat(item.PERCENTAGE);
+                                                }
+                                                return sum + parseFloat(item.PERCENTAGE);
+                                            }
+                                            return sum;
+                                        } else if (parseInt(item.PERIOD_YEAR) < y) {
+                                            return sum + parseFloat(item.PERCENTAGE);
+                                        }
+                                        return sum;
+                                    }, 0);
+                                    
+                                    const tempPlans = plans.reduce((sum, item) => {
+                                        if (parseInt(item.PERIOD_YEAR) == y) {
+                                            if (parseInt(item.PERIOD_MONTH.split('-')[0], 10) <= m) {
+                                                if (parseInt(item.PERIOD_MONTH.split('-')[0], 10) == m) {
+                                                    plansCheck += parseFloat(item.PERCENTAGE);
+                                                    return sum + parseFloat(item.PERCENTAGE);
+                                                }
+                                                return sum + parseFloat(item.PERCENTAGE);
+                                            }
+                                            return sum;
+                                        } else if (parseInt(item.PERIOD_YEAR) < y) {
+                                            return sum + parseFloat(item.PERCENTAGE);
+                                        }
+                                        return sum;
+                                    }, 0);
+
+                                    if (plansCheck > 0 || actualCheck > 0) {
+                                        return {
+                                            ...item,
+                                            progress: {
+                                                PERCENTAGE: totalActual > 0 ? ((totalActual / parseFloat(item.CAPACITY)) * 100).toFixed(2) + "%" : "0%",
+                                                PLANS: tempPlans.toFixed(2) + "%",
+                                                ACTUAL: tempActual.toFixed(2) + "%",
+                                                DEVIATION: (tempActual.toFixed(2) - tempPlans.toFixed(2)).toFixed(2) + "%",
+                                            },
+                                        };
+                                    }
+                                    return null;
+                                }
+
+                                return {
+                                    ...item,
+                                    progress: {
+                                        PERCENTAGE: totalActual > 0 ? ((totalActual / parseFloat(item.CAPACITY)) * 100).toFixed(2) + "%" : "0%",
+                                    },
+                                };
+                            })
+                        )
+                    ).filter((item) => item !== null);
+
                     await connection.commit()
                     return res.status(200).json({
                         message: "Get Project successfully",
-                        data: projects
+                        data: {
+                            period: periodYear, projects: projects
+                        }
                     })
                 } catch (error) {
                     await connection.rollback()
@@ -185,90 +264,6 @@ const projectControllers = {
                 })
             }
         },
-        // summary: async (req, res, next) => {
-        //     const companyId = req.params.companyId
-        //     const year = req.query.y
-
-        //     if (!companyId || !year) return res.status(400).json({ message: "Invalid Parameter" })
-
-        //     try {
-        //         const connection = await PPIC.getConnection()
-        //         try {
-        //             await connection.beginTransaction()
-
-        //             const [periodYear] = await connection.query(othersQuerys.select.distinct.period.year, [companyId, companyId])
-
-        //             const categories = await categoryServices.get(companyId, connection)
-
-        //             const groupedProjects = await Promise.all(categories.map(async (category) => {
-        //                 const workLoad = await workLoadServices.get.onlyOne.byYear(category.ID, year, connection)
-
-        //                 const projectsAtributes = await projectServices.get.byCategoryId(category.ID, connection)
-        //                 const plansData = await Promise.all(projectsAtributes.map(async (project) => {
-        //                     const plans = await plansServices.get.data(project.ID, year, connection)
-        //                     return plans
-        //                 }))
-
-        //                 const actualData = await Promise.all(projectsAtributes.map(async (project) => {
-        //                     const actual = await actualServices.get.data(project.ID, year, connection)
-        //                     return actual
-        //                 }))
-
-        //                 return {
-        //                     CATEGORY_NAME: category.NAME,
-        //                     CATEGORY_ID: category.ID,
-        //                     UOM: category.UOM,
-        //                     WORK_LOAD: workLoad[0]?.WORK_LOAD,
-        //                     PLANS: Object.values(
-        //                         plansData.flat().reduce((accumulator, current) => {
-        //                             const date = current.PERIOD_MONTH;
-        //                             const amount = parseFloat(current.AMOUNT);
-
-        //                             if (!accumulator[date]) {
-        //                                 accumulator[date] = [date, amount];
-        //                             } else {
-        //                                 accumulator[date][1] += amount;
-        //                             }
-        //                             return accumulator;
-        //                         }, {})
-        //                     ).sort((a, b) => new Date(a[0]) - new Date(b[0])),
-        //                     ACTUAL: Object.values(
-        //                         actualData.flat().reduce((accumulator, current) => {
-        //                             const date = current.PERIOD_MONTH;
-        //                             const amount = parseFloat(current.AMOUNT);
-
-        //                             if (!accumulator[date]) {
-        //                                 accumulator[date] = [date, amount];
-        //                             } else {
-        //                                 accumulator[date][1] += amount;
-        //                             }
-        //                             return accumulator;
-        //                         }, {})
-        //                     ).sort((a, b) => new Date(a[0]) - new Date(b[0]))
-        //                 }
-        //             }))
-        //             await connection.commit()
-        //             return res.status(200).json({
-        //                 message: "Get Project successfully",
-        //                 data: {
-        //                     period: periodYear,
-        //                     data: groupedProjects
-        //                 }
-        //             })
-        //         } catch (error) {
-        //             await connection.rollback()
-        //             return res.status(500).json({
-        //                 message: error.message
-        //             })
-        //         } finally {
-        //             connection.release()
-        //         }
-        //     } catch (error) {
-        //         res.status(500).json({
-        //             message: error.message
-        //         })
-        //     }
-        // },
         summary: async (req, res, next) => {
             const companyId = req.params.companyId
             const year = req.query.y
