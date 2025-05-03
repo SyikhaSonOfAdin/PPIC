@@ -21,7 +21,7 @@ const app = express();
 const port = 3000;
 
 const corsOptions = {
-    origin: ['https://ppic.syikha.com'],
+    origin: ['https://ppic.syikha.com', 'https://server1.ppic.syikha.com'],
     optionsSuccessStatus: 200
 };
 
