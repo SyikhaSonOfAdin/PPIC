@@ -137,39 +137,44 @@ const projectControllers = {
                                 );
 
                                 if (m && y) {
-                                    let actualCheck = 0 ;
-                                    let plansCheck = 0 ;
+                                    let actualCheck = 0;
+                                    let plansCheck = 0;
+                                    let realActual = 0;
 
                                     const plans = await plansServices.get.all(item.ID, connection);
 
-                                    const tempActual = actual.reduce((sum, item) => {
-                                        if (parseInt(item.PERIOD_YEAR) == y) {
-                                            if (parseInt(item.PERIOD_MONTH.split('-')[0], 10) <= m) {
-                                                if (parseInt(item.PERIOD_MONTH.split('-')[0], 10) == m) {
-                                                    actualCheck += parseFloat(item.PERCENTAGE);
-                                                    return sum + parseFloat(item.PERCENTAGE);
+                                    actual.reduce((sum, i) => {
+                                        if (parseInt(i.PERIOD_YEAR) == y) {
+                                            if (parseInt(i.PERIOD_MONTH.split('-')[0], 10) <= m) {
+                                                if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
+                                                    realActual += parseFloat(i.PERCENTAGE);
                                                 }
-                                                return sum + parseFloat(item.PERCENTAGE);
+                                                actualCheck += parseFloat(i.PERCENTAGE);
+                                                return sum + parseFloat(i.PERCENTAGE);
                                             }
                                             return sum;
-                                        } else if (parseInt(item.PERIOD_YEAR) < y) {
-                                            return sum + parseFloat(item.PERCENTAGE);
+                                        } else if (parseInt(i.PERIOD_YEAR) < y) {
+                                            if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
+                                                realActual += parseFloat(i.PERCENTAGE);
+                                            }
+                                            return sum + parseFloat(i.PERCENTAGE);
                                         }
                                         return sum;
                                     }, 0);
-                                    
-                                    const tempPlans = plans.reduce((sum, item) => {
-                                        if (parseInt(item.PERIOD_YEAR) == y) {
-                                            if (parseInt(item.PERIOD_MONTH.split('-')[0], 10) <= m) {
-                                                if (parseInt(item.PERIOD_MONTH.split('-')[0], 10) == m) {
-                                                    plansCheck += parseFloat(item.PERCENTAGE);
-                                                    return sum + parseFloat(item.PERCENTAGE);
-                                                }
-                                                return sum + parseFloat(item.PERCENTAGE);
+
+                                    const tempPlans = plans.reduce((sum, i) => {
+                                        if (parseInt(i.PERIOD_YEAR) == y) {
+                                            if (parseInt(i.PERIOD_MONTH.split('-')[0], 10) <= m) {
+                                                // if (parseInt(i.PERIOD_MONTH.split('-')[0], 10) == m) {
+                                                //     plansCheck += parseFloat(i.PERCENTAGE);
+                                                //     return sum + parseFloat(i.PERCENTAGE);
+                                                // }
+                                                plansCheck += parseFloat(i.PERCENTAGE);
+                                                return sum + parseFloat(i.PERCENTAGE);
                                             }
                                             return sum;
-                                        } else if (parseInt(item.PERIOD_YEAR) < y) {
-                                            return sum + parseFloat(item.PERCENTAGE);
+                                        } else if (parseInt(i.PERIOD_YEAR) < y) {
+                                            return sum + parseFloat(i.PERCENTAGE);
                                         }
                                         return sum;
                                     }, 0);
@@ -180,8 +185,8 @@ const projectControllers = {
                                             progress: {
                                                 PERCENTAGE: totalActual > 0 ? ((totalActual / parseFloat(item.CAPACITY)) * 100).toFixed(2) + "%" : "0%",
                                                 PLANS: tempPlans.toFixed(2) + "%",
-                                                ACTUAL: tempActual.toFixed(2) + "%",
-                                                DEVIATION: (tempActual.toFixed(2) - tempPlans.toFixed(2)).toFixed(2) + "%",
+                                                ACTUAL: realActual.toFixed(2) + "%",
+                                                DEVIATION: (realActual.toFixed(2) - tempPlans.toFixed(2)).toFixed(2) + "%",
                                             },
                                         };
                                     }
