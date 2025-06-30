@@ -90,10 +90,11 @@ const attachmentControllers = {
         }
     },
     download: async (req, res, next) => {
-        const fileName = req.params.fileName
-        if (!fileName) return res.status(400).json({ message: "Invalid Parameter" })
+        const attachmentId = req.params.attachmentId
+        if (!attachmentId) return res.status(400).json({ message: "Invalid Parameter" })
+        const fileName = await attachmentServices.get.fileName(attachmentId)
         try {
-            const filePath = path.join(__dirname, '../../../uploads/ppic', fileName);
+            const filePath = path.join(__dirname, '../../../uploads/ppic', fileName[0]["FILE_NAME"]);
             return res.download(filePath, fileName, (err) => {
                 if (err) {
                     return next(err);
