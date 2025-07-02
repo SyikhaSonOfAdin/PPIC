@@ -65,21 +65,38 @@ const journalRemarkController = {
             })
         }
     },
-    get: async (req, res, next) => {
-        const projectId = req.params.projectId
-        if (!projectId) return res.status(400).json({ message: "Invalid Parameters" })
-        try {
-            const data = await remarkServices.get(projectId)
-            return res.status(200).json({
-                message: "Get Remark Journal successfully",
-                data: data
-            })
-        } catch (error) {
-            res.status(500).json({
-                message: error.message
-            })
-        }
-    },
+    get: {
+        onlyOne: async (req, res, next) => {
+            const projectId = req.params.projectId
+            if (!projectId) return res.status(400).json({ message: "Invalid Parameters" })
+            try {
+                const data = await remarkServices.get.onlyOne(projectId)
+                return res.status(200).json({
+                    message: "Get Remark Journal successfully",
+                    data: data
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+        all: async (req, res, next) => {
+            const companyId = req.params.companyId
+            if (!companyId) return res.status(400).json({ message: "Invalid Parameters" })
+            try {
+                const data = await remarkServices.get.all(companyId)
+                return res.status(200).json({
+                    message: "Get Remark Journal successfully",
+                    data: data
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+    }
 }
 
 module.exports = { journalRemarkController }

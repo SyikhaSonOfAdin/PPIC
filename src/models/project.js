@@ -40,7 +40,7 @@ const QUERY = {
             DATE_FORMAT(PD.${projectDetailTable.COLUMN.FINISH_DATE}, '%Y-%m-%d') AS FINISH_DATE,
             CASE 
             WHEN ${projectDetailTable.COLUMN.FINISH_DATE} IS NULL OR ${projectDetailTable.COLUMN.FINISH_DATE} = "0000-00-00" THEN 'On Going'
-            WHEN DATEDIFF(${projectDetailTable.COLUMN.FINISH_DATE}, ${projectDetailTable.COLUMN.DUE_DATE}) < 0 THEN 'Advanced'
+            WHEN DATEDIFF(${projectDetailTable.COLUMN.FINISH_DATE}, ${projectDetailTable.COLUMN.DUE_DATE}) < 0 THEN 'Ahead'
             WHEN DATEDIFF(${projectDetailTable.COLUMN.FINISH_DATE}, ${projectDetailTable.COLUMN.DUE_DATE}) = 0 THEN 'On Time'
             WHEN DATEDIFF(${projectDetailTable.COLUMN.FINISH_DATE}, ${projectDetailTable.COLUMN.DUE_DATE}) > 0 THEN 'Delayed'
             END AS STATUS,

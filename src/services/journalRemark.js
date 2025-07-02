@@ -58,7 +58,12 @@ exports.remarkServices = {
                 case 3:
                     _b.trys.push([3, 5, 6, 7]);
                     id = (0, uuid_1.v7)();
-                    return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.insert, [id, projectId, userId, description])];
+                    return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.insert, [
+                            id,
+                            projectId,
+                            userId,
+                            description,
+                        ])];
                 case 4:
                     _b.sent();
                     return [2 /*return*/, id];
@@ -138,7 +143,7 @@ exports.remarkServices = {
                     case 7: return [2 /*return*/];
                 }
             });
-        }); }
+        }); },
     },
     edit: function (remarkId, userId, description, connection) { return __awaiter(void 0, void 0, void 0, function () {
         var CONNECTION, _a, error_4;
@@ -156,7 +161,11 @@ exports.remarkServices = {
                     _b.label = 3;
                 case 3:
                     _b.trys.push([3, 5, 6, 7]);
-                    return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.update, [userId, description, remarkId])];
+                    return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.update, [
+                            userId,
+                            description,
+                            remarkId,
+                        ])];
                 case 4:
                     _b.sent();
                     return [3 /*break*/, 7];
@@ -172,36 +181,74 @@ exports.remarkServices = {
             }
         });
     }); },
-    get: function (projectId, connection) { return __awaiter(void 0, void 0, void 0, function () {
-        var CONNECTION, _a, data, error_5;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _a = connection;
-                    if (_a) return [3 /*break*/, 2];
-                    return [4 /*yield*/, db_1.PPIC.getConnection()];
-                case 1:
-                    _a = (_b.sent());
-                    _b.label = 2;
-                case 2:
-                    CONNECTION = _a;
-                    _b.label = 3;
-                case 3:
-                    _b.trys.push([3, 5, 6, 7]);
-                    return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.select, [projectId])];
-                case 4:
-                    data = (_b.sent())[0];
-                    return [2 /*return*/, data];
-                case 5:
-                    error_5 = _b.sent();
-                    throw error_5;
-                case 6:
-                    if (!connection && CONNECTION) {
-                        CONNECTION.release();
-                    }
-                    return [7 /*endfinally*/];
-                case 7: return [2 /*return*/];
-            }
-        });
-    }); }
+    get: {
+        onlyOne: function (projectId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, rows, error_5;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.select.onlyOne, [
+                                projectId,
+                            ])];
+                    case 4:
+                        rows = (_b.sent())[0];
+                        return [2 /*return*/, rows];
+                    case 5:
+                        error_5 = _b.sent();
+                        throw error_5;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+        all: function (companyId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, rows, error_6;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.select.all, [
+                                companyId,
+                            ])];
+                    case 4:
+                        rows = (_b.sent())[0];
+                        return [2 /*return*/, rows];
+                    case 5:
+                        error_6 = _b.sent();
+                        throw error_6;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+    },
 };

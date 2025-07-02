@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon src/app"
+    "start": "nodemon src/app",
+    "build": "tsc"
   },
   "keywords": [
     "PPIC"
