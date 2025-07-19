@@ -46,20 +46,108 @@ const userControllers = {
         }
 
     },
-    delete: async (req, res, next) => {
-        const { userId } = req.body
-        if (!userId) return res.status(400).json({ message: "Invalid Parameter" })
-        try {
-            await userServices.delete(userId)
-            return res.status(200).json({
-                message: `User deleted successfully`,
-                data: []
-            })
-        } catch (error) {
-            res.status(500).json({
-                message: error.message
-            })
-        }
+    delete: {
+        user: async (req, res, next) => {
+            const { userId } = req.body
+
+            if (!userId) return res.status(400).json({ message: "Invalid Parameter" })
+
+            try {
+                await userServices.delete(userId)
+                return res.status(200).json({
+                    message: `User deleted successfully`,
+                    data: []
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+        department: async (req, res, next) => {
+            const { userId } = req.body
+
+            if (!userId) return res.status(400).json({ message: "Invalid Parameter" })
+
+            try {
+                await userServices.delete.department(userId)
+                return res.status(200).json({
+                    message: `User deleted successfully`,
+                    data: []
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+    },
+    update: {
+        department: async (req, res, next) => {
+            const { userId, departmentId } = req.body
+
+            if (!userId || !departmentId) return res.status(400).json({ message: "Invalid Parameter" })
+
+            try {
+                await userServices.edit.department(departmentId, userId)
+                return res.status(200).json({
+                    message: `User updated successfully`,
+                    data: []
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+    },
+    get: {
+        all: async (req, res, next) => {
+            const companyId = req.params.companyId
+            if (!companyId) return res.status(400).json({ message: "Invalid Parameter" })
+            try {
+                const data = await userServices.get.all(companyId)
+                return res.status(200).json({
+                    message: "Get User successfully",
+                    data: data
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+        withoutDep: async (req, res, next) => {
+            const companyId = req.params.companyId
+            if (!companyId) return res.status(400).json({ message: "Invalid Parameter" })
+            try {
+                const data = await userServices.get.withoutDep(companyId)
+                return res.status(200).json({
+                    message: "Get User successfully",
+                    data: data
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+        byDepId: async (req, res, next) => {
+            const companyId = req.params.companyId
+            const departmentId = req.params.departmentId
+            if (!companyId || !departmentId) return res.status(400).json({ message: "Invalid Parameter" })
+            try {
+                const data = await userServices.get.byDepId(departmentId)
+                return res.status(200).json({
+                    message: "Get User successfully",
+                    data: data
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
     },
     login: async (req, res, next) => {
         const { email, password } = req.body

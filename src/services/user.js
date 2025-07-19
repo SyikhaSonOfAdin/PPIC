@@ -58,11 +58,17 @@ exports.userServices = {
                     _b.label = 3;
                 case 3:
                     _b.trys.push([3, 6, 7, 8]);
-                    id = (0, uuid_1.v4)();
+                    id = (0, uuid_1.v7)();
                     return [4 /*yield*/, argon2.hash(password)];
                 case 4:
                     hashedPassword = _b.sent();
-                    return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.insert, [id, companyId, username, email, hashedPassword])];
+                    return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.insert, [
+                            id,
+                            companyId,
+                            username,
+                            email,
+                            hashedPassword,
+                        ])];
                 case 5:
                     _b.sent();
                     return [2 /*return*/, id];
@@ -78,9 +84,46 @@ exports.userServices = {
             }
         });
     }); },
+    edit: {
+        department: function (departmentId, userId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, error_2;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.update.department, [
+                                departmentId,
+                                userId,
+                            ])];
+                    case 4:
+                        _b.sent();
+                        return [3 /*break*/, 7];
+                    case 5:
+                        error_2 = _b.sent();
+                        throw error_2;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+    },
     check: {
         email: function (email, connection) { return __awaiter(void 0, void 0, void 0, function () {
-            var CONNECTION, _a, data, error_2;
+            var CONNECTION, _a, data, error_3;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -102,8 +145,8 @@ exports.userServices = {
                             return [2 /*return*/, true];
                         return [2 /*return*/, false];
                     case 5:
-                        error_2 = _b.sent();
-                        throw error_2;
+                        error_3 = _b.sent();
+                        throw error_3;
                     case 6:
                         if (!connection && CONNECTION) {
                             CONNECTION.release();
@@ -112,42 +155,174 @@ exports.userServices = {
                     case 7: return [2 /*return*/];
                 }
             });
-        }); }
+        }); },
     },
-    delete: function (userId, connection) { return __awaiter(void 0, void 0, void 0, function () {
-        var CONNECTION, _a, error_3;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _a = connection;
-                    if (_a) return [3 /*break*/, 2];
-                    return [4 /*yield*/, db_1.PPIC.getConnection()];
-                case 1:
-                    _a = (_b.sent());
-                    _b.label = 2;
-                case 2:
-                    CONNECTION = _a;
-                    _b.label = 3;
-                case 3:
-                    _b.trys.push([3, 5, 6, 7]);
-                    return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.delete, [userId])];
-                case 4:
-                    _b.sent();
-                    return [3 /*break*/, 7];
-                case 5:
-                    error_3 = _b.sent();
-                    throw error_3;
-                case 6:
-                    if (!connection && CONNECTION) {
-                        CONNECTION.release();
-                    }
-                    return [7 /*endfinally*/];
-                case 7: return [2 /*return*/];
-            }
-        });
-    }); },
+    delete: {
+        user: function (userId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, error_4;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.delete.user, [userId])];
+                    case 4:
+                        _b.sent();
+                        return [3 /*break*/, 7];
+                    case 5:
+                        error_4 = _b.sent();
+                        throw error_4;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+        department: function (userId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, error_5;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.update.department, [null, userId])];
+                    case 4:
+                        _b.sent();
+                        return [3 /*break*/, 7];
+                    case 5:
+                        error_5 = _b.sent();
+                        throw error_5;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+    },
+    get: {
+        all: function (companyId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, data, error_6;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.get.all.all, [companyId])];
+                    case 4:
+                        data = (_b.sent())[0];
+                        return [2 /*return*/, data];
+                    case 5:
+                        error_6 = _b.sent();
+                        throw error_6;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+        withoutDep: function (companyId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, data, error_7;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.get.all.withoutDepartment, [companyId])];
+                    case 4:
+                        data = (_b.sent())[0];
+                        return [2 /*return*/, data];
+                    case 5:
+                        error_7 = _b.sent();
+                        throw error_7;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+        byDepId: function (departmentId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, data, error_8;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(user_1.userQuerys.get.all.byDepId, [departmentId])];
+                    case 4:
+                        data = (_b.sent())[0];
+                        return [2 /*return*/, data];
+                    case 5:
+                        error_8 = _b.sent();
+                        throw error_8;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+    },
     login: function (email, password, connection) { return __awaiter(void 0, void 0, void 0, function () {
-        var CONNECTION, _a, isExist, user, isMatch, error_4;
+        var CONNECTION, _a, isExist, user, isMatch, error_9;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -180,8 +355,8 @@ exports.userServices = {
                 case 6: return [2 /*return*/, "Email not found"];
                 case 7: return [3 /*break*/, 10];
                 case 8:
-                    error_4 = _b.sent();
-                    throw error_4;
+                    error_9 = _b.sent();
+                    throw error_9;
                 case 9:
                     if (!connection && CONNECTION) {
                         CONNECTION.release();

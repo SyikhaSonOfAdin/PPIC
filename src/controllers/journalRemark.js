@@ -2,10 +2,10 @@ const { remarkServices } = require("../services/journalRemark")
 
 const journalRemarkController = {
     add: async (req, res, next) => {
-        const { projectId, userId, description } = req.body
-        if (!projectId || !userId || !description) return res.status(400).json({ message: "Invalid Parameters" })
+        const { projectId, userId, description, solution, deadline, departmentId, status } = req.body
+        if (!projectId || !userId || !description || !deadline || !departmentId || !status) return res.status(400).json({ message: "Invalid Parameters" })
         try {
-            const id = await remarkServices.add(projectId, userId, description)
+            const id = await remarkServices.add(projectId, userId, departmentId, description, deadline, status, solution)
             return res.status(200).json({
                 message: "Remark Journal added successfully",
                 data: [{
@@ -51,10 +51,10 @@ const journalRemarkController = {
         }
     },
     edit: async (req, res, next) => {
-        const { remarkId, userId, description } = req.body
-        if (!remarkId || !userId || !description) return res.status(400).json({ message: "Invalid Parameters" })
+        const { remarkId, userId, description, solution, deadline, departmentId, status } = req.body
+        if (!remarkId || !userId || !description || !deadline || !departmentId || !status) return res.status(400).json({ message: "Invalid Parameters" })
         try {
-            await remarkServices.edit(remarkId, userId, description)
+            await remarkServices.edit(remarkId, userId, description, deadline, departmentId, status, solution)
             return res.status(200).json({
                 message: "Remark Journal edited successfully",
                 data: []
@@ -81,21 +81,39 @@ const journalRemarkController = {
                 })
             }
         },
-        all: async (req, res, next) => {
-            const companyId = req.params.companyId
-            if (!companyId) return res.status(400).json({ message: "Invalid Parameters" })
-            try {
-                const data = await remarkServices.get.all(companyId)
-                return res.status(200).json({
-                    message: "Get Remark Journal successfully",
-                    data: data
-                })
-            } catch (error) {
-                res.status(500).json({
-                    message: error.message
-                })
-            }
-        },
+        all: {
+            forReport: async (req, res, next) => {
+                const companyId = req.params.companyId
+                if (!companyId) return res.status(400).json({ message: "Invalid Parameters" })
+                try {
+                    const data = await remarkServices.get.all.forReport(companyId)
+                    return res.status(200).json({
+                        message: "Get Remark Journal successfully",
+                        data: data
+                    })
+                } catch (error) {
+                    res.status(500).json({
+                        message: error.message
+                    })
+                }
+            },
+            all: async (req, res, next) => {
+                const companyId = req.params.companyId
+                const s = req.query.s
+                if (!companyId) return res.status(400).json({ message: "Invalid Parameters" })
+                try {
+                    const data = await remarkServices.get.all.all(companyId, s)
+                    return res.status(200).json({
+                        message: "Get Remark Journal successfully",
+                        data: data
+                    })
+                } catch (error) {
+                    res.status(500).json({
+                        message: error.message
+                    })
+                }
+            },
+        }
     }
 }
 

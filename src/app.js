@@ -16,6 +16,7 @@ const { userRouter } = require('./routes/user');
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const { departmentRouter } = require('./routes/department');
 
 const app = express();
 const port = 3000;
@@ -26,6 +27,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+// app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '')));
@@ -40,6 +42,7 @@ app.use("/project/plans", projectPlansRouter);
 app.use("/permission", permissionRouter);
 app.use("/attachment", attachmentRouter);
 app.use("/category", categoryRouter);
+app.use("/department", departmentRouter);
 app.use("/workload", workLoadRouter);
 app.use("/project", projectRouter);
 app.use("/company", companyRouter);
