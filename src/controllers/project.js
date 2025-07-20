@@ -39,35 +39,53 @@ const projectControllers = {
             })
         }
     },
-    edit: async (req, res, next) => {
-        const { projectId, categoryId, projectNo, client, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
-        if (!projectId || !categoryId || !projectNo || !client || !userId || !name || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
+    edit: {
+        all: async (req, res, next) => {
+            const { projectId, categoryId, projectNo, client, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
+            if (!projectId || !categoryId || !projectNo || !client || !userId || !name || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
 
-        try {
-            const connection = await PPIC.getConnection()
             try {
-                await connection.beginTransaction()
-                await projectServices.edit(projectId, categoryId, projectNo, client, userId, connection)
-                await projectDetailServices.edit(projectId, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, connection)
-                await plansServices.update.percentage(projectId, connection)
-                await actualServices.update.percentage(projectId, connection)
-                await connection.commit()
+                const connection = await PPIC.getConnection()
+                try {
+                    await connection.beginTransaction()
+                    await projectServices.edit(projectId, categoryId, projectNo, client, userId, connection)
+                    await projectDetailServices.edit.all(projectId, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, connection)
+                    await plansServices.update.percentage(projectId, connection)
+                    await actualServices.update.percentage(projectId, connection)
+                    await connection.commit()
+                    return res.status(200).json({
+                        message: "Project edited successfully",
+                        data: []
+                    })
+                } catch (error) {
+                    await connection.rollback()
+                    return res.status(500).json({
+                        message: error.message
+                    })
+                } finally {
+                    connection.release()
+                }
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+        deliver: async (req, res, next) => {
+            const { projectId } = req.body;
+            if (!projectId) return res.status(400).json({ message: "Invalid Parameter" })
+
+            try {
+                await projectDetailServices.edit.deliver(projectId)
                 return res.status(200).json({
                     message: "Project edited successfully",
                     data: []
                 })
             } catch (error) {
-                await connection.rollback()
                 return res.status(500).json({
                     message: error.message
                 })
-            } finally {
-                connection.release()
             }
-        } catch (error) {
-            res.status(500).json({
-                message: error.message
-            })
         }
     },
     delete: async (req, res, next) => {
