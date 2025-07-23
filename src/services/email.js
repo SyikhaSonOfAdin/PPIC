@@ -44,7 +44,7 @@ var transporter = nodemailer.createTransport({
     secure: true,
     auth: {
         user: process.env.EMAIL_HOST_USER,
-        pass: process.env.PASSWORD,
+        pass: process.env.PASSWORD_EMAIL,
     },
 });
 exports.emailServices = {
@@ -58,7 +58,7 @@ exports.emailServices = {
                         to: to,
                         subject: subject,
                         text: text,
-                        html: html
+                        html: html,
                     };
                     _a.label = 1;
                 case 1:
@@ -73,5 +73,40 @@ exports.emailServices = {
                 case 4: return [2 /*return*/];
             }
         });
-    }); }
+    }); },
+    template: {
+        projectRemark: function (username, departmentName, data) {
+            var safeData = Array.isArray(data) ? data : [];
+            // Group data by project
+            var grouped = safeData.reduce(function (acc, item) {
+                var key = item.ID;
+                if (!acc[key]) {
+                    acc[key] = {
+                        project_id: item.ID,
+                        project_no: item.PROJECT_NO,
+                        project_name: item.NAME,
+                        project_status: item.PROJECT_STATUS,
+                        remarks: [],
+                    };
+                }
+                if (item.STATUS !== "Close") {
+                    acc[key].remarks.push(item);
+                }
+                return acc;
+            }, {});
+            // Render rows for each project with remarks
+            var rows = Object.values(grouped)
+                .filter(function (group) { return group.remarks.length > 0; })
+                .map(function (group) {
+                var remarkRows = group.remarks
+                    .map(function (r) { return "\n          <tr style=\"border-bottom:1px solid #e0e0e0;\">\n            <td style=\"padding:4px 8px; font-size:13px; color:#e53935; background-color:#fdecea;\">\n              ".concat(r.STATUS, "\n            </td>\n            <td style=\"padding:4px 8px; font-size:13px; color:#333;\">\n              ").concat(r.DEADLINE, "\n            </td>\n            <td style=\"padding:4px 8px; font-size:13px; color:#333;\">\n              ").concat(r.DESCRIPTION, "\n            </td>\n          </tr>\n        "); })
+                    .join("");
+                return "\n        <tr>\n          <td style=\"padding:12px; border:1px solid #e0e0e0; border-radius:8px;\">\n            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;\">\n              <tr>\n                <td style=\"padding-bottom:8px; font-size:14px; font-weight:400;\">\n                  <a href=\"".concat(process.env.APP, "/d/").concat(group.project_id, "?open-tabs=remark\" target=\"_blank\" style=\"color:#333; text-decoration:none;\">\n                    ").concat(group.project_no, " - ").concat(group.project_name, "\n                  </a>\n                </td>\n              </tr>\n              <tr>\n                <td>\n                  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;\">\n                    ").concat(remarkRows, "\n                  </table>\n                </td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n      ");
+            })
+                .join("");
+            // Full HTML
+            var html = "\n    <center>\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n        <tr>\n          <td align=\"center\" bgcolor=\"#f1f1f1\" style=\"padding:40px 0;\">\n            <table width=\"650\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#ffffff;\">\n              <tr>\n                <td style=\"padding:20px; font-family:sans-serif; font-size:16px; color:#333;\">\n                  <h1 style=\"margin:0; font-size:20px;\">Halo, ".concat(username, "!</h1>\n                  <p style=\"margin:8px 0 0; font-size:14px;\">Berikut adalah remark dengan status selain Close pada departemen ").concat(departmentName, ".</p>\n                </td>\n              </tr>\n              <tr>\n                <td style=\"padding:20px;\">\n                  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;\">\n                    ").concat(rows, "\n                  </table>\n                </td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n      </table>\n    </center>\n  ");
+            return html;
+        },
+    },
 };

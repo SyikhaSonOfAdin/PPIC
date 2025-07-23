@@ -75,6 +75,7 @@ const QUERY = {
             P.${projectTable.COLUMN.PROJECT_NO},
             U.${userTable.COLUMN.USERNAME} AS INPUT_BY, 
             D.${departmentTable.COLUMN.NAME} AS DEPARTMENT_NAME,
+            D.${departmentTable.COLUMN.ID} AS DEPARTMENT_ID,
             (
                 SELECT
                 GROUP_CONCAT(${userTable.COLUMN.USERNAME}
@@ -113,6 +114,47 @@ const QUERY = {
                 OR PD.${projectDetailTable.COLUMN.WORK_PLACE} LIKE ?
                 OR D.${departmentTable.COLUMN.NAME} LIKE ?
                 ) 
+            ORDER BY P.${projectTable.COLUMN.ID} ASC
+            `,
+            byDepId: `SELECT 
+            P.${table.COLUMN.ID}, 
+            PR.${table.COLUMN.STATUS},
+            PD.${projectDetailTable.COLUMN.NAME},
+            P.${projectTable.COLUMN.PROJECT_NO},
+            U.${userTable.COLUMN.USERNAME} AS INPUT_BY, 
+            D.${departmentTable.COLUMN.NAME} AS DEPARTMENT_NAME,
+            D.${departmentTable.COLUMN.ID} AS DEPARTMENT_ID,
+            (
+                SELECT
+                GROUP_CONCAT(${userTable.COLUMN.USERNAME}
+                ORDER BY ${userTable.COLUMN.ID}
+                SEPARATOR ', '
+                )
+                FROM ${userTable.TABLE}
+                WHERE ${userTable.COLUMN.DEPARTMENT_ID} = PR.${table.COLUMN.DEPARTMENT_ID}
+            ) AS PIC,
+             CASE 
+            WHEN PD.${projectDetailTable.COLUMN.FINISH_DATE} IS NULL OR PD.${projectDetailTable.COLUMN.FINISH_DATE} = "0000-00-00" THEN 'On Going'
+            WHEN DATEDIFF(PD.${projectDetailTable.COLUMN.FINISH_DATE}, PD.${projectDetailTable.COLUMN.DUE_DATE}) < 0 THEN 'Ahead'
+            WHEN DATEDIFF(PD.${projectDetailTable.COLUMN.FINISH_DATE}, PD.${projectDetailTable.COLUMN.DUE_DATE}) = 0 THEN 'On Time'
+            WHEN DATEDIFF(PD.${projectDetailTable.COLUMN.FINISH_DATE}, PD.${projectDetailTable.COLUMN.DUE_DATE}) > 0 THEN 'Delayed'
+            END AS PROJECT_STATUS,
+            CASE 
+            WHEN PD.${projectDetailTable.COLUMN.FINISH_DATE}  IS NULL OR PD.${projectDetailTable.COLUMN.FINISH_DATE}  = '0000-00-00' THEN NULL
+            ELSE DATEDIFF(PD.${projectDetailTable.COLUMN.FINISH_DATE}, PD.${projectDetailTable.COLUMN.DUE_DATE})
+            END AS DAYS,
+            DATE_FORMAT(PR.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, 
+            DATE_FORMAT(PR.${table.COLUMN.DEADLINE}, '%Y-%m-%d') AS DEADLINE, 
+            PR.${table.COLUMN.SOLUTION},
+            PR.${table.COLUMN.DESCRIPTION} 
+            FROM ${table.TABLE} AS PR 
+            JOIN ${projectTable.TABLE} AS P ON PR.${table.COLUMN.PROJECT_ID} = P.${projectTable.COLUMN.ID}
+            JOIN ${projectDetailTable.TABLE} AS PD ON P.${projectTable.COLUMN.ID} = PD.${projectDetailTable.COLUMN.PROJECT_ID}
+            JOIN ${userTable.TABLE} AS U ON PR.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID} 
+            LEFT JOIN ${departmentTable.TABLE} AS D ON PR.${table.COLUMN.DEPARTMENT_ID} = D.${departmentTable.COLUMN.ID}
+            WHERE P.${projectTable.COLUMN.COMPANY_ID} = ?            
+            AND D.${departmentTable.COLUMN.ID} = ? 
+            AND PR.${table.COLUMN.STATUS} <> "Close" 
             ORDER BY P.${projectTable.COLUMN.ID} ASC
             `,
         },

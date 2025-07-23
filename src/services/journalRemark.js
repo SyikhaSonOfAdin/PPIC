@@ -250,9 +250,7 @@ exports.remarkServices = {
                             _b.label = 3;
                         case 3:
                             _b.trys.push([3, 5, 6, 7]);
-                            return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.select.all.forReport, [
-                                    companyId,
-                                ])];
+                            return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.select.all.forReport, [companyId])];
                         case 4:
                             rows = (_b.sent())[0];
                             return [2 /*return*/, rows];
@@ -317,6 +315,41 @@ exports.remarkServices = {
                     });
                 });
             },
+            byDepId: function (companyId, departmentId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+                var CONNECTION, _a, rows, error_8;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = connection;
+                            if (_a) return [3 /*break*/, 2];
+                            return [4 /*yield*/, db_1.PPIC.getConnection()];
+                        case 1:
+                            _a = (_b.sent());
+                            _b.label = 2;
+                        case 2:
+                            CONNECTION = _a;
+                            _b.label = 3;
+                        case 3:
+                            _b.trys.push([3, 5, 6, 7]);
+                            return [4 /*yield*/, CONNECTION.query(journalRemark_1.remarkQuerys.select.all.byDepId, [
+                                    companyId,
+                                    departmentId,
+                                ])];
+                        case 4:
+                            rows = (_b.sent())[0];
+                            return [2 /*return*/, rows];
+                        case 5:
+                            error_8 = _b.sent();
+                            throw error_8;
+                        case 6:
+                            if (!connection && CONNECTION) {
+                                CONNECTION.release();
+                            }
+                            return [7 /*endfinally*/];
+                        case 7: return [2 /*return*/];
+                    }
+                });
+            }); },
         },
     },
 };

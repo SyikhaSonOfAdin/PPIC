@@ -20,9 +20,10 @@ const QUERY = {
     },
     update: `UPDATE ${table.TABLE} SET ${table.COLUMN.INPUT_BY} = ?, ${table.COLUMN.INPUT_DATE} = NOW(), ${table.COLUMN.NAME} = ? WHERE ${table.COLUMN.ID} = ?`,
     select: {
-        all: `SELECT D.${table.COLUMN.ID}, U.${userTable.COLUMN.USERNAME} AS INPUT_BY, DATE_FORMAT(D.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, D.${table.COLUMN.NAME} 
+        all: `SELECT C.${companyTable.COLUMN.NAME} AS COMPANY_NAME, D.${table.COLUMN.ID}, U.${userTable.COLUMN.USERNAME} AS INPUT_BY, DATE_FORMAT(D.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, D.${table.COLUMN.NAME} 
         FROM ${table.TABLE} AS D 
         JOIN ${userTable.TABLE} AS U ON D.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID}
+        JOIN ${companyTable.TABLE} AS C ON D.${table.COLUMN.COMPANY_ID} = C.${companyTable.COLUMN.ID}
         WHERE D.${table.COLUMN.COMPANY_ID} = ?`,
         onlyOne: `SELECT D.${table.COLUMN.ID}, D.${table.COLUMN.NAME}
         FROM ${table.TABLE} AS D WHERE D.${table.COLUMN.ID} = ?`,

@@ -1,4 +1,11 @@
-const { remarkServices } = require("../services/journalRemark")
+const { render } = require("@react-email/render")
+const React = require('react');
+const { emailServices } = require("../services/email")
+const { remarkServices } = require("../services/journalRemark");
+const { departmentServices } = require("../services/department");
+const { userServices } = require("../services/user");
+const { PPIC } = require("../config/db");
+const ProjectRemark = require("../../dist/templates/email/ProjectRemark").default;
 
 const journalRemarkController = {
     add: async (req, res, next) => {
@@ -114,7 +121,46 @@ const journalRemarkController = {
                 }
             },
         }
-    }
+    },
+    sendEmail: async (req, res) => {
+        const companyId = req.params.companyId
+        if (!companyId) return res.status(400).json({ message: "Invalid Parameters" })
+        try {
+            const connection = await PPIC.getConnection()
+            try {
+                const departments = await departmentServices.get.all(companyId, connection)
+                departments.forEach(async dep => {
+                    const data = await remarkServices.get.all.byDepId(companyId, dep.ID, connection)
+                    const users = await userServices.get.byDepId(dep.ID, connection)
+                    if (data.length > 0) {
+                        const htmlStatic = emailServices.template.projectRemark(dep.COMPANY_NAME, dep.NAME, data)
+                        const emails = users.length > 1 ? users.map(u => (u.EMAIL)).join(", ") : users.map(u => (u.EMAIL))[0]
+                        await emailServices.sendEmail(
+                            emails,
+                            "Remarks Reminder",
+                            "",
+                            htmlStatic
+                        );
+                    }
+                })
+                return res.status(200).json({
+                    message: "Send Email Remark Journal successfully",
+                    data: []
+                })
+            } catch (error) {
+                connection.rollback()
+                res.status(500).json({
+                    message: error.message
+                })
+            } finally {
+                connection.release()
+            }
+        } catch (error) {
+            res.status(500).json({
+                message: error.message
+            })
+        }
+    },
 }
 
 module.exports = { journalRemarkController }
