@@ -1,11 +1,8 @@
-const { render } = require("@react-email/render")
-const React = require('react');
 const { emailServices } = require("../services/email")
 const { remarkServices } = require("../services/journalRemark");
 const { departmentServices } = require("../services/department");
 const { userServices } = require("../services/user");
 const { PPIC } = require("../config/db");
-const ProjectRemark = require("../../dist/templates/email/ProjectRemark").default;
 
 const journalRemarkController = {
     add: async (req, res, next) => {
