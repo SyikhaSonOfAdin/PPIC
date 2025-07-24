@@ -1,6 +1,7 @@
-const { emailServices } = require("../services/email")
-const { remarkServices } = require("../services/journalRemark");
 const { departmentServices } = require("../services/department");
+const { actualServices } = require("../services/projectActual");
+const { remarkServices } = require("../services/journalRemark");
+const { emailServices } = require("../services/email")
 const { userServices } = require("../services/user");
 const { PPIC } = require("../config/db");
 
@@ -104,13 +105,38 @@ const journalRemarkController = {
             all: async (req, res, next) => {
                 const companyId = req.params.companyId
                 const s = req.query.s
+
                 if (!companyId) return res.status(400).json({ message: "Invalid Parameters" })
+
                 try {
-                    const data = await remarkServices.get.all.all(companyId, s)
-                    return res.status(200).json({
-                        message: "Get Remark Journal successfully",
-                        data: data
-                    })
+                    const connection = await PPIC.getConnection()
+                    try {
+                        const data = await remarkServices.get.all.all(companyId, s, connection)
+                        const projects = await Promise.all(data.map(async p => {
+                            const actualData = await actualServices.get.all(p.ID, connection)
+                            const totalActual = actualData.reduce(
+                                (sum, item) => sum + parseFloat(item.AMOUNT),
+                                0
+                            );
+
+                            return {
+                                ...p,
+                                PERCENTAGE: totalActual > 0 ? ((totalActual / parseFloat(p.CAPACITY)) * 100).toFixed(2) + "%" : "0%",
+                            };
+                        }))
+
+                        return res.status(200).json({
+                            message: "Get Remark Journal successfully",
+                            data: projects
+                        })
+                    } catch (error) {
+                        connection.rollback()
+                        res.status(500).json({
+                            message: error.message
+                        })
+                    } finally {
+                        connection.release()
+                    }
                 } catch (error) {
                     res.status(500).json({
                         message: error.message
