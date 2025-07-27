@@ -48,13 +48,13 @@ var transporter = nodemailer.createTransport({
     },
 });
 exports.emailServices = {
-    sendEmail: function (to, subject, text, html) { return __awaiter(void 0, void 0, void 0, function () {
+    sendEmail: function (to, subject, text, html, from) { return __awaiter(void 0, void 0, void 0, function () {
         var options, info, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     options = {
-                        from: process.env.EMAIL_HOST_USER,
+                        from: "".concat(from, " <").concat(process.env.EMAIL_HOST_USER, ">"),
                         to: to,
                         subject: subject,
                         text: text,
@@ -76,6 +76,8 @@ exports.emailServices = {
     }); },
     template: {
         projectRemark: function (username, departmentName, data) {
+            if (data === void 0) { data = []; }
+            // Ensure data is array
             var safeData = Array.isArray(data) ? data : [];
             // Group data by project
             var grouped = safeData.reduce(function (acc, item) {
@@ -94,18 +96,55 @@ exports.emailServices = {
                 }
                 return acc;
             }, {});
-            // Render rows for each project with remarks
+            // Build HTML rows
             var rows = Object.values(grouped)
                 .filter(function (group) { return group.remarks.length > 0; })
                 .map(function (group) {
                 var remarkRows = group.remarks
-                    .map(function (r) { return "\n          <tr style=\"border-bottom:1px solid #e0e0e0;\">\n            <td style=\"padding:4px 8px; font-size:13px; color:#e53935; background-color:#fdecea;\">\n              ".concat(r.STATUS, "\n            </td>\n            <td style=\"padding:4px 8px; font-size:13px; color:#333;\">\n              ").concat(r.DEADLINE, "\n            </td>\n            <td style=\"padding:4px 8px; font-size:13px; color:#333;\">\n              ").concat(r.DESCRIPTION, "\n            </td>\n          </tr>\n        "); })
-                    .join("");
-                return "\n        <tr>\n          <td style=\"padding:12px; border:1px solid #e0e0e0; border-radius:8px;\">\n            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;\">\n              <tr>\n                <td style=\"padding-bottom:8px; font-size:14px; font-weight:400;\">\n                  <a href=\"".concat(process.env.APP, "/d/").concat(group.project_id, "?open-tabs=remark\" target=\"_blank\" style=\"color:#333; text-decoration:none;\">\n                    ").concat(group.project_no, " - ").concat(group.project_name, "\n                  </a>\n                </td>\n              </tr>\n              <tr>\n                <td>\n                  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;\">\n                    ").concat(remarkRows, "\n                  </table>\n                </td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n      ");
+                    .map(function (r) {
+                    var statusColor = r.STATUS === "Warm"
+                        ? {
+                            text: "#fb8c00",
+                            bg: "rgba(255,152,0,0.1)",
+                            border: "#ff9800",
+                        }
+                        : r.STATUS === "On Going"
+                            ? {
+                                text: "#1e88e5",
+                                bg: "rgba(33,150,243,0.1)",
+                                border: "#2196f3",
+                            }
+                            : {
+                                text: "#e53935",
+                                bg: "rgba(244,67,54,0.1)",
+                                border: "#f44336",
+                            };
+                    return "\n            <tr>\n              <td style=\"padding: 0 20px\">\n                <p style=\"\n                  display:inline-block;\n                  padding:2px 8px;\n                  color:".concat(statusColor.text, ";\n                  background-color:").concat(statusColor.bg, ";\n                  border:1px solid ").concat(statusColor.border, ";\n                  border-radius:10px;\n                  text-align:center;\n                  font-size:12px;\n                  line-height:16px;\n                  font-weight:500;\n                \">\n                  ").concat(r.STATUS, "\n                </p>\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.DEPARTMENT_NAME, "\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.PIC || "", "\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.DESCRIPTION, "\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.SOLUTION || "", "\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.DEADLINE, "\n              </td>\n            </tr>\n            <tr>\n              <td style=\"padding: 2px 0\"></td>\n            </tr>\n            <tr>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n            </tr>\n            <tr>\n              <td style=\"padding: 2px 0\"></td>\n            </tr>\n          ");
+                })
+                    .join("\n");
+                var projectColor = group.project_status === "On Time" ||
+                    group.project_status === "Ahead"
+                    ? {
+                        text: "#43a047",
+                        bg: "rgba(76,175,80,0.1)",
+                        border: "#4caf50",
+                    }
+                    : group.project_status === "On Going"
+                        ? {
+                            text: "#1e88e5",
+                            bg: "rgba(33,150,243,0.1)",
+                            border: "#2196f3",
+                        }
+                        : {
+                            text: "#e53935",
+                            bg: "rgba(244,67,54,0.1)",
+                            border: "#f44336",
+                        };
+                return "\n        <tr>\n          <td style=\"width:100%;padding:10px;border:1px solid #d9d9d9;border-radius:15px;\">\n            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;\">\n              <tr>\n                <td>\n                  <table>\n                    <tr>\n                      <td>\n                        <a href=\"".concat(process.env.APP, "/d/").concat(group.project_id, "?open-tabs=remark\" target=\"_blank\" style=\"color:#585858;font-weight:700;font-size:18px;line-height:28px;text-decoration:none;\">\n                          ").concat(group.project_no, "\n                        </a>\n                      </td>\n                      <td style=\"padding: 0 0 0 10px\">\n                        <p style=\"\n                          display:inline-block;\n                          padding:2px 8px;\n                          color:").concat(projectColor.text, ";\n                          background-color:").concat(projectColor.bg, ";\n                          border:1px solid ").concat(projectColor.border, ";\n                          border-radius:10px;\n                          text-align:center;\n                          font-size:12px;\n                          line-height:16px;\n                          font-weight:500;\n                        \">\n                          ").concat(group.project_status, "\n                        </p>\n                      </td>\n                    </tr>\n                  </table>\n                </td>\n              </tr>\n              <tr>\n                  <td>\n                    <table>\n                      <tbody>\n                        <tr>\n                          <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                            ").concat(group.project_name, "\n                          </td>\n                        </tr>\n                      </tbody>\n                    </table>\n                  </td>\n              </tr>\n              <tr>\n                <td>\n                  <table width=\"100%\">\n                    <tbody>\n                      ").concat(remarkRows, "\n                    </tbody>\n                  </table>\n                </td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding: 10px 0\"></td>\n        </tr>\n      ");
             })
-                .join("");
+                .join("\n");
             // Full HTML
-            var html = "\n    <center>\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n        <tr>\n          <td align=\"center\" bgcolor=\"#f1f1f1\" style=\"padding:40px 0;\">\n            <table width=\"650\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"background-color:#ffffff;\">\n              <tr>\n                <td style=\"padding:20px; font-family:sans-serif; font-size:16px; color:#333;\">\n                  <h1 style=\"margin:0; font-size:20px;\">Halo, ".concat(username, "!</h1>\n                  <p style=\"margin:8px 0 0; font-size:14px;\">Berikut adalah remark dengan status selain Close pada departemen ").concat(departmentName, ".</p>\n                </td>\n              </tr>\n              <tr>\n                <td style=\"padding:20px;\">\n                  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;\">\n                    ").concat(rows, "\n                  </table>\n                </td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n      </table>\n    </center>\n  ");
+            var html = "\n    <center>\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n        <tr>\n          <td align=\"center\" bgcolor=\"#f1f1f1\" style=\"padding:40px 0;\">\n            <table width=\"1000\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-family:Inter, Arial, sans-serif;padding:50px 40px 100px 40px;background-color:#ffffff;border:1px solid #d9d9d9;border-radius:15px;\">\n              <tr>\n                <td style=\"font-size:16px;color:#333;\">\n                  <h1 style=\"margin:0;font-size:24px;line-height:32px;color:#2e3849;\">Halo, ".concat(username, "!</h1>\n                  <p style=\"margin:8px 0 0;font-size:16px;line-height:25px;color:#2e3849;\">\n                    Ini adalah remark dengan status selain Close yang ditugaskan pada Departemen ").concat(departmentName, ", Data ini diperbarui per tanggal ").concat(new Date().toLocaleDateString(), ".\n                  </p>\n                </td>\n              </tr>\n              <tr><td style=\"padding:10px\"></td></tr>\n              <tr><td style=\"border-bottom:2px solid #d9d9d9\"></td></tr>\n              <tr><td style=\"padding:10px\"></td></tr>\n              ").concat(rows, "\n              <tr><td style=\"padding:10px\"></td></tr>\n              <tr><td style=\"border-bottom:2px solid #d9d9d9\"></td></tr>\n              <tr><td style=\"padding:10px\"></td></tr>              \n              <tr><td align=\"center\" style=\"text-align: center;\">Copyright Syikha Akmal</td></tr>\n            </table>\n          </td>\n        </tr>\n      </table>\n    </center>\n  ");
             return html;
         },
     },

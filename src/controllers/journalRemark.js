@@ -158,12 +158,15 @@ const journalRemarkController = {
                     if (data.length > 0) {
                         const htmlStatic = emailServices.template.projectRemark(dep.COMPANY_NAME, dep.NAME, data)
                         const emails = users.length > 1 ? users.map(u => (u.EMAIL)).join(", ") : users.map(u => (u.EMAIL))[0]
-                        await emailServices.sendEmail(
-                            emails,
-                            "Remarks Reminder",
-                            "",
-                            htmlStatic
-                        );
+                        if (emails) {
+                            await emailServices.sendEmail(
+                                emails,
+                                "Remarks Reminder",
+                                "",
+                                htmlStatic,
+                                "PPIC Report"
+                            );
+                        }
                     }
                 })
                 return res.status(200).json({
