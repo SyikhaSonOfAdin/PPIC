@@ -10,7 +10,7 @@ const table = {
 }
 
 const QUERY = {
-    get: `SELECT * ${table.TABLE} WHERE ${table.COLUMN.USER_ID} = ?`,
+    get: `SELECT * FROM ${table.TABLE} WHERE ${table.COLUMN.USER_ID} = ?`,
     insert: `INSERT INTO ${table.TABLE} (${table.COLUMN.ID}, ${table.COLUMN.USER_ID}, ${table.COLUMN.PERMISSION_ID}) VALUES (?,?,?)`,
     delete: {
         all: `DELETE FROM ${table.TABLE} WHERE ${table.COLUMN.USER_ID} = ?`,

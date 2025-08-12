@@ -2,6 +2,8 @@ const { permissionServices } = require("../services/permission");
 const { userServices } = require("../services/user")
 const { PPIC } = require("../config/db");
 const jwt = require('jsonwebtoken');
+const { privilegeServices } = require("../services/privilege");
+const user = require("../models/user");
 
 const userControllers = {
     add: async (req, res, next) => {
@@ -53,7 +55,7 @@ const userControllers = {
             if (!userId) return res.status(400).json({ message: "Invalid Parameter" })
 
             try {
-                await userServices.delete(userId)
+                await userServices.delete.user(userId)
                 return res.status(200).json({
                     message: `User deleted successfully`,
                     data: []
@@ -83,6 +85,45 @@ const userControllers = {
         },
     },
     update: {
+        single: async (req, res, next) => {
+            const { userId, username, email, permissions } = req.body
+
+            if (!userId || !username || !email || !permissions) return res.status(400).json({ message: "Invalid Parameter" })
+
+            try {
+                const connection = await PPIC.getConnection();
+
+                try {
+                    await connection.beginTransaction();
+
+                    const id = await userServices.edit.single(userId, username, email)
+
+                    for (const key of Object.keys(permissions)) {
+                        await permissionServices.add(id, key, permissions[key], connection);
+                    }
+
+                    await connection.commit();
+
+                    return res.status(200).json({
+                        message: `User edited successfully`,
+                        data: [{ userId: id }],
+                    });
+                } catch (error) {
+                    await connection.rollback();
+                    return res.status(500).json({
+                        message: "Failed to add user",
+                        error: error.message,
+                    });
+                } finally {
+                    connection.release();
+                }
+            } catch (error) {
+                return res.status(500).json({
+                    message: "Failed to connect to database",
+                    error: error.message,
+                });
+            }
+        },
         department: async (req, res, next) => {
             const { userId, departmentId } = req.body
 
@@ -110,6 +151,25 @@ const userControllers = {
                 return res.status(200).json({
                     message: "Get User successfully",
                     data: data
+                })
+            } catch (error) {
+                res.status(500).json({
+                    message: error.message
+                })
+            }
+        },
+        single: async (req, res, next) => {
+            const userId = req.params.userId
+            if (!userId) return res.status(400).json({ message: "Invalid Parameter" })
+            try {
+                const data = await userServices.get.single(userId)
+                const privileges = await privilegeServices.get(userId)
+                return res.status(200).json({
+                    message: "Get User successfully",
+                    data: {
+                        user: data,
+                        privileges: privileges
+                    }
                 })
             } catch (error) {
                 res.status(500).json({
@@ -164,8 +224,8 @@ const userControllers = {
                         cName: user.COMPANY_NAME,
                         pId: user.PROJECT_ID,
                         eAddr: user.EMAIL,
-                        t: jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '7d' }),
-                        version: "1.0.0"
+                        t: jwt.sign({ email, user: {id: user.ID} }, process.env.JWT_SECRET, { expiresIn: '7d' }),
+                        version: "1.4.3"
                     }]
                 })
             }

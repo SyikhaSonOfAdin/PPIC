@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { delayedMaterialListDetailRouter } = require('./routes/delayedMaterialDetail');
 const { delayedMaterialListRouter } = require('./routes/delayedMaterialList');
+const { productivityPeriodRouter } = require('./routes/productivityPeriod');
 const { delayedMaterialRouter } = require('./routes/delayedMaterial');
 const { journalDelaysRouter } = require('./routes/journalDelays');
 const { journalRemarkRouter } = require('./routes/journalRemark');
@@ -8,15 +9,17 @@ const { projectActualRouter } = require('./routes/projectActual');
 const { projectPlansRouter } = require('./routes/projectPlans');
 const { permissionRouter } = require('./routes/permission');
 const { attachmentRouter } = require('./routes/attachment');
+const { departmentRouter } = require('./routes/department');
 const { categoryRouter } = require('./routes/category');
 const { workLoadRouter } = require('./routes/workLoad');
 const { companyRouter } = require('./routes/company');
 const { projectRouter } = require('./routes/project');
+const { processRouter } = require('./routes/process');
 const { userRouter } = require('./routes/user');
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const { departmentRouter } = require('./routes/department');
+const { projectProductivityRouter } = require('./routes/projectProductivity');
 
 const app = express();
 const port = 3000;
@@ -33,7 +36,9 @@ app.use(express.static(path.join(__dirname, '')));
 
 app.use("/journal/material/delayed/list/detail", delayedMaterialListDetailRouter);
 app.use("/journal/material/delayed/list", delayedMaterialListRouter);
+app.use("/productivity/progress", projectProductivityRouter);
 app.use("/journal/material/delayed", delayedMaterialRouter);
+app.use("/productivity/period", productivityPeriodRouter);
 app.use("/journal/delays", journalDelaysRouter);
 app.use("/journal/remark", journalRemarkRouter);
 app.use("/project/actual", projectActualRouter);
@@ -44,6 +49,7 @@ app.use("/category", categoryRouter);
 app.use("/department", departmentRouter);
 app.use("/workload", workLoadRouter);
 app.use("/project", projectRouter);
+app.use("/process", processRouter);
 app.use("/company", companyRouter);
 app.use("/user", userRouter);
 

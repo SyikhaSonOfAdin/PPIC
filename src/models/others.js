@@ -1,3 +1,6 @@
+const { projectTable } = require("./project")
+const { projectDetailTable } = require("./projectDetail")
+
 const QUERY = {
     select: {
         distinct: {
@@ -12,6 +15,20 @@ const QUERY = {
                         JOIN company_projects AS CP ON CP.ID = PA.PROJECT_ID
                         WHERE CP.COMPANY_ID = ? ORDER BY PERIOD_YEAR DESC`
             }
+        },
+        project: {
+            start_date: {
+                earliest: `SELECT PD.${projectDetailTable.COLUMN.START_DATE} FROM ${projectTable.TABLE} AS CP
+                            JOIN ${projectDetailTable.TABLE} AS PD ON CP.${projectTable.COLUMN.ID} = PD.${projectDetailTable.COLUMN.PROJECT_ID}
+                            WHERE CP.${projectTable.COLUMN.COMPANY_ID} = ?
+                            ORDER BY PD.${projectDetailTable.COLUMN.START_DATE} ASC LIMIT 1`
+            },
+            due_date: {
+                latest: `SELECT PD.${projectDetailTable.COLUMN.DUE_DATE} FROM ${projectTable.TABLE} AS CP
+                            JOIN ${projectDetailTable.TABLE} AS PD ON CP.${projectTable.COLUMN.ID} = PD.${projectDetailTable.COLUMN.PROJECT_ID}
+                            WHERE CP.${projectTable.COLUMN.COMPANY_ID} = ?
+                            ORDER BY PD.${projectDetailTable.COLUMN.DUE_DATE} DESC LIMIT 1`
+            },
         }
     }
 }
