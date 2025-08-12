@@ -5,7 +5,7 @@ const processControllers = {
     add: async (req, res, next) => {
         try {
             const { companyId, name, description } = req.body;
-            if (!companyId || !name || !description) {
+            if (!companyId || !name) {
                 return res.status(400).json({ message: "Name and Description are required" });
             }
             await processServices.add(companyId, req.u.user.id, name, description);

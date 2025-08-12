@@ -42,7 +42,7 @@ const projectControllers = {
     edit: {
         all: async (req, res, next) => {
             const { projectId, categoryId, projectNo, client, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
-            if (!projectId || !categoryId || !projectNo || !client || !userId || !name || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
+            if (!projectId || !categoryId || !projectNo || !client || !userId || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
 
             try {
                 const connection = await PPIC.getConnection()
