@@ -135,42 +135,81 @@ exports.productivityPeriodServices = {
         }); },
     },
     get: {
-        byPeriod: function (companyId, startDate, endDate, connection) { return __awaiter(void 0, void 0, void 0, function () {
-            var conn, _a, rows, error_2;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = connection;
-                        if (_a) return [3 /*break*/, 2];
-                        return [4 /*yield*/, db_1.PPIC.getConnection()];
-                    case 1:
-                        _a = (_b.sent());
-                        _b.label = 2;
-                    case 2:
-                        conn = _a;
-                        _b.label = 3;
-                    case 3:
-                        _b.trys.push([3, 5, 6, 7]);
-                        return [4 /*yield*/, conn.query(productivityPeriod_1.productivityPeriodQuerys.select.period, [endDate, startDate, companyId])];
-                    case 4:
-                        rows = (_b.sent())[0];
-                        return [2 /*return*/, rows.map(function (row) { return ({
-                                ID: row.ID,
-                                COMPANY_ID: row.COMPANY_ID,
-                                CUTOFF_DATE_START: row.CUTOFF_DATE_START,
-                                CUTOFF_DATE_FINISH: row.CUTOFF_DATE_FINISH,
-                            }); })];
-                    case 5:
-                        error_2 = _b.sent();
-                        throw error_2;
-                    case 6:
-                        if (!connection) {
-                            conn.release();
-                        }
-                        return [7 /*endfinally*/];
-                    case 7: return [2 /*return*/];
-                }
-            });
-        }); },
+        by: {
+            companyId: function (companyId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+                var conn, _a, rows, error_2;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = connection;
+                            if (_a) return [3 /*break*/, 2];
+                            return [4 /*yield*/, db_1.PPIC.getConnection()];
+                        case 1:
+                            _a = (_b.sent());
+                            _b.label = 2;
+                        case 2:
+                            conn = _a;
+                            _b.label = 3;
+                        case 3:
+                            _b.trys.push([3, 5, 6, 7]);
+                            return [4 /*yield*/, conn.query(productivityPeriod_1.productivityPeriodQuerys.select.all, [companyId])];
+                        case 4:
+                            rows = (_b.sent())[0];
+                            return [2 /*return*/, rows.map(function (row) { return ({
+                                    ID: row.ID,
+                                    COMPANY_ID: row.COMPANY_ID,
+                                    CUTOFF_DATE_START: row.CUTOFF_DATE_START,
+                                    CUTOFF_DATE_FINISH: row.CUTOFF_DATE_FINISH,
+                                }); })];
+                        case 5:
+                            error_2 = _b.sent();
+                            throw error_2;
+                        case 6:
+                            if (!connection) {
+                                conn.release();
+                            }
+                            return [7 /*endfinally*/];
+                        case 7: return [2 /*return*/];
+                    }
+                });
+            }); },
+            period: function (companyId, startDate, endDate, connection) { return __awaiter(void 0, void 0, void 0, function () {
+                var conn, _a, rows, error_3;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = connection;
+                            if (_a) return [3 /*break*/, 2];
+                            return [4 /*yield*/, db_1.PPIC.getConnection()];
+                        case 1:
+                            _a = (_b.sent());
+                            _b.label = 2;
+                        case 2:
+                            conn = _a;
+                            _b.label = 3;
+                        case 3:
+                            _b.trys.push([3, 5, 6, 7]);
+                            return [4 /*yield*/, conn.query(productivityPeriod_1.productivityPeriodQuerys.select.period, [endDate, startDate, companyId])];
+                        case 4:
+                            rows = (_b.sent())[0];
+                            return [2 /*return*/, rows.map(function (row) { return ({
+                                    ID: row.ID,
+                                    COMPANY_ID: row.COMPANY_ID,
+                                    CUTOFF_DATE_START: row.CUTOFF_DATE_START,
+                                    CUTOFF_DATE_FINISH: row.CUTOFF_DATE_FINISH,
+                                }); })];
+                        case 5:
+                            error_3 = _b.sent();
+                            throw error_3;
+                        case 6:
+                            if (!connection) {
+                                conn.release();
+                            }
+                            return [7 /*endfinally*/];
+                        case 7: return [2 /*return*/];
+                    }
+                });
+            }); },
+        },
     },
 };

@@ -18,7 +18,17 @@ const projectProductivityController = {
                     const { projectId } = req.params
                     if (!projectId) return res.status(400).json({ message: "Invalid Parameters" })
                     const data = await projectProductivityService.get.by.projectId(projectId)
-                    res.status(201).send({ message: "Get Project productivity data successfully", data:data });
+                    res.status(201).send({ message: "Get Project productivity data successfully", data: data });
+                } catch (error) {
+                    res.status(500).send({ error: "An error occurred while adding project productivity data", message: error.message });
+                }
+            },
+            companyId: async (req, res) => {
+                try {
+                    const { companyId } = req.params
+                    if (!companyId) return res.status(400).json({ message: "Invalid Parameters" })
+                    const data = await projectProductivityService.get.by.companyId(companyId)
+                    res.status(201).send({ message: "Get Project productivity data successfully", data: data });
                 } catch (error) {
                     res.status(500).send({ error: "An error occurred while adding project productivity data", message: error.message });
                 }
