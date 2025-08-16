@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -161,13 +161,47 @@ exports.projectServices = {
         });
     }); },
     get: {
+        by: {
+            periodId: function (periodId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+                var CONNECTION, _a, data, error_4;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = connection;
+                            if (_a) return [3 /*break*/, 2];
+                            return [4 /*yield*/, db_1.PPIC.getConnection()];
+                        case 1:
+                            _a = (_b.sent());
+                            _b.label = 2;
+                        case 2:
+                            CONNECTION = _a;
+                            _b.label = 3;
+                        case 3:
+                            _b.trys.push([3, 5, 6, 7]);
+                            return [4 /*yield*/, CONNECTION.query(project_1.projectQuerys.select.by.periodId, [periodId])];
+                        case 4:
+                            data = (_b.sent())[0];
+                            return [2 /*return*/, data];
+                        case 5:
+                            error_4 = _b.sent();
+                            throw error_4;
+                        case 6:
+                            if (!connection && CONNECTION) {
+                                CONNECTION.release();
+                            }
+                            return [7 /*endfinally*/];
+                        case 7: return [2 /*return*/];
+                    }
+                });
+            }); },
+        },
         all: function (companyId_1) {
             var args_1 = [];
             for (var _i = 1; _i < arguments.length; _i++) {
                 args_1[_i - 1] = arguments[_i];
             }
             return __awaiter(void 0, __spreadArray([companyId_1], args_1, true), void 0, function (companyId, searchPattern, connection) {
-                var CONNECTION, _a, pattern, data, error_4;
+                var CONNECTION, _a, pattern, data, error_5;
                 if (searchPattern === void 0) { searchPattern = ""; }
                 return __generator(this, function (_b) {
                     switch (_b.label) {
@@ -201,8 +235,8 @@ exports.projectServices = {
                             data = (_b.sent())[0];
                             return [2 /*return*/, data];
                         case 5:
-                            error_4 = _b.sent();
-                            throw error_4;
+                            error_5 = _b.sent();
+                            throw error_5;
                         case 6:
                             if (!connection && CONNECTION) {
                                 CONNECTION.release();
@@ -214,7 +248,7 @@ exports.projectServices = {
             });
         },
         onlyOne: function (projectId, connection) { return __awaiter(void 0, void 0, void 0, function () {
-            var CONNECTION, _a, data, error_5;
+            var CONNECTION, _a, data, error_6;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -234,8 +268,8 @@ exports.projectServices = {
                         data = (_b.sent())[0];
                         return [2 /*return*/, data[0]];
                     case 5:
-                        error_5 = _b.sent();
-                        throw error_5;
+                        error_6 = _b.sent();
+                        throw error_6;
                     case 6:
                         if (!connection && CONNECTION) {
                             CONNECTION.release();
@@ -246,7 +280,7 @@ exports.projectServices = {
             });
         }); },
         byCategoryId: function (categoryId, connection) { return __awaiter(void 0, void 0, void 0, function () {
-            var CONNECTION, _a, data, error_6;
+            var CONNECTION, _a, data, error_7;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -266,8 +300,8 @@ exports.projectServices = {
                         data = (_b.sent())[0];
                         return [2 /*return*/, data];
                     case 5:
-                        error_6 = _b.sent();
-                        throw error_6;
+                        error_7 = _b.sent();
+                        throw error_7;
                     case 6:
                         if (!connection && CONNECTION) {
                             CONNECTION.release();

@@ -157,7 +157,7 @@ exports.productivityPeriodServices = {
                             rows = (_b.sent())[0];
                             return [2 /*return*/, rows.map(function (row) { return ({
                                     ID: row.ID,
-                                    COMPANY_ID: row.COMPANY_ID,
+                                    COMPANY_ID: companyId,
                                     CUTOFF_DATE_START: row.CUTOFF_DATE_START,
                                     CUTOFF_DATE_FINISH: row.CUTOFF_DATE_FINISH,
                                 }); })];

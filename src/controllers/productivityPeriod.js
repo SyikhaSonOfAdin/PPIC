@@ -1,5 +1,7 @@
 const { productivityPeriodServices } = require("../services/productivityPeriod");
 const { projectDetailServices } = require("../services/projectDetail");
+const { projectServices } = require("../services/project");
+const { PPIC } = require("../config/db");
 
 const productivityPeriodControllers = {
     get: {
@@ -18,13 +20,39 @@ const productivityPeriodControllers = {
                 }
             },
             companyId: async (req, res) => {
+                const { companyId } = req.params;
+                if (!companyId) {
+                    return res.status(400).json({ message: "Invalid Parameter" });
+                }
+
+                let connection;
                 try {
-                    const { companyId } = req.params;
-                    if (!companyId) return res.status(400).json({ message: "Invalid Parameter" })
-                    const data = await productivityPeriodServices.get.by.companyId(companyId)
-                    res.status(200).json({ message: "Productivity periods retrieved successfully", data });
+                    connection = await PPIC.getConnection();
+
+                    const periods = await productivityPeriodServices.get.by.companyId(companyId, connection);
+                    const projects = await Promise.all(periods.map(period =>
+                        projectServices.get.by.periodId(period.ID, connection)
+                    ));
+
+                    const data = periods.map((period, index) => ({
+                        ...period,
+                        PROJECT: projects[index] || []
+                    }));
+
+                    res.status(200).json({
+                        message: "Productivity periods retrieved successfully",
+                        data
+                    });
                 } catch (error) {
-                    res.status(500).json({ message: "Error retrieving productivity periods", error: error.message });
+                    console.error("Error retrieving productivity periods:", error);
+                    res.status(500).json({
+                        message: "Error retrieving productivity periods",
+                        error: error.message
+                    });
+                } finally {
+                    if (connection) {
+                        connection.release();
+                    }
                 }
             }
         },

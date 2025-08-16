@@ -28,7 +28,7 @@ const QUERY = {
         ${table.COLUMN.INPUT_DATE} = NOW()`,
     select: {
         by: {
-            companyId: `SELECT PP.${table.COLUMN.PROCESS_ID}, PP.${table.COLUMN.PERIOD_ID}, DATE_FORMAT(PP.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, PP.${table.COLUMN.PROGRESS}, PP.${table.COLUMN.MAN_POWER}, PP.${table.COLUMN.MAN_HOUR} 
+            companyId: `SELECT PP.${table.COLUMN.PROJECT_ID}, PP.${table.COLUMN.PROCESS_ID}, PP.${table.COLUMN.PERIOD_ID}, DATE_FORMAT(PP.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, PP.${table.COLUMN.PROGRESS}, PP.${table.COLUMN.MAN_POWER}, PP.${table.COLUMN.MAN_HOUR} 
             FROM ${table.TABLE} AS PP 
             JOIN ${projectTable.TABLE} AS P ON PP.${table.COLUMN.PROJECT_ID} = P.${projectTable.COLUMN.ID}
             WHERE P.${projectTable.COLUMN.COMPANY_ID} = ?`,

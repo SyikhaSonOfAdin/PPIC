@@ -1,5 +1,6 @@
-const { categoryTable } = require("./category")
+const { productivityPeriodTable } = require("./productivityPeriod")
 const { projectDetailTable } = require("./projectDetail")
+const { categoryTable } = require("./category")
 const { userTable } = require("./user")
 
 const table = {
@@ -68,7 +69,13 @@ const QUERY = {
             ) 
             ORDER BY CP.${table.COLUMN.ID} ASC`,
         onlyOne: `SELECT CP.${table.COLUMN.ID}, CP.${table.COLUMN.PROJECT_NO}, CP.${table.COLUMN.CLIENT}, U.${userTable.COLUMN.USERNAME} AS INPUT_BY, DATE_FORMAT(CP.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, C.${categoryTable.COLUMN.ID} AS CATEGORY_ID, C.${categoryTable.COLUMN.UOM}, C.${categoryTable.COLUMN.NAME} AS CATEGORY_NAME FROM ${table.TABLE} AS CP JOIN ${categoryTable.TABLE} AS C ON CP.${table.COLUMN.CATEGORY_ID} = C.${categoryTable.COLUMN.ID} JOIN ${userTable.TABLE} AS U ON CP.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID} WHERE CP.${table.COLUMN.ID} = ?`,
-        byCatgoeryId: `SELECT CP.* FROM ${table.TABLE} AS CP JOIN ${categoryTable.TABLE} AS C ON CP.${table.COLUMN.CATEGORY_ID} = C.${categoryTable.COLUMN.ID} WHERE C.${categoryTable.COLUMN.ID} = ?`
+        byCatgoeryId: `SELECT CP.* FROM ${table.TABLE} AS CP JOIN ${categoryTable.TABLE} AS C ON CP.${table.COLUMN.CATEGORY_ID} = C.${categoryTable.COLUMN.ID} WHERE C.${categoryTable.COLUMN.ID} = ?`,
+        by: {
+            periodId: `SELECT DISTINCT CP.* FROM ${table.TABLE} AS CP
+            JOIN project_productivity AS PP ON CP.${table.COLUMN.ID} = PP.PROJECT_ID
+            JOIN ${productivityPeriodTable.TABLE} AS P ON PP.PERIOD_ID = P.${productivityPeriodTable.COLUMN.ID}
+            WHERE P.${productivityPeriodTable.COLUMN.ID} = ?`,
+        }
     }
 }
 
