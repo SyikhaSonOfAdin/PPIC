@@ -109,10 +109,10 @@ exports.productivityPeriodServices = {
                                 actualEnd.toISOString().slice(0, 10),
                             ]));
                             record = {
-                                id: id,
-                                company_id: companyId,
-                                start_date: periodStart.toISOString().slice(0, 10),
-                                end_date: actualEnd.toISOString().slice(0, 10),
+                                ID: id,
+                                COMPANY_ID: companyId,
+                                CUTOFF_DATE_START: periodStart.toISOString().slice(0, 10),
+                                CUTOFF_DATE_FINISH: actualEnd.toISOString().slice(0, 10),
                             };
                             periods.push(record);
                             periodStart = new Date(actualEnd.getTime() + 1 * 24 * 60 * 60 * 1000);
@@ -133,11 +133,49 @@ exports.productivityPeriodServices = {
                 }
             });
         }); },
+        single: function (companyId, startDate, finishDate, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, id, error_2;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        id = (0, uuid_1.v7)();
+                        return [4 /*yield*/, CONNECTION.query(productivityPeriod_1.productivityPeriodQuerys.insert, [
+                                id,
+                                companyId,
+                                new Date(startDate),
+                                new Date(finishDate),
+                            ])];
+                    case 4:
+                        _b.sent();
+                        return [2 /*return*/, id];
+                    case 5:
+                        error_2 = _b.sent();
+                        throw error_2;
+                    case 6:
+                        if (!connection) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
     },
     get: {
         by: {
             companyId: function (companyId, connection) { return __awaiter(void 0, void 0, void 0, function () {
-                var conn, _a, rows, error_2;
+                var conn, _a, rows, error_3;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -162,8 +200,45 @@ exports.productivityPeriodServices = {
                                     CUTOFF_DATE_FINISH: row.CUTOFF_DATE_FINISH,
                                 }); })];
                         case 5:
-                            error_2 = _b.sent();
-                            throw error_2;
+                            error_3 = _b.sent();
+                            throw error_3;
+                        case 6:
+                            if (!connection) {
+                                conn.release();
+                            }
+                            return [7 /*endfinally*/];
+                        case 7: return [2 /*return*/];
+                    }
+                });
+            }); },
+            projectId: function (projectId, connection) { return __awaiter(void 0, void 0, void 0, function () {
+                var conn, _a, rows, error_4;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = connection;
+                            if (_a) return [3 /*break*/, 2];
+                            return [4 /*yield*/, db_1.PPIC.getConnection()];
+                        case 1:
+                            _a = (_b.sent());
+                            _b.label = 2;
+                        case 2:
+                            conn = _a;
+                            _b.label = 3;
+                        case 3:
+                            _b.trys.push([3, 5, 6, 7]);
+                            return [4 /*yield*/, conn.query(productivityPeriod_1.productivityPeriodQuerys.select.by.projectId, [projectId])];
+                        case 4:
+                            rows = (_b.sent())[0];
+                            return [2 /*return*/, rows.map(function (row) { return ({
+                                    ID: row.ID,
+                                    COMPANY_ID: row.COMPANY_ID,
+                                    CUTOFF_DATE_START: row.CUTOFF_DATE_START,
+                                    CUTOFF_DATE_FINISH: row.CUTOFF_DATE_FINISH,
+                                }); })];
+                        case 5:
+                            error_4 = _b.sent();
+                            throw error_4;
                         case 6:
                             if (!connection) {
                                 conn.release();
@@ -174,7 +249,7 @@ exports.productivityPeriodServices = {
                 });
             }); },
             period: function (companyId, startDate, endDate, connection) { return __awaiter(void 0, void 0, void 0, function () {
-                var conn, _a, rows, error_3;
+                var conn, _a, rows, error_5;
                 return __generator(this, function (_b) {
                     switch (_b.label) {
                         case 0:
@@ -199,8 +274,8 @@ exports.productivityPeriodServices = {
                                     CUTOFF_DATE_FINISH: row.CUTOFF_DATE_FINISH,
                                 }); })];
                         case 5:
-                            error_3 = _b.sent();
-                            throw error_3;
+                            error_5 = _b.sent();
+                            throw error_5;
                         case 6:
                             if (!connection) {
                                 conn.release();

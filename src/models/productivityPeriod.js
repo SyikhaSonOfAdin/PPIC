@@ -20,7 +20,13 @@ const QUERY = {
     },
     select: {
         all: `SELECT p.${table.COLUMN.ID}, DATE_FORMAT(p.${table.COLUMN.CUTOFF_DATE_START}, '%Y-%m-%d') AS CUTOFF_DATE_START, DATE_FORMAT(p.${table.COLUMN.CUTOFF_DATE_FINISH}, '%Y-%m-%d') AS CUTOFF_DATE_FINISH FROM ${table.TABLE} AS p WHERE p.${table.COLUMN.COMPANY_ID} = ?`,
-        period: `SELECT p.${table.COLUMN.ID}, DATE_FORMAT(p.${table.COLUMN.CUTOFF_DATE_START}, '%Y-%m-%d') AS CUTOFF_DATE_START, DATE_FORMAT(p.${table.COLUMN.CUTOFF_DATE_FINISH}, '%Y-%m-%d') AS CUTOFF_DATE_FINISH FROM ${table.TABLE} AS p WHERE p.${table.COLUMN.CUTOFF_DATE_START} <= ? AND p.${table.COLUMN.CUTOFF_DATE_FINISH} >= ? AND p.${table.COLUMN.COMPANY_ID} = ?`
+        period: `SELECT p.${table.COLUMN.ID}, DATE_FORMAT(p.${table.COLUMN.CUTOFF_DATE_START}, '%Y-%m-%d') AS CUTOFF_DATE_START, DATE_FORMAT(p.${table.COLUMN.CUTOFF_DATE_FINISH}, '%Y-%m-%d') AS CUTOFF_DATE_FINISH FROM ${table.TABLE} AS p WHERE p.${table.COLUMN.CUTOFF_DATE_START} <= ? AND p.${table.COLUMN.CUTOFF_DATE_FINISH} >= ? AND p.${table.COLUMN.COMPANY_ID} = ?`,
+        by: {
+            projectId: `SELECT DISTINCT p.${table.COLUMN.ID}, p.${table.COLUMN.COMPANY_ID}, DATE_FORMAT(p.${table.COLUMN.CUTOFF_DATE_START}, '%Y-%m-%d') AS CUTOFF_DATE_START, DATE_FORMAT(p.${table.COLUMN.CUTOFF_DATE_FINISH}, '%Y-%m-%d') AS CUTOFF_DATE_FINISH 
+            FROM ${table.TABLE} AS p 
+            JOIN project_productivity AS pp ON p.${table.COLUMN.ID} = pp.PERIOD_ID
+            WHERE pp.PROJECT_ID = ? ORDER BY p.${table.COLUMN.CUTOFF_DATE_START}`
+        }
     }
 }
 

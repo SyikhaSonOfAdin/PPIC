@@ -70,7 +70,7 @@ exports.projectProductivityService = {
                         ])];
                 case 4:
                     _b.sent();
-                    return [3 /*break*/, 7];
+                    return [2 /*return*/, id];
                 case 5:
                     error_1 = _b.sent();
                     throw error_1;
