@@ -225,7 +225,7 @@ const userControllers = {
                         pId: user.PROJECT_ID,
                         eAddr: user.EMAIL,
                         t: jwt.sign({ email, user: {id: user.ID} }, process.env.JWT_SECRET, { expiresIn: '7d' }),
-                        version: "1.4.5"
+                        version: "1.4.6"
                     }]
                 })
             }
