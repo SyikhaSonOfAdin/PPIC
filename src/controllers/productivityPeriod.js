@@ -16,16 +16,17 @@ const productivityPeriodControllers = {
                         return res.status(404).json({ message: "Project not found" });
                     }
 
-                    let data
-
                     const project_period = await productivityPeriodServices.get.by.projectId(projectId)
                     const default_period = await productivityPeriodServices.get.by.period(companyId, project.START_DATE, project.DUE_DATE);
 
-                    if (project_period.length >= default_period.length) {
-                        data = project_period
-                    } else {
-                        data = default_period
-                    }
+                    const mergedMap = new Map(
+                        [...default_period, ...project_period].map(item => [item.ID, item])
+                    );
+
+                    const data = Array.from(mergedMap.values());
+
+                    data.sort((a, b) => new Date(a.CUTOFF_DATE_START) - new Date(b.CUTOFF_DATE_START));
+
 
                     res.status(200).json({ message: "Productivity periods retrieved successfully", data });
                 } catch (error) {

@@ -9,15 +9,15 @@ const { PPIC } = require("../config/db");
 
 const projectControllers = {
     add: async (req, res, next) => {
-        const { companyId, categoryId, projectNo, client, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
-        if (!companyId || !categoryId || !projectNo || !client || !userId || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
+        const { companyId, categoryId, projectNo, client, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
+        if (!companyId || !categoryId || !projectNo || !spk || !client || !userId || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
 
         try {
             const connection = await PPIC.getConnection()
             try {
                 await connection.beginTransaction()
                 const id = await projectServices.add(companyId, categoryId, projectNo, client, userId)
-                await projectDetailServices.add(id, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate)
+                await projectDetailServices.add(id, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate)
                 await connection.commit()
                 return res.status(200).json({
                     message: "Project added successfully",
@@ -41,15 +41,15 @@ const projectControllers = {
     },
     edit: {
         all: async (req, res, next) => {
-            const { projectId, categoryId, projectNo, client, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
-            if (!projectId || !categoryId || !projectNo || !client || !userId || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
+            const { projectId, categoryId, projectNo, client, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
+            if (!projectId || !categoryId || !projectNo || !spk || !client || !userId || !capacity || !workPlace || !startDate || !dueDate) return res.status(400).json({ message: "Invalid Parameter" })
 
             try {
                 const connection = await PPIC.getConnection()
                 try {
                     await connection.beginTransaction()
                     await projectServices.edit(projectId, categoryId, projectNo, client, userId, connection)
-                    await projectDetailServices.edit.all(projectId, userId, name, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, connection)
+                    await projectDetailServices.edit.all(projectId, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, connection)
                     await plansServices.update.percentage(projectId, connection)
                     await actualServices.update.percentage(projectId, connection)
                     await connection.commit()
