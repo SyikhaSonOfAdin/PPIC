@@ -425,6 +425,67 @@ const projectControllers = {
                 })
             }
         },
+        download: {
+            plans_and_actual: async (req, res) => {
+                const { companyId, year } = req.params
+                const { month_start, month_end } = req.query
+
+                if (!companyId || !year || !month_start || !month_end) return res.status(400).json({ message: "Invalid Parameter" })
+                try {
+                    const CONNECTION = await PPIC.getConnection()
+                    try {
+                        const [actual] = await CONNECTION.query(othersQuerys.select.actual.by.period.month, [companyId, year, month_start, month_end])
+                        const [plans] = await CONNECTION.query(othersQuerys.select.plan.by.period.month, [companyId, year, month_start, month_end])
+
+                        const temp = new Map([...plans, ...actual].map(item => [item.PROJECT_ID + "|" + item.YEAR.toString() + "|" + item.MONTH, {
+                            PROJECT_ID: item.PROJECT_ID,
+                            PROJECT_NO: item.PROJECT_NO,
+                            UOM: item.UOM,
+                            CATEGORY: item.CATEGORY,
+                            YEAR: item.YEAR,
+                            MONTH: item.MONTH,
+                        }]))
+
+                        const pd = await Promise.all(Array.from(temp.values()).map(async p => {
+                            const project = await projectServices.get.onlyOne(p.PROJECT_ID, CONNECTION)
+                            const projectDetail = await projectDetailServices.get(p.PROJECT_ID, CONNECTION)
+                            
+                            return {
+                                PROJECT_ID: p.PROJECT_ID,
+                                ...project,
+                                ...projectDetail
+                            }
+                        }))
+
+                        const data = Array.from(temp.values()).map(p => {
+                            return {
+                                ...p,
+                                ...pd.find(item => item.PROJECT_ID == p.PROJECT_ID),
+                                TOTAL_AMOUNT_PLAN: plans.find(item => item.PROJECT_ID == p.PROJECT_ID && item.MONTH == p.MONTH)?.TOTAL_AMOUNT_PLAN ?? 0,
+                                TOTAL_AMOUNT_ACTUAL: actual.find(item => item.PROJECT_ID == p.PROJECT_ID && item.MONTH == p.MONTH)?.TOTAL_AMOUNT_ACTUAL ?? 0,
+                            }
+                        })
+
+                        res.status(200).json({
+                            success: true,
+                            message: "Successfully Get Data",
+                            data: data
+                        })
+                    } catch (error) {
+                        CONNECTION.rollback()
+                        res.status(500).json({
+                            message: error.message ?? "Internal server error"
+                        })
+                    } finally {
+                        CONNECTION.release()
+                    }
+                } catch (error) {
+                    res.status(500).json({
+                        message: error.message ?? "Internal server error"
+                    })
+                }
+            }
+        }
     }
 }
 

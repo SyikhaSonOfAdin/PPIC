@@ -30,6 +30,7 @@ const QUERY = {
             CP.${table.COLUMN.PROJECT_NO}, 
             CP.${table.COLUMN.CLIENT}, 
             PD.${projectDetailTable.COLUMN.NAME}, 
+            PD.${projectDetailTable.COLUMN.SPK}, 
             PD.${projectDetailTable.COLUMN.DELIVERED}, 
             PD.${projectDetailTable.COLUMN.DESCRIPTION}, 
             PD.${projectDetailTable.COLUMN.PPM}, 
