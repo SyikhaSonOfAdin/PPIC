@@ -159,7 +159,7 @@ const projectControllers = {
                                     let plansCheck = 0;
                                     let realActual = 0;
 
-                                    const plans = await plansServices.get.all(item.ID, connection);
+                                    const plans = await plansServices.get.all(item.ID, connection);                                    
 
                                     actual.reduce((sum, i) => {
                                         if (parseInt(i.PERIOD_YEAR) == y) {
@@ -174,9 +174,10 @@ const projectControllers = {
                                             }
                                             return sum;
                                         } else if (parseInt(i.PERIOD_YEAR) < y) {
-                                            if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
-                                                realActual += parseFloat(i.PERCENTAGE);
-                                            }
+                                            // if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
+                                            //     realActual += parseFloat(i.PERCENTAGE);
+                                            // }
+                                            realActual += parseFloat(i.PERCENTAGE);
                                             return sum + parseFloat(i.PERCENTAGE);
                                         }
                                         return sum;
@@ -208,6 +209,7 @@ const projectControllers = {
                                                 ACTUAL: realActual.toFixed(2) + "%",
                                                 DEVIATION: (realActual.toFixed(2) - tempPlans.toFixed(2)).toFixed(2) + "%",
                                             },
+                                            actual: actual
                                         };
                                     }
                                     return null;
