@@ -164,20 +164,19 @@ const projectControllers = {
                                     actual.reduce((sum, i) => {
                                         if (parseInt(i.PERIOD_YEAR) == y) {
                                             if (parseInt(i.PERIOD_MONTH.split('-')[0], 10) <= m) {
-                                                // if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
-                                                //     console.log(Number(i.PERCENTAGE))
-                                                //     realActual += parseFloat(i.PERCENTAGE);
-                                                // }
-                                                realActual += parseFloat(i.PERCENTAGE);
+                                                if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
+                                                    realActual += parseFloat(i.PERCENTAGE);
+                                                }
+                                                // realActual += parseFloat(i.PERCENTAGE);
                                                 actualCheck += parseFloat(i.PERCENTAGE);
                                                 return sum + parseFloat(i.PERCENTAGE);
                                             }
                                             return sum;
                                         } else if (parseInt(i.PERIOD_YEAR) < y) {
-                                            // if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
-                                            //     realActual += parseFloat(i.PERCENTAGE);
-                                            // }
-                                            realActual += parseFloat(i.PERCENTAGE);
+                                            if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
+                                                realActual += parseFloat(i.PERCENTAGE);
+                                            }
+                                            // realActual += parseFloat(i.PERCENTAGE);
                                             return sum + parseFloat(i.PERCENTAGE);
                                         }
                                         return sum;
