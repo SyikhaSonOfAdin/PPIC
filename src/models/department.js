@@ -25,8 +25,13 @@ const QUERY = {
         JOIN ${userTable.TABLE} AS U ON D.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID}
         JOIN ${companyTable.TABLE} AS C ON D.${table.COLUMN.COMPANY_ID} = C.${companyTable.COLUMN.ID}
         WHERE D.${table.COLUMN.COMPANY_ID} = ?`,
-        onlyOne: `SELECT D.${table.COLUMN.ID}, D.${table.COLUMN.NAME}
-        FROM ${table.TABLE} AS D WHERE D.${table.COLUMN.ID} = ?`,
+        onlyOne: `SELECT 
+        C.${companyTable.COLUMN.NAME} AS COMPANY_NAME,
+        D.${table.COLUMN.ID}, 
+        D.${table.COLUMN.NAME}
+        FROM ${table.TABLE} AS D 
+        JOIN ${companyTable.TABLE} AS C ON D.${table.COLUMN.COMPANY_ID} = C.${companyTable.COLUMN.ID}
+        WHERE D.${table.COLUMN.ID} = ?`,
         detail: {
             withUser: `SELECT U.${userTable.COLUMN.ID}, U.${userTable.COLUMN.USERNAME}, D.${table.COLUMN.NAME} FROM ${userTable.TABLE} AS U
             JOIN ${table.TABLE} AS D ON U.${userTable.COLUMN.DEPARTMENT_ID} = D.${table.COLUMN.ID}

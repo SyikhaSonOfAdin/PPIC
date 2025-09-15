@@ -39,6 +39,60 @@ const projectControllers = {
             })
         }
     },
+    copy: async (req, res, next) => {
+        const { projectId, userId } = req.body;
+        if (!projectId || !userId) return res.status(400).json({ message: "Invalid Parameter" })
+
+        try {
+            const connection = await PPIC.getConnection()
+            try {
+                await connection.beginTransaction()
+                const project = await projectServices.get.onlyOne(projectId, connection)
+                const projectDetail = await projectDetailServices.get(projectId, connection)
+                const plans = await plansServices.get.all(projectId, connection)
+                const actual = await actualServices.get.all(projectId, connection)
+                const id = await projectServices.add(project.COMPANY_ID, project.CATEGORY_ID, project.PROJECT_NO + " Copy", project.CLIENT, userId)
+                await projectDetailServices.add(
+                    id,
+                    userId,
+                    projectDetail.NAME,
+                    projectDetail.SPK,
+                    projectDetail.SPK,
+                    projectDetail.PPM,
+                    projectDetail.CAPACITY,
+                    projectDetail.WORK_PLACE,
+                    projectDetail.START_DATE,
+                    projectDetail.DUE_DATE,
+                    projectDetail.FINISH_DATE,
+                    connection
+                )
+                plans.forEach(async p => {
+                    plansServices.add(id, userId, p.PERIOD_YEAR, p.PERIOD_YEAR + "-" + p.PERIOD_MONTH, p.PERCENTAGE, p.AMOUNT, p.WEEK, connection)
+                })
+                actual.forEach(async p => {
+                    actualServices.add(id, userId, p.PERIOD_YEAR, p.PERIOD_YEAR + "-" + p.PERIOD_MONTH, p.PERCENTAGE, p.AMOUNT, p.WEEK, connection)
+                })
+                await connection.commit()
+                return res.status(200).json({
+                    message: "Project copied successfully",
+                    data: [{
+                        projectId: id,
+                    }]
+                })
+            } catch (error) {
+                await connection.rollback()
+                return res.status(500).json({
+                    message: error.message
+                })
+            } finally {
+                connection.release()
+            }
+        } catch (error) {
+            res.status(500).json({
+                message: error.message
+            })
+        }
+    },
     edit: {
         all: async (req, res, next) => {
             const { projectId, categoryId, projectNo, client, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate } = req.body;
@@ -159,7 +213,7 @@ const projectControllers = {
                                     let plansCheck = 0;
                                     let realActual = 0;
 
-                                    const plans = await plansServices.get.all(item.ID, connection);                                    
+                                    const plans = await plansServices.get.all(item.ID, connection);
 
                                     actual.reduce((sum, i) => {
                                         if (parseInt(i.PERIOD_YEAR) == y) {
@@ -452,7 +506,7 @@ const projectControllers = {
                         const pd = await Promise.all(Array.from(temp.values()).map(async p => {
                             const project = await projectServices.get.onlyOne(p.PROJECT_ID, CONNECTION)
                             const projectDetail = await projectDetailServices.get(p.PROJECT_ID, CONNECTION)
-                            
+
                             return {
                                 PROJECT_ID: p.PROJECT_ID,
                                 ...project,

@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 
 router.post('/add', jwtServices.verifyToken.byHeader, privilege.hasPrivilege("01987838-08c3-7772-9ed6-c473ae329470"), projectControllers.add)
+router.post('/copy', jwtServices.verifyToken.byHeader, privilege.hasPrivilege("01987838-08c3-7772-9ed6-c473ae329470"), projectControllers.copy)
 router.post('/edit', jwtServices.verifyToken.byHeader, privilege.hasPrivilege("01987839-d26e-7772-9ed6-ccd8de97ea37"), projectControllers.edit.all)
 router.post('/edit/d/deliver', jwtServices.verifyToken.byHeader, privilege.hasPrivilege("01987839-d26e-7772-9ed6-ccd8de97ea37"), projectControllers.edit.deliver)
 router.post('/delete', jwtServices.verifyToken.byHeader, privilege.hasPrivilege("0198783a-0811-7772-9ed6-d47d8803e2d9"), projectControllers.delete)

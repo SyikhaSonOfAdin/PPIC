@@ -40,7 +40,14 @@ const QUERY = {
         onlyOne: `DELETE FROM ${table.TABLE} WHERE ${table.COLUMN.PROJECT_ID} = ?`
     },
     select: {
-        byProjectId: `SELECT ${table.COLUMN.NAME}, ${table.COLUMN.SPK}, ${table.COLUMN.DELIVERED}, ${table.COLUMN.DESCRIPTION}, ${table.COLUMN.PPM}, ${table.COLUMN.CAPACITY}, ${table.COLUMN.WORK_PLACE}, 
+        byProjectId: `SELECT 
+        ${table.COLUMN.NAME}, 
+        ${table.COLUMN.SPK}, 
+        ${table.COLUMN.DELIVERED}, 
+        ${table.COLUMN.DESCRIPTION}, 
+        ${table.COLUMN.PPM}, 
+        ${table.COLUMN.CAPACITY}, 
+        ${table.COLUMN.WORK_PLACE}, 
         DATE_FORMAT(${table.COLUMN.START_DATE}, '%Y-%m-%d') AS START_DATE, 
         DATE_FORMAT(${table.COLUMN.DUE_DATE}, '%Y-%m-%d') AS DUE_DATE,
         DATE_FORMAT(${table.COLUMN.FINISH_DATE}, '%Y-%m-%d') AS FINISH_DATE

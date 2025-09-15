@@ -178,7 +178,9 @@ exports.projectServices = {
                             _b.label = 3;
                         case 3:
                             _b.trys.push([3, 5, 6, 7]);
-                            return [4 /*yield*/, CONNECTION.query(project_1.projectQuerys.select.by.periodId, [periodId])];
+                            return [4 /*yield*/, CONNECTION.query(project_1.projectQuerys.select.by.periodId, [
+                                    periodId,
+                                ])];
                         case 4:
                             data = (_b.sent())[0];
                             return [2 /*return*/, data];
