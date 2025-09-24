@@ -16,6 +16,7 @@ const { workLoadRouter } = require('./routes/workLoad');
 const { companyRouter } = require('./routes/company');
 const { projectRouter } = require('./routes/project');
 const { processRouter } = require('./routes/process');
+const sapDummyRouter = require('./routes/sap-dummy');
 const { userRouter } = require('./routes/user');
 const express = require('express');
 const path = require('path');
@@ -24,12 +25,13 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
-const corsOptions = {
-    origin: ['https://ppic.syikha.com', 'https://server1.ppic.syikha.com'],
-    optionsSuccessStatus: 200
-};
+// const corsOptions = {
+//     origin: ['https://ppic.syikha.com', 'https://server1.ppic.syikha.com'],
+//     optionsSuccessStatus: 200
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '')));
@@ -45,6 +47,8 @@ app.use("/project/actual", projectActualRouter);
 app.use("/project/plans", projectPlansRouter);
 app.use("/permission", permissionRouter);
 app.use("/attachment", attachmentRouter);
+app.use("/attachment", attachmentRouter);
+app.use("/sap-dummy", sapDummyRouter);
 app.use("/category", categoryRouter);
 app.use("/department", departmentRouter);
 app.use("/workload", workLoadRouter);
