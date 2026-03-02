@@ -7,10 +7,10 @@ const attachmentControllers = {
     add: async (req, res, next) => {
         const fileName = req.file?.filename
         const { projectId, userId, description, label } = req.body
-        if (!projectId || !userId || !fileName || !label) return res.status(400).json({ message: "Invalid Parameter" })
+        // if (!projectId || !userId || !fileName || !label) return res.status(400).json({ message: "Invalid Parameter" })
 
         try {
-            const id = await attachmentServices.add(projectId, userId, fileName, description, label)
+            // const id = await attachmentServices.add(projectId, userId, fileName, description, label)
             return res.status(200).json({
                 message: "Attachment saved successfully",
                 data: [{

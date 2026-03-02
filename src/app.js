@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { default: welderRejectionRateRoute } = require('./extensions/welder_rejection_rate/module/route');
 const { delayedMaterialListDetailRouter } = require('./routes/delayedMaterialDetail');
 const { delayedMaterialListRouter } = require('./routes/delayedMaterialList');
 const { projectProductivityRouter } = require('./routes/projectProductivity');
@@ -18,6 +19,7 @@ const { projectRouter } = require('./routes/project');
 const { processRouter } = require('./routes/process');
 const sapDummyRouter = require('./routes/sap-dummy');
 const { userRouter } = require('./routes/user');
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
@@ -25,6 +27,10 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
+// const corsOptions = {
+//     origin: 'http://localhost:5174', // Ganti dengan origin frontend Anda
+//     credentials: true, // Mengizinkan kredensial (cookies, authorization headers, etc.)
+// };
 const corsOptions = {
     origin: ['https://ppic.syikha.com', 'https://server1.ppic.syikha.com'],
     optionsSuccessStatus: 200
@@ -32,10 +38,12 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '')));
 
 app.use("/journal/material/delayed/list/detail", delayedMaterialListDetailRouter);
+app.use("/extensions/welder_rejection_rate", welderRejectionRateRoute);
 app.use("/journal/material/delayed/list", delayedMaterialListRouter);
 app.use("/productivity/progress", projectProductivityRouter);
 app.use("/journal/material/delayed", delayedMaterialRouter);
@@ -45,7 +53,6 @@ app.use("/journal/remark", journalRemarkRouter);
 app.use("/project/actual", projectActualRouter);
 app.use("/project/plans", projectPlansRouter);
 app.use("/permission", permissionRouter);
-app.use("/attachment", attachmentRouter);
 app.use("/attachment", attachmentRouter);
 app.use("/sap-dummy", sapDummyRouter);
 app.use("/category", categoryRouter);

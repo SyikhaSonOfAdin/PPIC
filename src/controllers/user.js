@@ -215,6 +215,26 @@ const userControllers = {
         try {
             const user = await userServices.login(email, password)
             if (typeof user !== 'string') {
+                // Generate token
+                const token = jwt.sign(
+                    {
+                        email,
+                        user: { id: user.ID },
+                        company: { id: user.COMPANY_ID, name: user.COMPANY_NAME }
+                    },
+                    process.env.JWT_SECRET,
+                    { expiresIn: '7d' }
+                );
+
+                // Set HttpOnly cookie dengan token
+                res.cookie('auth_token', token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production', // HTTPS di production
+                    sameSite: 'lax',
+                    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 hari
+                    path: '/'
+                });
+
                 return res.status(200).json({
                     message: "Login Success",
                     data: [{
@@ -224,7 +244,7 @@ const userControllers = {
                         cName: user.COMPANY_NAME,
                         pId: user.PROJECT_ID,
                         eAddr: user.EMAIL,
-                        t: jwt.sign({ email, user: {id: user.ID} }, process.env.JWT_SECRET, { expiresIn: '7d' }),
+                        t: "ignore",
                         version: "1.4.7"
                     }]
                 })

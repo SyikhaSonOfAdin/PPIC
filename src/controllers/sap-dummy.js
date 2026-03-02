@@ -41,10 +41,10 @@ var sapDummyController = {
     get: {
         by: {
             projectNo: function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-                var stages, projectNo, s, response_1, items_1, error_1;
-                var _a, _b;
-                return __generator(this, function (_c) {
-                    switch (_c.label) {
+                var stages, _a, projectNo_1, identCode_1, _b, s, p, response_1, items_1, error_1;
+                var _c, _d;
+                return __generator(this, function (_e) {
+                    switch (_e.label) {
                         case 0:
                             stages = [
                                 "request_purchase",
@@ -55,66 +55,95 @@ var sapDummyController = {
                                 "goods_issue",
                                 "goods_receipt",
                             ];
-                            _c.label = 1;
+                            _e.label = 1;
                         case 1:
-                            _c.trys.push([1, 3, , 4]);
-                            projectNo = req.params.projectNo;
-                            s = req.query.s;
-                            if (!projectNo)
+                            _e.trys.push([1, 3, , 4]);
+                            _a = req.params, projectNo_1 = _a.projectNo, identCode_1 = _a.identCode;
+                            _b = req.query, s = _b.s, p = _b.p;
+                            // prettier-ignore
+                            if (!projectNo_1)
                                 return [2 /*return*/, res.status(400).json({ message: "Invalid Parameters" })];
-                            return [4 /*yield*/, sap_dummy_1.default.get.by.projectNo(projectNo, 
+                            return [4 /*yield*/, sap_dummy_1.default.get.by.projectNo(projectNo_1, 
                                 //@ts-ignore
                                 s)];
                         case 2:
-                            response_1 = _c.sent();
+                            response_1 = _e.sent();
                             items_1 = new Map();
-                            /**
-                             * Get unique ident code
-                             */
-                            stages.forEach(function (s) {
-                                //@ts-ignore
-                                response_1.data.data[s].forEach(function (g) {
-                                    items_1.set(g.item_code + "|" + g.group + "|" + g.item_description, {
-                                        request_purchase: 0,
-                                        purchase_order: 0,
-                                        goods_receive_purchase_order: 0,
-                                        inventory_transfer_request: 0,
-                                        inventory_transfer: 0,
-                                        goods_issue: 0,
-                                        goods_receipt: 0,
+                            if (!identCode_1) {
+                                /**
+                                 * Get unique ident code
+                                 */
+                                stages.forEach(function (s) {
+                                    //@ts-ignore
+                                    response_1.data.data[s].forEach(function (g) {
+                                        items_1.set(g.item_code + "|" + g.group + "|" + g.item_description, {
+                                            request_purchase: 0,
+                                            purchase_order: 0,
+                                            goods_receive_purchase_order: 0,
+                                            inventory_transfer_request: 0,
+                                            inventory_transfer: 0,
+                                            goods_issue: 0,
+                                            goods_receipt: 0,
+                                        });
                                     });
                                 });
-                            });
-                            /**
-                             * Create the summary data based on stored item code
-                             */
-                            Array.from(items_1.keys()).forEach(function (key) {
-                                var _a, _b, _c, _d, _e, _f, _g;
-                                var id = key.split("|")[0]; // Item Code
-                                var group = key.split("|")[1]; // Item Group
-                                var description = key.split("|")[2]; // Item Description
-                                var sum = {
-                                    id: id,
-                                    group: group,
-                                    description: description,
-                                    request_purchase: ((_a = response_1.data.data.request_purchase) === null || _a === void 0 ? void 0 : _a.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
-                                    purchase_order: ((_b = response_1.data.data.purchase_order) === null || _b === void 0 ? void 0 : _b.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
-                                    goods_receive_purchase_order: ((_c = response_1.data.data.goods_receive_purchase_order) === null || _c === void 0 ? void 0 : _c.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
-                                    inventory_transfer_request: ((_d = response_1.data.data.inventory_transfer_request) === null || _d === void 0 ? void 0 : _d.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
-                                    inventory_transfer: ((_e = response_1.data.data.inventory_transfer) === null || _e === void 0 ? void 0 : _e.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
-                                    goods_issue: ((_f = response_1.data.data.goods_issue) === null || _f === void 0 ? void 0 : _f.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
-                                    goods_receipt: ((_g = response_1.data.data.goods_receipt) === null || _g === void 0 ? void 0 : _g.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
-                                };
-                                items_1.set(key, sum);
-                            });
-                            res.status(200).send({
-                                success: true,
-                                last_update: (_b = (_a = response_1.data) === null || _a === void 0 ? void 0 : _a.last_update) !== null && _b !== void 0 ? _b : "-",
-                                data: Array.from(items_1.values()),
-                            });
-                            return [3 /*break*/, 4];
+                                /**
+                                 * Create the summary data based on stored item code
+                                 */
+                                Array.from(items_1.keys()).forEach(function (key) {
+                                    var _a, _b, _c, _d, _e, _f, _g;
+                                    var id = key.split("|")[0]; // Item Code
+                                    var group = key.split("|")[1]; // Item Group
+                                    var description = key.split("|")[2]; // Item Description
+                                    var sum = {
+                                        id: id,
+                                        group: group,
+                                        description: description,
+                                        request_purchase: ((_a = response_1.data.data.request_purchase) === null || _a === void 0 ? void 0 : _a.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        purchase_order: ((_b = response_1.data.data.purchase_order) === null || _b === void 0 ? void 0 : _b.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_receive_purchase_order: ((_c = response_1.data.data.goods_receive_purchase_order) === null || _c === void 0 ? void 0 : _c.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        inventory_transfer_request: ((_d = response_1.data.data.inventory_transfer_request) === null || _d === void 0 ? void 0 : _d.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        inventory_transfer: ((_e = response_1.data.data.inventory_transfer) === null || _e === void 0 ? void 0 : _e.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_issue: ((_f = response_1.data.data.goods_issue) === null || _f === void 0 ? void 0 : _f.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_receipt: ((_g = response_1.data.data.goods_receipt) === null || _g === void 0 ? void 0 : _g.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                    };
+                                    items_1.set(key, sum);
+                                });
+                            }
+                            else if (identCode_1 && p) {
+                                response_1.data.data[p]
+                                    .filter(function (r) { return r.item_code == identCode_1; })
+                                    .forEach(function (r) {
+                                    items_1.set(r.id, {
+                                        project_no: projectNo_1,
+                                        item_code: r.item_code,
+                                        group: r.group,
+                                        input_date: r.doc_date
+                                            ? new Date(r.doc_date).toLocaleDateString("id-ID", {
+                                                year: "numeric",
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                            })
+                                            : null,
+                                        desc: r.item_description,
+                                        dimension: r.dimension,
+                                        qty: r.quantity,
+                                        warehouse: r.warehouse,
+                                        cost_centre: r.cost_centre,
+                                        remark: r.doc_remarks,
+                                    });
+                                });
+                            }
+                            else {
+                                return [2 /*return*/, res.status(400).json({ message: "Invalid Parameters" })];
+                            }
+                            return [2 /*return*/, res.status(200).send({
+                                    success: true,
+                                    last_update: (_d = (_c = response_1.data) === null || _c === void 0 ? void 0 : _c.last_update) !== null && _d !== void 0 ? _d : "-",
+                                    data: Array.from(items_1.values()),
+                                })];
                         case 3:
-                            error_1 = _c.sent();
+                            error_1 = _e.sent();
                             res
                                 .status(500)
                                 .send({ error: "An error occurred", message: error_1.message });

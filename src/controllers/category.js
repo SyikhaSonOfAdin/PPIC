@@ -8,6 +8,7 @@ const { workLoadServices } = require("../services/workLoad")
 const categoryControllers = {
     add: async (req, res, next) => {
         const { companyId, userId, name, description, uom } = req.body
+        console.log({ companyId, userId, name, description, uom })
         if (!companyId || !userId || !name || !uom) return res.status(400).json({ message: "Invalid Parameter" })
 
         try {

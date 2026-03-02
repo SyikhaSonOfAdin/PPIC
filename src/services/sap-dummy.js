@@ -37,8 +37,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var axios_1 = require("axios");
-// const URL = "http://localhost:3001";
-var URL = "https://sap.syikha.it.com";
+/**
+ * DEV URL
+ */
+var URL = "http://localhost:3001";
+/**
+ * PRODUCTION URL
+ */
+// const URL = "https://sap.syikha.it.com"
 var sapDummyServices = {
     update: {
         by: {
