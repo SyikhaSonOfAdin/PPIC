@@ -40,11 +40,11 @@ var axios_1 = require("axios");
 /**
  * DEV URL
  */
-var URL = "http://localhost:3001";
+// const URL = "http://localhost:3001";
 /**
  * PRODUCTION URL
  */
-// const URL = "https://sap.syikha.it.com"
+var URL = "https://sap.syikha.it.com";
 var sapDummyServices = {
     update: {
         by: {

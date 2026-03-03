@@ -144,6 +144,7 @@ var sapDummyController = {
                                 })];
                         case 3:
                             error_1 = _e.sent();
+                            console.error(error_1);
                             res
                                 .status(500)
                                 .send({ error: "An error occurred", message: error_1.message });
@@ -234,6 +235,7 @@ var sapDummyController = {
                             return [3 /*break*/, 4];
                         case 3:
                             error_2 = _c.sent();
+                            console.error(error_2);
                             res
                                 .status(500)
                                 .send({ error: "An error occurred", message: error_2.message });
@@ -263,6 +265,7 @@ var sapDummyController = {
                                 return [3 /*break*/, 3];
                             case 2:
                                 error_3 = _a.sent();
+                                console.error(error_3);
                                 res.status(500).send(error_3);
                                 return [3 /*break*/, 3];
                             case 3: return [2 /*return*/];

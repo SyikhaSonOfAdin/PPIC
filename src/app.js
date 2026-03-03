@@ -28,12 +28,12 @@ const app = express();
 const port = 3000;
 
 // const corsOptions = {
-//     origin: 'http://localhost:5174', // Ganti dengan origin frontend Anda
+//     origin: 'http://localhost:5173', // Ganti dengan origin frontend Anda
 //     credentials: true, // Mengizinkan kredensial (cookies, authorization headers, etc.)
 // };
 const corsOptions = {
-    origin: ['https://ppic.syikha.com', 'https://server1.ppic.syikha.com'],
-    optionsSuccessStatus: 200
+    origin: 'https://ppic.syikha.com',
+    credentials: true,
 };
 
 app.use(cors(corsOptions));
