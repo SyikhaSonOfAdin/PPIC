@@ -32,8 +32,8 @@ const port = 3000;
 //     credentials: true, // Mengizinkan kredensial (cookies, authorization headers, etc.)
 // };
 const corsOptions = {
-    origin: 'https://ppic.syikha.com',
-    // origin: 'http://localhost:5173',
+    // origin: 'https://ppic.syikha.com',
+    origin: 'http://localhost:5173',
     credentials: true,
 };
 
