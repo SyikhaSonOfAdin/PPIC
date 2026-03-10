@@ -33,6 +33,7 @@ const port = 3000;
 // };
 const corsOptions = {
     origin: 'https://ppic.syikha.com',
+    // origin: 'http://localhost:5173',
     credentials: true,
 };
 

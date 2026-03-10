@@ -80,5 +80,31 @@ var welderRejectionRateController = {
             }
         });
     }); },
+    getOverall: function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+        var project_id, data, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    project_id = req.params.project_id;
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, axios_1.default.get("".concat(url_conf_1.WELDER_REJECTION_RATE_APP.server, "/rejection_rate/overall/").concat(project_id))];
+                case 2:
+                    data = (_a.sent()).data;
+                    return [2 /*return*/, res.status(200).json({
+                            message: "Access Granted",
+                            data: data,
+                        })];
+                case 3:
+                    error_2 = _a.sent();
+                    res.status(500).json({
+                        message: error_2.message,
+                    });
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/];
+            }
+        });
+    }); },
 };
 exports.default = welderRejectionRateController;

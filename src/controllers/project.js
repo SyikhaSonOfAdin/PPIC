@@ -216,8 +216,8 @@ const projectControllers = {
                                     const plans = await plansServices.get.all(item.ID, connection);
 
                                     actual.reduce((sum, i) => {
-                                        if (parseInt(i.PERIOD_YEAR) == y) {
-                                            if (parseInt(i.PERIOD_MONTH.split('-')[0], 10) <= m) {
+                                        if (Number(i.PERIOD_YEAR) == y) {
+                                            if (Number(i.PERIOD_MONTH.split('-')[0], 10) <= m) {
                                                 if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
                                                     realActual += parseFloat(i.PERCENTAGE);
                                                 }
@@ -226,7 +226,7 @@ const projectControllers = {
                                                 return sum + parseFloat(i.PERCENTAGE);
                                             }
                                             return sum;
-                                        } else if (parseInt(i.PERIOD_YEAR) < y) {
+                                        } else if (Number(i.PERIOD_YEAR) < y) {
                                             if (new Date(Number(i.PERIOD_YEAR), Number(i.PERIOD_MONTH.split("-")[0]) - 1, Number(i.PERIOD_MONTH.split("-")[1])) <= new Date(item.DUE_DATE)) {
                                                 realActual += parseFloat(i.PERCENTAGE);
                                             }
@@ -237,9 +237,9 @@ const projectControllers = {
                                     }, 0);
 
                                     const tempPlans = plans.reduce((sum, i) => {
-                                        if (parseInt(i.PERIOD_YEAR) == y) {
-                                            if (parseInt(i.PERIOD_MONTH.split('-')[0], 10) <= m) {
-                                                // if (parseInt(i.PERIOD_MONTH.split('-')[0], 10) == m) {
+                                        if (Number(i.PERIOD_YEAR) == y) {
+                                            if (Number(i.PERIOD_MONTH.split('-')[0], 10) <= m) {
+                                                // if (Number(i.PERIOD_MONTH.split('-')[0], 10) == m) {
                                                 //     plansCheck += parseFloat(i.PERCENTAGE);
                                                 //     return sum + parseFloat(i.PERCENTAGE);
                                                 // }
@@ -247,7 +247,7 @@ const projectControllers = {
                                                 return sum + parseFloat(i.PERCENTAGE);
                                             }
                                             return sum;
-                                        } else if (parseInt(i.PERIOD_YEAR) < y) {
+                                        } else if (Number(i.PERIOD_YEAR) < y) {
                                             return sum + parseFloat(i.PERCENTAGE);
                                         }
                                         return sum;
@@ -306,10 +306,14 @@ const projectControllers = {
                 const connection = await PPIC.getConnection()
                 try {
                     await connection.beginTransaction()
+
                     const project = await projectServices.get.onlyOne(projectId, connection)
                     const projectDetail = await projectDetailServices.get(projectId, connection)
                     const actual = await actualServices.get.all(projectId, connection)
                     const plans = await plansServices.get.all(projectId, connection)
+
+                    const currActual = actual.filter(p => new Date(`${p.PERIOD_YEAR}-${p.PERIOD_MONTH}`) <= new Date()).reduce((total, item) => total + Number(item.PERCENTAGE), 0);;
+                    const currPlan = plans.filter(p => new Date(`${p.PERIOD_YEAR}-${p.PERIOD_MONTH}`) <= new Date()).reduce((total, item) => total + Number(item.PERCENTAGE), 0);;
 
                     await connection.commit()
                     const tempActual = actual.reduce((sum, item) => sum + parseFloat(item.AMOUNT), 0);
@@ -319,14 +323,14 @@ const projectControllers = {
                         message: "Get Project successfully",
                         data: [{
                             project,
-                            projectDetail,
+                            projectDetail: {
+                                ...projectDetail,
+                                DEVIATION: (currActual - currPlan).toFixed(2)
+                            },
                             progress: {
                                 PERCENTAGE: tempActual > 0 ? ((tempActual / parseFloat(projectDetail.CAPACITY)) * 100).toFixed(2) + "%" : "0%",
-                                ACTUAL: `${new Intl.NumberFormat("id-ID").format(
-                                    tempPlans
-                                )} / ${new Intl.NumberFormat("id-ID").format(
-                                    tempActual
-                                )}`
+                                // prettier-ignore
+                                ACTUAL: `${new Intl.NumberFormat("id-ID").format(tempPlans)} / ${new Intl.NumberFormat("id-ID").format(tempActual)}`
                             }
                         }]
                     })
@@ -390,14 +394,14 @@ const projectControllers = {
                         }))
 
                         plansData.flat().forEach((eachData) => {
-                            const monthIndex = parseInt(eachData.PERIOD_MONTH.split("-")[0], 10) - 1;
+                            const monthIndex = Number(eachData.PERIOD_MONTH.split("-")[0], 10) - 1;
                             if (monthIndex >= 0 && monthIndex < months.length && eachData.PERIOD_YEAR == year) {
                                 periods.add(`${eachData.PERIOD_YEAR} / ${months[monthIndex]}`);
                             }
                         })
 
                         actualData.flat().forEach((eachData) => {
-                            const monthIndex = parseInt(eachData.PERIOD_MONTH.split("-")[0], 10) - 1;
+                            const monthIndex = Number(eachData.PERIOD_MONTH.split("-")[0], 10) - 1;
                             if (monthIndex >= 0 && monthIndex < months.length && eachData.PERIOD_YEAR == year) {
                                 periods.add(`${eachData.PERIOD_YEAR} / ${months[monthIndex]}`);
                             }
@@ -407,8 +411,8 @@ const projectControllers = {
                             const [yearA, monthA] = a.split(" / ");
                             const [yearB, monthB] = b.split(" / ");
 
-                            const yearAInt = parseInt(yearA, 10);
-                            const yearBInt = parseInt(yearB, 10);
+                            const yearAInt = Number(yearA, 10);
+                            const yearBInt = Number(yearB, 10);
 
                             if (yearAInt === yearBInt) {
                                 return months.indexOf(monthA) - months.indexOf(monthB);
@@ -430,11 +434,11 @@ const projectControllers = {
                                 const [year, month] = label.split(" / ");
 
                                 const planItem = plansData.flat().filter(
-                                    (item) => item.PERIOD_YEAR == year && months[parseInt(item.PERIOD_MONTH.split("-")[0], 10) - 1] === month
+                                    (item) => item.PERIOD_YEAR == year && months[Number(item.PERIOD_MONTH.split("-")[0], 10) - 1] === month
                                 );
 
                                 const totalAmount = planItem.reduce((total, item) => {
-                                    return total + (parseInt(item.AMOUNT) || 0);
+                                    return total + (Number(item.AMOUNT) || 0);
                                 }, null);
 
                                 return {
@@ -446,11 +450,11 @@ const projectControllers = {
                                 const [year, month] = label.split(" / ");
 
                                 const actualItem = actualData.flat().filter(
-                                    (item) => item.PERIOD_YEAR == year && months[parseInt(item.PERIOD_MONTH.split("-")[0], 10) - 1] === month
+                                    (item) => item.PERIOD_YEAR == year && months[Number(item.PERIOD_MONTH.split("-")[0], 10) - 1] === month
                                 );
 
                                 const totalAmount = actualItem.reduce((total, item) => {
-                                    return total + (parseInt(item.AMOUNT) || 0);
+                                    return total + (Number(item.AMOUNT) || 0);
                                 }, null);
 
                                 return {

@@ -15,6 +15,7 @@ const table = {
         DUE_DATE: "DUE_DATE",
         FINISH_DATE: "FINISH_DATE",
         DELIVERED: "DELIVERED",
+        DELIVERY_DATE: "DELIVERY_DATE",
     }
 }
 
@@ -34,7 +35,7 @@ const QUERY = {
             ${table.COLUMN.DUE_DATE} = ?, 
             ${table.COLUMN.FINISH_DATE} = ? 
             WHERE ${table.COLUMN.PROJECT_ID} = ?`,
-        deliver: `UPDATE ${table.TABLE} SET ${table.COLUMN.DELIVERED} = TRUE WHERE ${table.COLUMN.PROJECT_ID} = ?`
+        deliver: `UPDATE ${table.TABLE} SET ${table.COLUMN.DELIVERED} = TRUE, ${table.COLUMN.DELIVERY_DATE} = NOW() WHERE ${table.COLUMN.PROJECT_ID} = ?`
     },
     delete: {
         onlyOne: `DELETE FROM ${table.TABLE} WHERE ${table.COLUMN.PROJECT_ID} = ?`
@@ -43,7 +44,8 @@ const QUERY = {
         byProjectId: `SELECT 
         ${table.COLUMN.NAME}, 
         ${table.COLUMN.SPK}, 
-        ${table.COLUMN.DELIVERED}, 
+        ${table.COLUMN.DELIVERED},
+        DATE_FORMAT(${table.COLUMN.DELIVERY_DATE}, '%Y-%m-%d') AS DELIVERY_DATE, 
         ${table.COLUMN.DESCRIPTION}, 
         ${table.COLUMN.PPM}, 
         ${table.COLUMN.CAPACITY}, 
