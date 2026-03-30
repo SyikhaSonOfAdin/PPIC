@@ -8,8 +8,8 @@ class Access {
             connectionLimit: 25,
             queueLimit: 20,
             host: process.env.HOST,
-            user: process.env.USER,
-            password: process.env.PASSWORD,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
             database: database,
         });
     }

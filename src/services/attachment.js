@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -57,7 +57,7 @@ exports.attachmentServices = {
         }
         return __awaiter(void 0, __spreadArray([projectId_1, userId_1, fileName_1], args_1, true), void 0, function (projectId, userId, fileName, description, label, connection) {
             var CONNECTION, _a, id, error_1;
-            if (description === void 0) { description = ''; }
+            if (description === void 0) { description = ""; }
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -73,7 +73,14 @@ exports.attachmentServices = {
                     case 3:
                         _b.trys.push([3, 5, 6, 7]);
                         id = (0, uuid_1.v7)();
-                        return [4 /*yield*/, CONNECTION.query(attachment_1.projectAttachmentQuerys.insert, [id, projectId, userId, label, fileName, description])];
+                        return [4 /*yield*/, CONNECTION.query(attachment_1.projectAttachmentQuerys.insert, [
+                                id,
+                                projectId,
+                                userId,
+                                label,
+                                fileName,
+                                description,
+                            ])];
                     case 4:
                         _b.sent();
                         return [2 /*return*/, id];
@@ -107,7 +114,9 @@ exports.attachmentServices = {
                         _b.label = 3;
                     case 3:
                         _b.trys.push([3, 5, 6, 7]);
-                        return [4 /*yield*/, CONNECTION.query(attachment_1.projectAttachmentQuerys.delete.onlyOne, [attachmentId])];
+                        return [4 /*yield*/, CONNECTION.query(attachment_1.projectAttachmentQuerys.delete.onlyOne, [
+                                attachmentId,
+                            ])];
                     case 4:
                         _b.sent();
                         return [3 /*break*/, 7];
@@ -122,7 +131,7 @@ exports.attachmentServices = {
                     case 7: return [2 /*return*/];
                 }
             });
-        }); }
+        }); },
     },
     edit: function (attachmentId, userId, description, connection) { return __awaiter(void 0, void 0, void 0, function () {
         var CONNECTION, _a, error_3;
@@ -140,7 +149,11 @@ exports.attachmentServices = {
                     _b.label = 3;
                 case 3:
                     _b.trys.push([3, 5, 6, 7]);
-                    return [4 /*yield*/, CONNECTION.query(attachment_1.projectAttachmentQuerys.update, [description, userId, attachmentId])];
+                    return [4 /*yield*/, CONNECTION.query(attachment_1.projectAttachmentQuerys.update, [
+                            description,
+                            userId,
+                            attachmentId,
+                        ])];
                 case 4:
                     _b.sent();
                     return [3 /*break*/, 7];
@@ -157,38 +170,46 @@ exports.attachmentServices = {
         });
     }); },
     get: {
-        all: function (projectId, label, connection) { return __awaiter(void 0, void 0, void 0, function () {
-            var CONNECTION, _a, data, error_4;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = connection;
-                        if (_a) return [3 /*break*/, 2];
-                        return [4 /*yield*/, db_1.PPIC.getConnection()];
-                    case 1:
-                        _a = (_b.sent());
-                        _b.label = 2;
-                    case 2:
-                        CONNECTION = _a;
-                        _b.label = 3;
-                    case 3:
-                        _b.trys.push([3, 5, 6, 7]);
-                        return [4 /*yield*/, CONNECTION.query(attachment_1.projectAttachmentQuerys.select.byProjectId, [projectId, label])];
-                    case 4:
-                        data = (_b.sent())[0];
-                        return [2 /*return*/, data];
-                    case 5:
-                        error_4 = _b.sent();
-                        throw error_4;
-                    case 6:
-                        if (!connection && CONNECTION) {
-                            CONNECTION.release();
-                        }
-                        return [7 /*endfinally*/];
-                    case 7: return [2 /*return*/];
-                }
+        all: function (projectId_1, label_1) {
+            var args_1 = [];
+            for (var _i = 2; _i < arguments.length; _i++) {
+                args_1[_i - 2] = arguments[_i];
+            }
+            return __awaiter(void 0, __spreadArray([projectId_1, label_1], args_1, true), void 0, function (projectId, label, searchTerms, skip, take, connection) {
+                var CONNECTION, _a, pattern, data, error_4;
+                if (searchTerms === void 0) { searchTerms = ""; }
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = connection;
+                            if (_a) return [3 /*break*/, 2];
+                            return [4 /*yield*/, db_1.PPIC.getConnection()];
+                        case 1:
+                            _a = (_b.sent());
+                            _b.label = 2;
+                        case 2:
+                            CONNECTION = _a;
+                            _b.label = 3;
+                        case 3:
+                            _b.trys.push([3, 5, 6, 7]);
+                            pattern = "%".concat(searchTerms, "%");
+                            return [4 /*yield*/, CONNECTION.query(attachment_1.projectAttachmentQuerys.select.byProjectId, [projectId, label, pattern, pattern, pattern, pattern])];
+                        case 4:
+                            data = (_b.sent())[0];
+                            return [2 /*return*/, data];
+                        case 5:
+                            error_4 = _b.sent();
+                            throw error_4;
+                        case 6:
+                            if (!connection && CONNECTION) {
+                                CONNECTION.release();
+                            }
+                            return [7 /*endfinally*/];
+                        case 7: return [2 /*return*/];
+                    }
+                });
             });
-        }); },
+        },
         fileName: function (rowId, connection) { return __awaiter(void 0, void 0, void 0, function () {
             var CONNECTION, _a, data, error_5;
             return __generator(this, function (_b) {
@@ -221,5 +242,5 @@ exports.attachmentServices = {
                 }
             });
         }); },
-    }
+    },
 };

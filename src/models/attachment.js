@@ -27,6 +27,13 @@ const QUERY = {
             FROM ${table.TABLE} a
             JOIN ${userTable.TABLE} u ON a.${table.COLUMN.INPUT_BY} = u.${userTable.COLUMN.ID}
             WHERE a.${table.COLUMN.PROJECT_ID} = ? AND a.${table.COLUMN.LABEL} = ?
+            AND (
+            a.${table.COLUMN.FILE_NAME} LIKE ?
+            OR a.${table.COLUMN.DESCRIPTION} LIKE ?
+            OR a.${table.COLUMN.INPUT_DATE} LIKE ?
+            OR u.${userTable.COLUMN.USERNAME} LIKE ?
+            ) 
+            ORDER BY a.${table.COLUMN.ID} ASC
         `,
         byRowId: `SELECT ${table.COLUMN.FILE_NAME} FROM ${table.TABLE} WHERE ${table.COLUMN.ID} = ?`
     },
