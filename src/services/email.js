@@ -47,9 +47,66 @@ var transporter = nodemailer.createTransport({
         pass: process.env.PASSWORD_EMAIL,
     },
 });
+// ─── Shared style helpers ──────────────────────────────────────────────────
+/** Label kecil di atas field (Status, Dept, PIC, dst.) */
+var fieldLabel = function (text) {
+    return "<p style=\"margin:0 0 4px;font-size:10px;font-weight:600;color:#94a3b8;\n    text-transform:uppercase;letter-spacing:.5px;line-height:14px;\">".concat(text, "</p>");
+};
+/** Badge status remark */
+var remarkBadge = function (status) {
+    var _a;
+    var map = {
+        Warm: { text: "#fb8c00", bg: "rgba(255,152,0,0.1)", border: "#ff9800" },
+        "On Going": {
+            text: "#1e88e5",
+            bg: "rgba(33,150,243,0.1)",
+            border: "#2196f3",
+        },
+    };
+    var c = (_a = map[status]) !== null && _a !== void 0 ? _a : {
+        text: "#e53935",
+        bg: "rgba(244,67,54,0.1)",
+        border: "#f44336",
+    };
+    return "<span style=\"display:inline-block;padding:2px 10px;\n    color:".concat(c.text, ";background:").concat(c.bg, ";border:1px solid ").concat(c.border, ";\n    border-radius:20px;font-size:11px;font-weight:600;line-height:18px;\">").concat(status, "</span>");
+};
+/** Badge status project */
+var projectBadge = function (status) {
+    var ok = status === "On Time" || status === "Ahead";
+    var ongoing = status === "On Going";
+    var c = ok
+        ? { text: "#43a047", bg: "rgba(76,175,80,0.1)", border: "#4caf50" }
+        : ongoing
+            ? { text: "#1e88e5", bg: "rgba(33,150,243,0.1)", border: "#2196f3" }
+            : { text: "#e53935", bg: "rgba(244,67,54,0.1)", border: "#f44336" };
+    return "<span style=\"display:inline-block;padding:2px 10px;\n    color:".concat(c.text, ";background:").concat(c.bg, ";border:1px solid ").concat(c.border, ";\n    border-radius:20px;font-size:11px;font-weight:600;line-height:18px;\">").concat(status, "</span>");
+};
+/**
+ * Satu remark = card vertikal.
+ * PIC dan deskripsi tidak pernah tabrakan karena masing-masing full-width.
+ */
+var buildRemarkCard = function (r, isLast) {
+    var hasSolution = r.SOLUTION && r.SOLUTION.trim() !== "";
+    // Jika ada solusi → description & solution berdampingan (50/50)
+    // Jika tidak → description full-width
+    var descSolutionBlock = hasSolution
+        ? "\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:10px;\">\n        <tr>\n          <td width=\"49%\" valign=\"top\"\n            style=\"background:#f8fafc;border-left:3px solid #e2e8f0;\n              border-radius:0 6px 6px 0;padding:10px 12px;\">\n            ".concat(fieldLabel("Deskripsi"), "\n            <p style=\"margin:0;font-size:13px;color:#475569;line-height:21px;\n              word-break:break-word;\">").concat(r.DESCRIPTION, "</p>\n          </td>\n          <td width=\"2%\"></td>\n          <td width=\"49%\" valign=\"top\"\n            style=\"background:#f0fdf4;border-left:3px solid #bbf7d0;\n              border-radius:0 6px 6px 0;padding:10px 12px;\">\n            ").concat(fieldLabel("Solusi"), "\n            <p style=\"margin:0;font-size:13px;color:#166534;line-height:21px;\n              word-break:break-word;\">").concat(r.SOLUTION, "</p>\n          </td>\n        </tr>\n      </table>")
+        : "\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:10px;\">\n        <tr>\n          <td style=\"background:#f8fafc;border-left:3px solid #e2e8f0;\n            border-radius:0 6px 6px 0;padding:10px 12px;\">\n            ".concat(fieldLabel("Deskripsi"), "\n            <p style=\"margin:0;font-size:13px;color:#475569;line-height:21px;\n              word-break:break-word;\">").concat(r.DESCRIPTION, "</p>\n          </td>\n        </tr>\n      </table>");
+    var bottomPad = isLast ? "16px" : "12px";
+    var divider = isLast
+        ? ""
+        : "\n    <tr>\n      <td style=\"padding:0 18px;\">\n        <div style=\"height:1px;background:#f1f5f9;\"></div>\n      </td>\n    </tr>";
+    return "\n    <tr>\n      <td style=\"padding:14px 18px ".concat(bottomPad, ";\">\n\n        <!-- Meta: status / dept / deadline -->\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n          <tr>\n            <td valign=\"top\">\n              ").concat(fieldLabel("Status"), "\n              ").concat(remarkBadge(r.STATUS), "\n            </td>\n            <td valign=\"top\" style=\"padding-left:20px;\">\n              ").concat(fieldLabel("Departemen"), "\n              <p style=\"margin:0;font-size:13px;color:#334155;font-weight:500;\n                line-height:20px;\">").concat(r.DEPARTMENT_NAME, "</p>\n            </td>\n            <td valign=\"top\" align=\"right\" style=\"white-space:nowrap;\">\n              ").concat(fieldLabel("Deadline"), "\n              <p style=\"margin:0;font-size:13px;color:#334155;font-weight:500;\n                line-height:20px;\">").concat(r.DEADLINE, "</p>\n            </td>\n          </tr>\n        </table>\n\n        <!-- PIC \u2014 full width agar nama panjang tidak tabrakan -->\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:10px;\">\n          <tr>\n            <td>\n              ").concat(fieldLabel("PIC"), "\n              <p style=\"margin:0;font-size:13px;color:#334155;line-height:20px;\n                word-break:break-word;\">").concat(r.PIC || "—", "</p>\n            </td>\n          </tr>\n        </table>\n\n        <!-- Description / Solution -->\n        ").concat(descSolutionBlock, "\n\n      </td>\n    </tr>\n    ").concat(divider);
+};
+var buildProjectCard = function (group, appUrl) {
+    var remarkRows = group.remarks
+        .map(function (r, i) { return buildRemarkCard(r, i === group.remarks.length - 1); })
+        .join("\n");
+    return "\n    <tr>\n      <td style=\"border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;padding:0;\n        mso-border-alt:solid #e0e0e0 1px;\">\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n\n          <!-- Project header -->\n          <tr>\n            <td style=\"background:#f8fafc;padding:14px 18px;\n              border-bottom:1px solid #e9ecef;border-radius:12px 12px 0 0;\">\n              <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td>\n                    <a href=\"".concat(appUrl, "/d/").concat(group.project_id, "?open-tabs=remark\"\n                      target=\"_blank\"\n                      style=\"color:#1e293b;font-weight:700;font-size:16px;\n                        text-decoration:none;line-height:24px;\">\n                      ").concat(group.project_no, "\n                    </a>\n                  </td>\n                  <td style=\"padding-left:10px;\">\n                    ").concat(projectBadge(group.project_status), "\n                  </td>\n                </tr>\n              </table>\n              <p style=\"margin:5px 0 0;font-size:13px;color:#64748b;line-height:20px;\">\n                ").concat(group.project_name, "\n              </p>\n            </td>\n          </tr>\n\n          <!-- Remarks -->\n          ").concat(remarkRows, "\n\n        </table>\n      </td>\n    </tr>\n    <tr><td style=\"padding:6px 0;\"></td></tr>");
+};
 exports.emailServices = {
     sendEmail: function (to, subject, text, html, from) { return __awaiter(void 0, void 0, void 0, function () {
-        var options, info, error_1;
+        var options, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -64,9 +121,7 @@ exports.emailServices = {
                 case 1:
                     _a.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, transporter.sendMail(options)];
-                case 2:
-                    info = _a.sent();
-                    return [2 /*return*/, info];
+                case 2: return [2 /*return*/, _a.sent()];
                 case 3:
                     error_1 = _a.sent();
                     throw new Error("Failed to send email: ".concat(error_1.message));
@@ -76,14 +131,19 @@ exports.emailServices = {
     }); },
     template: {
         projectRemark: function (username, departmentName, data) {
+            var _a;
             if (data === void 0) { data = []; }
-            // Ensure data is array
             var safeData = Array.isArray(data) ? data : [];
-            // Group data by project
+            var appUrl = (_a = process.env.APP) !== null && _a !== void 0 ? _a : "";
+            var today = new Date().toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+            });
+            // Group by project, only include non-Closed remarks
             var grouped = safeData.reduce(function (acc, item) {
-                var key = item.ID;
-                if (!acc[key]) {
-                    acc[key] = {
+                if (!acc[item.ID]) {
+                    acc[item.ID] = {
                         project_id: item.ID,
                         project_no: item.PROJECT_NO,
                         project_name: item.NAME,
@@ -92,60 +152,22 @@ exports.emailServices = {
                     };
                 }
                 if (item.STATUS !== "Close") {
-                    acc[key].remarks.push(item);
+                    acc[item.ID].remarks.push({
+                        STATUS: item.STATUS,
+                        DEPARTMENT_NAME: item.DEPARTMENT_NAME,
+                        PIC: item.PIC,
+                        DESCRIPTION: item.DESCRIPTION,
+                        SOLUTION: item.SOLUTION,
+                        DEADLINE: item.DEADLINE,
+                    });
                 }
                 return acc;
             }, {});
-            // Build HTML rows
-            var rows = Object.values(grouped)
-                .filter(function (group) { return group.remarks.length > 0; })
-                .map(function (group) {
-                var remarkRows = group.remarks
-                    .map(function (r) {
-                    var statusColor = r.STATUS === "Warm"
-                        ? {
-                            text: "#fb8c00",
-                            bg: "rgba(255,152,0,0.1)",
-                            border: "#ff9800",
-                        }
-                        : r.STATUS === "On Going"
-                            ? {
-                                text: "#1e88e5",
-                                bg: "rgba(33,150,243,0.1)",
-                                border: "#2196f3",
-                            }
-                            : {
-                                text: "#e53935",
-                                bg: "rgba(244,67,54,0.1)",
-                                border: "#f44336",
-                            };
-                    return "\n            <tr>\n              <td style=\"padding: 0 20px\">\n                <p style=\"\n                  display:inline-block;\n                  padding:2px 8px;\n                  color:".concat(statusColor.text, ";\n                  background-color:").concat(statusColor.bg, ";\n                  border:1px solid ").concat(statusColor.border, ";\n                  border-radius:10px;\n                  text-align:center;\n                  font-size:12px;\n                  line-height:16px;\n                  font-weight:500;\n                \">\n                  ").concat(r.STATUS, "\n                </p>\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.DEPARTMENT_NAME, "\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.PIC || "", "\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.DESCRIPTION, "\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.SOLUTION || "", "\n              </td>\n              <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                ").concat(r.DEADLINE, "\n              </td>\n            </tr>\n            <tr>\n              <td style=\"padding: 2px 0\"></td>\n            </tr>\n            <tr>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n              <td style=\"border-bottom: 1px solid #d9d9d9\"></td>\n            </tr>\n            <tr>\n              <td style=\"padding: 2px 0\"></td>\n            </tr>\n          ");
-                })
-                    .join("\n");
-                var projectColor = group.project_status === "On Time" ||
-                    group.project_status === "Ahead"
-                    ? {
-                        text: "#43a047",
-                        bg: "rgba(76,175,80,0.1)",
-                        border: "#4caf50",
-                    }
-                    : group.project_status === "On Going"
-                        ? {
-                            text: "#1e88e5",
-                            bg: "rgba(33,150,243,0.1)",
-                            border: "#2196f3",
-                        }
-                        : {
-                            text: "#e53935",
-                            bg: "rgba(244,67,54,0.1)",
-                            border: "#f44336",
-                        };
-                return "\n        <tr>\n          <td style=\"width:100%;padding:10px;border:1px solid #d9d9d9;border-radius:15px;\">\n            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"border-collapse:collapse;\">\n              <tr>\n                <td>\n                  <table>\n                    <tr>\n                      <td>\n                        <a href=\"".concat(process.env.APP, "/d/").concat(group.project_id, "?open-tabs=remark\" target=\"_blank\" style=\"color:#585858;font-weight:700;font-size:18px;line-height:28px;text-decoration:none;\">\n                          ").concat(group.project_no, "\n                        </a>\n                      </td>\n                      <td style=\"padding: 0 0 0 10px\">\n                        <p style=\"\n                          display:inline-block;\n                          padding:2px 8px;\n                          color:").concat(projectColor.text, ";\n                          background-color:").concat(projectColor.bg, ";\n                          border:1px solid ").concat(projectColor.border, ";\n                          border-radius:10px;\n                          text-align:center;\n                          font-size:12px;\n                          line-height:16px;\n                          font-weight:500;\n                        \">\n                          ").concat(group.project_status, "\n                        </p>\n                      </td>\n                    </tr>\n                  </table>\n                </td>\n              </tr>\n              <tr>\n                  <td>\n                    <table>\n                      <tbody>\n                        <tr>\n                          <td style=\"color:#585858;font-size:16px;font-weight:400;line-height:25px;\">\n                            ").concat(group.project_name, "\n                          </td>\n                        </tr>\n                      </tbody>\n                    </table>\n                  </td>\n              </tr>\n              <tr>\n                <td>\n                  <table width=\"100%\">\n                    <tbody>\n                      ").concat(remarkRows, "\n                    </tbody>\n                  </table>\n                </td>\n              </tr>\n            </table>\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding: 10px 0\"></td>\n        </tr>\n      ");
-            })
+            var projectCards = Object.values(grouped)
+                .filter(function (g) { return g.remarks.length > 0; })
+                .map(function (g) { return buildProjectCard(g, appUrl); })
                 .join("\n");
-            // Full HTML
-            var html = "\n    <center>\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n        <tr>\n          <td align=\"center\" bgcolor=\"#f1f1f1\" style=\"padding:40px 0;\">\n            <table width=\"1000\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"font-family:Inter, Arial, sans-serif;padding:50px 40px 100px 40px;background-color:#ffffff;border:1px solid #d9d9d9;border-radius:15px;\">\n              <tr>\n                <td style=\"font-size:16px;color:#333;\">\n                  <h1 style=\"margin:0;font-size:24px;line-height:32px;color:#2e3849;\">Halo, ".concat(username, "!</h1>\n                  <p style=\"margin:8px 0 0;font-size:16px;line-height:25px;color:#2e3849;\">\n                    Dimohon untuk melakukan update status obstacle pada PPIC Dashboard secara berkala, Data ini diperbarui per tanggal ").concat(new Date().toLocaleDateString(), ".\n                  </p>\n                </td>\n              </tr>\n              <tr><td style=\"padding:10px\"></td></tr>\n              <tr><td style=\"border-bottom:2px solid #d9d9d9\"></td></tr>\n              <tr><td style=\"padding:10px\"></td></tr>\n              ").concat(rows, "\n              <tr><td style=\"padding:10px\"></td></tr>\n              <tr><td style=\"border-bottom:2px solid #d9d9d9\"></td></tr>\n              <tr><td style=\"padding:10px\"></td></tr>              \n              <tr><td align=\"center\" style=\"text-align: center;\">Copyright Syikha Akmal</td></tr>\n            </table>\n          </td>\n        </tr>\n      </table>\n    </center>\n  ");
-            return html;
+            return "\n        <center>\n          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n            <tr>\n              <td align=\"center\" bgcolor=\"#f1f1f1\" style=\"padding:40px 0;\">\n                <table width=\"680\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"\n                  style=\"font-family:Inter,Arial,sans-serif;\n                    padding:48px 40px 60px;\n                    background:#ffffff;\n                    border:1px solid #e0e0e0;\n                    border-radius:16px;\">\n\n                  <!-- HEADER -->\n                  <tr>\n                    <td>\n                      <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\">\n                        <tr>\n                          <!-- Accent bar biru -->\n                          <td width=\"6\" style=\"background:#2563eb;border-radius:4px;\"></td>\n                          <td style=\"padding-left:14px;\">\n                            <h1 style=\"margin:0;font-size:22px;line-height:30px;\n                              color:#1a2233;font-weight:700;\">\n                              Halo, ".concat(username, "!\n                            </h1>\n                            <p style=\"margin:6px 0 0;font-size:14px;line-height:22px;color:#64748b;\">\n                              Dimohon untuk melakukan update status obstacle pada\n                              <strong style=\"color:#334155;\">PPIC Dashboard</strong>\n                              secara berkala.<br>\n                              Data ini diperbarui per tanggal\n                              <strong style=\"color:#334155;\">").concat(today, "</strong>.\n                            </p>\n                          </td>\n                        </tr>\n                      </table>\n                    </td>\n                  </tr>\n\n                  <!-- Divider -->\n                  <tr>\n                    <td style=\"padding:20px 0;\">\n                      <div style=\"height:1px;background:#e9ecef;\"></div>\n                    </td>\n                  </tr>\n\n                  <!-- PROJECT CARDS -->\n                  ").concat(projectCards, "\n\n                  <!-- Divider -->\n                  <tr>\n                    <td style=\"padding:14px 0 20px;\">\n                      <div style=\"height:1px;background:#e9ecef;\"></div>\n                    </td>\n                  </tr>\n\n                  <!-- FOOTER -->\n                  <tr>\n                    <td align=\"center\">\n                      <p style=\"margin:0;font-size:12px;color:#94a3b8;\">\n                        PPIC Dashboard &nbsp;&middot;&nbsp; &copy; ").concat(new Date().getFullYear(), " Syikha Akmal\n                      </p>\n                    </td>\n                  </tr>\n\n                </table>\n              </td>\n            </tr>\n          </table>\n        </center>");
         },
     },
 };
