@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -54,6 +65,14 @@ var sapDummyController = {
                                 "inventory_transfer",
                                 "goods_issue",
                                 "goods_receipt",
+                                // KBN Fields
+                                "request_purchase_kbn",
+                                "purchase_order_kbn",
+                                "goods_receive_purchase_order_kbn",
+                                "inventory_transfer_request_kbn",
+                                "inventory_transfer_kbn",
+                                "goods_issue_kbn",
+                                "goods_receipt_kbn",
                             ];
                             _e.label = 1;
                         case 1:
@@ -84,6 +103,14 @@ var sapDummyController = {
                                             inventory_transfer: 0,
                                             goods_issue: 0,
                                             goods_receipt: 0,
+                                            // KBN Fields
+                                            request_purchase_kbn: 0,
+                                            purchase_order_kbn: 0,
+                                            goods_receive_purchase_order_kbn: 0,
+                                            inventory_transfer_request_kbn: 0,
+                                            inventory_transfer_kbn: 0,
+                                            goods_issue_kbn: 0,
+                                            goods_receipt_kbn: 0,
                                         });
                                     });
                                 });
@@ -91,7 +118,7 @@ var sapDummyController = {
                                  * Create the summary data based on stored item code
                                  */
                                 Array.from(items_1.keys()).forEach(function (key) {
-                                    var _a, _b, _c, _d, _e, _f, _g;
+                                    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
                                     var id = key.split("|")[0]; // Item Code
                                     var group = key.split("|")[1]; // Item Group
                                     var description = key.split("|")[2]; // Item Description
@@ -106,6 +133,16 @@ var sapDummyController = {
                                         inventory_transfer: ((_e = response_1.data.data.inventory_transfer) === null || _e === void 0 ? void 0 : _e.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
                                         goods_issue: ((_f = response_1.data.data.goods_issue) === null || _f === void 0 ? void 0 : _f.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
                                         goods_receipt: ((_g = response_1.data.data.goods_receipt) === null || _g === void 0 ? void 0 : _g.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        /**
+                                         * KBN FIELDS
+                                         */
+                                        request_purchase_kbn: ((_h = response_1.data.data.request_purchase_kbn) === null || _h === void 0 ? void 0 : _h.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        purchase_order_kbn: ((_j = response_1.data.data.purchase_order_kbn) === null || _j === void 0 ? void 0 : _j.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_receive_purchase_order_kbn: ((_k = response_1.data.data.goods_receive_purchase_order_kbn) === null || _k === void 0 ? void 0 : _k.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        inventory_transfer_request_kbn: ((_l = response_1.data.data.inventory_transfer_request_kbn) === null || _l === void 0 ? void 0 : _l.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        inventory_transfer_kbn: ((_m = response_1.data.data.inventory_transfer_kbn) === null || _m === void 0 ? void 0 : _m.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_issue_kbn: ((_o = response_1.data.data.goods_issue_kbn) === null || _o === void 0 ? void 0 : _o.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_receipt_kbn: ((_p = response_1.data.data.goods_receipt_kbn) === null || _p === void 0 ? void 0 : _p.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
                                     };
                                     items_1.set(key, sum);
                                 });
@@ -114,24 +151,13 @@ var sapDummyController = {
                                 response_1.data.data[p]
                                     .filter(function (r) { return r.item_code == identCode_1; })
                                     .forEach(function (r) {
-                                    items_1.set(r.id, {
-                                        project_no: projectNo_1,
-                                        item_code: r.item_code,
-                                        group: r.group,
-                                        input_date: r.doc_date
+                                    items_1.set(r.id, __assign(__assign({}, r), { project_no: projectNo_1, input_date: r.doc_date
                                             ? new Date(r.doc_date).toLocaleDateString("id-ID", {
                                                 year: "numeric",
                                                 month: "2-digit",
                                                 day: "2-digit",
                                             })
-                                            : null,
-                                        desc: r.item_description,
-                                        dimension: r.dimension,
-                                        qty: r.quantity,
-                                        warehouse: r.warehouse,
-                                        cost_centre: r.cost_centre,
-                                        remark: r.doc_remarks,
-                                    });
+                                            : null }));
                                 });
                             }
                             else {
@@ -169,6 +195,14 @@ var sapDummyController = {
                                 "inventory_transfer",
                                 "goods_issue",
                                 "goods_receipt",
+                                // KBN Fields
+                                "request_purchase_kbn",
+                                "purchase_order_kbn",
+                                "goods_receive_purchase_order_kbn",
+                                "inventory_transfer_request_kbn",
+                                "inventory_transfer_kbn",
+                                "goods_issue_kbn",
+                                "goods_receipt_kbn",
                             ];
                             _c.label = 1;
                         case 1:
@@ -198,6 +232,14 @@ var sapDummyController = {
                                             inventory_transfer: 0,
                                             goods_issue: 0,
                                             goods_receipt: 0,
+                                            // KBN Fields
+                                            request_purchase_kbn: 0,
+                                            purchase_order_kbn: 0,
+                                            goods_receive_purchase_order_kbn: 0,
+                                            inventory_transfer_request_kbn: 0,
+                                            inventory_transfer_kbn: 0,
+                                            goods_issue_kbn: 0,
+                                            goods_receipt_kbn: 0,
                                         });
                                     });
                                 });
@@ -205,7 +247,7 @@ var sapDummyController = {
                                  * Create the summary data based on stored item code
                                  */
                                 Array.from(items_2.keys()).forEach(function (key) {
-                                    var _a, _b, _c, _d, _e, _f, _g;
+                                    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
                                     var id = key.split("|")[0]; // Item Code
                                     var group = key.split("|")[1]; // Item Group
                                     var description = key.split("|")[2]; // Item Description
@@ -220,6 +262,16 @@ var sapDummyController = {
                                         inventory_transfer: ((_e = response_2.data.data.inventory_transfer) === null || _e === void 0 ? void 0 : _e.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
                                         goods_issue: ((_f = response_2.data.data.goods_issue) === null || _f === void 0 ? void 0 : _f.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
                                         goods_receipt: ((_g = response_2.data.data.goods_receipt) === null || _g === void 0 ? void 0 : _g.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        /**
+                                         * KBN FIELDS
+                                         */
+                                        request_purchase_kbn: ((_h = response_2.data.data.request_purchase_kbn) === null || _h === void 0 ? void 0 : _h.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        purchase_order_kbn: ((_j = response_2.data.data.purchase_order_kbn) === null || _j === void 0 ? void 0 : _j.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_receive_purchase_order_kbn: ((_k = response_2.data.data.goods_receive_purchase_order_kbn) === null || _k === void 0 ? void 0 : _k.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        inventory_transfer_request_kbn: ((_l = response_2.data.data.inventory_transfer_request_kbn) === null || _l === void 0 ? void 0 : _l.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        inventory_transfer_kbn: ((_m = response_2.data.data.inventory_transfer_kbn) === null || _m === void 0 ? void 0 : _m.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_issue_kbn: ((_o = response_2.data.data.goods_issue_kbn) === null || _o === void 0 ? void 0 : _o.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
+                                        goods_receipt_kbn: ((_p = response_2.data.data.goods_receipt_kbn) === null || _p === void 0 ? void 0 : _p.reduce(function (acc, row) { var _a; return row.item_code === id ? acc + ((_a = row.quantity) !== null && _a !== void 0 ? _a : 0) : acc; }, 0)) || 0,
                                     };
                                     items_2.set(key, sum);
                                 });
