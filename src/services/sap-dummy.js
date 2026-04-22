@@ -87,7 +87,8 @@ var sapDummyServices = {
                             return [2 /*return*/, response.data];
                         case 2:
                             error_2 = _a.sent();
-                            throw error_2;
+                            console.error(error_2);
+                            return [3 /*break*/, 3];
                         case 3: return [2 /*return*/];
                     }
                 });
