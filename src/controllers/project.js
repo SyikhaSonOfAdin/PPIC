@@ -705,7 +705,7 @@ const projectControllers = {
 
                   return {
                     x: label,
-                    y: totalAmount.toFixed(2),
+                    y: (totalAmount ?? 0).toFixed(2),
                   };
                 }),
                 ACTUAL: uniqueLabels.map((label) => {
@@ -727,7 +727,7 @@ const projectControllers = {
 
                   return {
                     x: label,
-                    y: totalAmount.toFixed(2),
+                    y: (totalAmount ?? 0).toFixed(2),
                   };
                 }),
               };
