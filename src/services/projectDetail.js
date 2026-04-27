@@ -41,11 +41,12 @@ var projectDetail_1 = require("../models/projectDetail");
 var db_1 = require("../config/db");
 var uuid_1 = require("uuid");
 exports.projectDetailServices = {
-    add: function (projectId, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, connection) { return __awaiter(void 0, void 0, void 0, function () {
-        var CONNECTION, _a, id, error_1;
+    add: function (data, connection) { return __awaiter(void 0, void 0, void 0, function () {
+        var projectId, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, delivery, productivity, budget, cost, CONNECTION, _a, id, error_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
+                    projectId = data.projectId, userId = data.userId, name = data.name, spk = data.spk, description = data.description, ppm = data.ppm, capacity = data.capacity, workPlace = data.workPlace, startDate = data.startDate, dueDate = data.dueDate, finishDate = data.finishDate, delivery = data.delivery, productivity = data.productivity, budget = data.budget, cost = data.cost;
                     _a = connection;
                     if (_a) return [3 /*break*/, 2];
                     return [4 /*yield*/, db_1.PPIC.getConnection()];
@@ -70,7 +71,12 @@ exports.projectDetailServices = {
                             workPlace,
                             startDate,
                             dueDate,
-                            finishDate,
+                            finishDate !== "" ? finishDate : null,
+                            delivery ? true : false,
+                            delivery !== "" ? delivery : null,
+                            productivity !== null && productivity !== void 0 ? productivity : null,
+                            budget !== null && budget !== void 0 ? budget : null,
+                            cost !== null && cost !== void 0 ? cost : null,
                         ])];
                 case 4:
                     _b.sent();
@@ -120,11 +126,12 @@ exports.projectDetailServices = {
         });
     }); },
     edit: {
-        all: function (projectId, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, connection) { return __awaiter(void 0, void 0, void 0, function () {
-            var CONNECTION, _a, error_3;
+        all: function (data, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, delivery, productivity, budget, cost, projectId, CONNECTION, _a, error_3;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        userId = data.userId, name = data.name, spk = data.spk, description = data.description, ppm = data.ppm, capacity = data.capacity, workPlace = data.workPlace, startDate = data.startDate, dueDate = data.dueDate, finishDate = data.finishDate, delivery = data.delivery, productivity = data.productivity, budget = data.budget, cost = data.cost, projectId = data.projectId;
                         _a = connection;
                         if (_a) return [3 /*break*/, 2];
                         return [4 /*yield*/, db_1.PPIC.getConnection()];
@@ -147,6 +154,11 @@ exports.projectDetailServices = {
                                 startDate,
                                 dueDate,
                                 finishDate,
+                                delivery ? true : false,
+                                delivery !== null && delivery !== void 0 ? delivery : null,
+                                productivity !== null && productivity !== void 0 ? productivity : null,
+                                budget !== null && budget !== void 0 ? budget : null,
+                                cost !== null && cost !== void 0 ? cost : null,
                                 projectId,
                             ])];
                     case 4:

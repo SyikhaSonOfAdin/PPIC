@@ -40,11 +40,11 @@ var axios_1 = require("axios");
 /**
  * DEV URL
  */
-// const URL = "http://localhost:3002";
+var URL = "http://localhost:3002";
 /**
  * PRODUCTION URL
  */
-var URL = "https://sap.syikha.it.com";
+// const URL = "https://sap.syikha.it.com"
 var sapDummyServices = {
     update: {
         by: {
@@ -87,8 +87,7 @@ var sapDummyServices = {
                             return [2 /*return*/, response.data];
                         case 2:
                             error_2 = _a.sent();
-                            console.error(error_2);
-                            return [3 /*break*/, 3];
+                            throw error_2;
                         case 3: return [2 /*return*/];
                     }
                 });
