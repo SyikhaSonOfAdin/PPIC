@@ -125,17 +125,19 @@ const projectControllers = {
           userId,
         );
         await projectDetailServices.add(
-          id,
-          userId,
-          projectDetail.NAME,
-          projectDetail.SPK,
-          projectDetail.SPK,
-          projectDetail.PPM,
-          projectDetail.CAPACITY,
-          projectDetail.WORK_PLACE,
-          projectDetail.START_DATE,
-          projectDetail.DUE_DATE,
-          projectDetail.FINISH_DATE,
+          {
+            projectId: id,
+            userId,
+            name: projectDetail.NAME,
+            spk: projectDetail.SPK,
+            description: projectDetail.DESCRIPTION,
+            ppm: projectDetail.PPM,
+            capacity: projectDetail.CAPACITY,
+            workPlace: projectDetail.WORK_PLACE,
+            startDate: projectDetail.START_DATE,
+            dueDate: projectDetail.DUE_DATE,
+            finishDate: projectDetail.FINISH_DATE,
+          },
           connection,
         );
         plans.forEach(async (p) => {
@@ -173,6 +175,7 @@ const projectControllers = {
         });
       } catch (error) {
         await connection.rollback();
+        console.error(error);
         return res.status(500).json({
           message: error.message,
         });
@@ -180,6 +183,7 @@ const projectControllers = {
         connection.release();
       }
     } catch (error) {
+      console.error(error);
       res.status(500).json({
         message: error.message,
       });
