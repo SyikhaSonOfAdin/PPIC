@@ -40,13 +40,14 @@ exports.projectDetailServices = void 0;
 var projectDetail_1 = require("../models/projectDetail");
 var db_1 = require("../config/db");
 var uuid_1 = require("uuid");
+var utils_1 = require("../utils");
 exports.projectDetailServices = {
     add: function (data, connection) { return __awaiter(void 0, void 0, void 0, function () {
-        var projectId, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, delivery, productivity, budget, cost, CONNECTION, _a, id, error_1;
+        var projectId, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, delivery, budget, cost, man_hours, CONNECTION, _a, id, error_1;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    projectId = data.projectId, userId = data.userId, name = data.name, spk = data.spk, description = data.description, ppm = data.ppm, capacity = data.capacity, workPlace = data.workPlace, startDate = data.startDate, dueDate = data.dueDate, finishDate = data.finishDate, delivery = data.delivery, productivity = data.productivity, budget = data.budget, cost = data.cost;
+                    projectId = data.projectId, userId = data.userId, name = data.name, spk = data.spk, description = data.description, ppm = data.ppm, capacity = data.capacity, workPlace = data.workPlace, startDate = data.startDate, dueDate = data.dueDate, finishDate = data.finishDate, delivery = data.delivery, budget = data.budget, cost = data.cost, man_hours = data.man_hours;
                     _a = connection;
                     if (_a) return [3 /*break*/, 2];
                     return [4 /*yield*/, db_1.PPIC.getConnection()];
@@ -74,9 +75,11 @@ exports.projectDetailServices = {
                             finishDate !== "" ? finishDate : null,
                             delivery ? true : false,
                             delivery !== "" ? delivery : null,
-                            productivity !== null && productivity !== void 0 ? productivity : null,
+                            null,
                             budget !== null && budget !== void 0 ? budget : null,
                             cost !== null && cost !== void 0 ? cost : null,
+                            man_hours !== null && man_hours !== void 0 ? man_hours : null,
+                            null,
                         ])];
                 case 4:
                     _b.sent();
@@ -127,11 +130,11 @@ exports.projectDetailServices = {
     }); },
     edit: {
         all: function (data, connection) { return __awaiter(void 0, void 0, void 0, function () {
-            var userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, delivery, productivity, budget, cost, projectId, CONNECTION, _a, error_3;
+            var userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, delivery, budget, cost, projectId, man_hours, CONNECTION, _a, actualProgress, productivity_cost, productivity, error_3;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        userId = data.userId, name = data.name, spk = data.spk, description = data.description, ppm = data.ppm, capacity = data.capacity, workPlace = data.workPlace, startDate = data.startDate, dueDate = data.dueDate, finishDate = data.finishDate, delivery = data.delivery, productivity = data.productivity, budget = data.budget, cost = data.cost, projectId = data.projectId;
+                        userId = data.userId, name = data.name, spk = data.spk, description = data.description, ppm = data.ppm, capacity = data.capacity, workPlace = data.workPlace, startDate = data.startDate, dueDate = data.dueDate, finishDate = data.finishDate, delivery = data.delivery, budget = data.budget, cost = data.cost, projectId = data.projectId, man_hours = data.man_hours;
                         _a = connection;
                         if (_a) return [3 /*break*/, 2];
                         return [4 /*yield*/, db_1.PPIC.getConnection()];
@@ -142,7 +145,12 @@ exports.projectDetailServices = {
                         CONNECTION = _a;
                         _b.label = 3;
                     case 3:
-                        _b.trys.push([3, 5, 6, 7]);
+                        _b.trys.push([3, 6, 7, 8]);
+                        return [4 /*yield*/, (0, utils_1.progressPercentage)(projectId, CONNECTION)];
+                    case 4:
+                        actualProgress = (_b.sent()).actualProgress;
+                        productivity_cost = cost ? cost / actualProgress : null;
+                        productivity = man_hours ? actualProgress / man_hours : null;
                         return [4 /*yield*/, CONNECTION.query(projectDetail_1.projectDetailQuerys.update.all, [
                                 userId,
                                 name,
@@ -156,23 +164,25 @@ exports.projectDetailServices = {
                                 finishDate,
                                 delivery ? true : false,
                                 delivery !== null && delivery !== void 0 ? delivery : null,
-                                productivity !== null && productivity !== void 0 ? productivity : null,
+                                productivity,
                                 budget !== null && budget !== void 0 ? budget : null,
                                 cost !== null && cost !== void 0 ? cost : null,
+                                man_hours !== null && man_hours !== void 0 ? man_hours : null,
+                                productivity_cost,
                                 projectId,
                             ])];
-                    case 4:
-                        _b.sent();
-                        return [3 /*break*/, 7];
                     case 5:
+                        _b.sent();
+                        return [3 /*break*/, 8];
+                    case 6:
                         error_3 = _b.sent();
                         throw error_3;
-                    case 6:
+                    case 7:
                         if (!connection && CONNECTION) {
                             CONNECTION.release();
                         }
                         return [7 /*endfinally*/];
-                    case 7: return [2 /*return*/];
+                    case 8: return [2 /*return*/];
                 }
             });
         }); },

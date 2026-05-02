@@ -6,6 +6,7 @@ const { categoryServices } = require("../services/category");
 const { projectServices } = require("../services/project");
 const { othersQuerys } = require("../models/others");
 const { PPIC } = require("../config/db");
+const { progressPercentage } = require("../utils");
 
 const projectControllers = {
   add: async (req, res, next) => {
@@ -25,9 +26,9 @@ const projectControllers = {
       dueDate,
       finishDate,
       delivery,
-      productivity,
       budget,
       cost,
+      man_hours,
     } = req.body;
     if (
       !companyId ||
@@ -69,9 +70,9 @@ const projectControllers = {
             dueDate,
             finishDate,
             delivery,
-            productivity,
             budget,
             cost,
+            man_hours,
           },
           connection,
         );
@@ -207,9 +208,9 @@ const projectControllers = {
         dueDate,
         finishDate,
         delivery,
-        productivity,
         budget,
         cost,
+        man_hours,
       } = req.body;
       if (
         !projectId ||
@@ -251,9 +252,9 @@ const projectControllers = {
               dueDate,
               finishDate,
               delivery,
-              productivity,
               budget,
               cost,
+              man_hours,
             },
             connection,
           );
@@ -509,28 +510,10 @@ const projectControllers = {
             projectId,
             connection,
           );
-          const actual = await actualServices.get.all(projectId, connection);
-          const plans = await plansServices.get.all(projectId, connection);
-
-          const currActual = actual
-            .filter(
-              (p) =>
-                new Date(`${p.PERIOD_YEAR}-${p.PERIOD_MONTH}`) <= new Date(),
-            )
-            .reduce((total, item) => total + Number(item.PERCENTAGE), 0);
-          const currPlan = plans
-            .filter(
-              (p) =>
-                new Date(`${p.PERIOD_YEAR}-${p.PERIOD_MONTH}`) <= new Date(),
-            )
-            .reduce((total, item) => total + Number(item.PERCENTAGE), 0);
-
-          await connection.commit();
-          const tempActual = actual.reduce(
-            (sum, item) => sum + parseFloat(item.AMOUNT),
-            0,
+          const { percentage, deviation, actual } = await progressPercentage(
+            projectId,
+            connection,
           );
-          const tempPlans = parseFloat(plans[plans.length - 1]?.AMOUNT ?? 0);
 
           return res.status(200).json({
             message: "Get Project successfully",
@@ -539,18 +522,12 @@ const projectControllers = {
                 project,
                 projectDetail: {
                   ...projectDetail,
-                  DEVIATION: (currActual - currPlan).toFixed(2),
+                  DEVIATION: deviation,
                 },
                 progress: {
-                  PERCENTAGE:
-                    tempActual > 0
-                      ? (
-                          (tempActual / parseFloat(projectDetail.CAPACITY)) *
-                          100
-                        ).toFixed(2) + "%"
-                      : "0%",
+                  PERCENTAGE: `${percentage.toFixed(2)}%`,
                   // prettier-ignore
-                  ACTUAL: `${new Intl.NumberFormat("id-ID").format(tempPlans)} / ${new Intl.NumberFormat("id-ID").format(tempActual)}`,
+                  ACTUAL: actual,
                 },
               },
             ],

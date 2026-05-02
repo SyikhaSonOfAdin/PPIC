@@ -19,6 +19,8 @@ const table = {
     PRODUCTIVITY: "PRODUCTIVITY",
     BUDGET: "BUDGET",
     COST: "COST",
+    MAN_HOURS: "MAN_HOURS",
+    PRODUCTIVITY_COST: "PRODUCTIVITY_COST",
   },
 };
 
@@ -42,9 +44,11 @@ const QUERY = {
     ${table.COLUMN.DELIVERY_DATE}, 
     ${table.COLUMN.PRODUCTIVITY}, 
     ${table.COLUMN.BUDGET}, 
-    ${table.COLUMN.COST}
+    ${table.COLUMN.COST},
+    ${table.COLUMN.MAN_HOURS},
+    ${table.COLUMN.PRODUCTIVITY_COST}
     ) 
-    VALUES (NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    VALUES (NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
   update: {
     all: `UPDATE ${table.TABLE} SET 
             ${table.COLUMN.INPUT_BY} = ?, 
@@ -61,7 +65,9 @@ const QUERY = {
             ${table.COLUMN.DELIVERY_DATE} = ?, 
             ${table.COLUMN.PRODUCTIVITY} = ?, 
             ${table.COLUMN.BUDGET} = ?, 
-            ${table.COLUMN.COST} = ? 
+            ${table.COLUMN.COST} = ?,
+            ${table.COLUMN.MAN_HOURS} = ?,
+            ${table.COLUMN.PRODUCTIVITY_COST} = ?
             WHERE ${table.COLUMN.PROJECT_ID} = ?`,
     deliver: `UPDATE ${table.TABLE} SET ${table.COLUMN.DELIVERED} = TRUE, ${table.COLUMN.DELIVERY_DATE} = NOW() WHERE ${table.COLUMN.PROJECT_ID} = ?`,
   },
@@ -83,7 +89,9 @@ const QUERY = {
         DATE_FORMAT(${table.COLUMN.FINISH_DATE}, '%Y-%m-%d') AS FINISH_DATE,
         ${table.COLUMN.PRODUCTIVITY}, 
         ${table.COLUMN.BUDGET}, 
-        ${table.COLUMN.COST}
+        ${table.COLUMN.COST},
+        ${table.COLUMN.MAN_HOURS},
+        ${table.COLUMN.PRODUCTIVITY_COST}
         FROM ${table.TABLE} WHERE ${table.COLUMN.PROJECT_ID} = ?`,
     all: `SELECT * FROM ${table.TABLE}`,
   },
