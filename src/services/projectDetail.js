@@ -149,8 +149,8 @@ exports.projectDetailServices = {
                         return [4 /*yield*/, (0, utils_1.progressPercentage)(projectId, CONNECTION)];
                     case 4:
                         actualProgress = (_b.sent()).actualProgress;
-                        productivity_cost = cost && cost !== 0 ? cost / actualProgress : null;
-                        productivity = man_hours && man_hours !== 0 ? actualProgress / man_hours : null;
+                        productivity_cost = cost && cost !== 0 && actualProgress !== 0 ? Number(cost) / Number(actualProgress) : null;
+                        productivity = man_hours && man_hours !== 0 && actualProgress !== 0 ? Number(actualProgress) / Number(man_hours) : null;
                         return [4 /*yield*/, CONNECTION.query(projectDetail_1.projectDetailQuerys.update.all, [
                                 userId,
                                 name,
@@ -167,8 +167,9 @@ exports.projectDetailServices = {
                                 productivity,
                                 budget !== null && budget !== void 0 ? budget : null,
                                 cost !== null && cost !== void 0 ? cost : null,
-                                man_hours !== null && man_hours !== void 0 ? man_hours : null,
-                                productivity_cost,
+                                // @ts-ignore
+                                man_hours && man_hours != "" ? man_hours : null,
+                                productivity_cost !== null && productivity_cost !== void 0 ? productivity_cost : null,
                                 projectId,
                             ])];
                     case 5:
