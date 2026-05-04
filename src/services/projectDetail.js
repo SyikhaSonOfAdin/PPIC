@@ -149,8 +149,8 @@ exports.projectDetailServices = {
                         return [4 /*yield*/, (0, utils_1.progressPercentage)(projectId, CONNECTION)];
                     case 4:
                         actualProgress = (_b.sent()).actualProgress;
-                        productivity_cost = cost ? cost / actualProgress : null;
-                        productivity = man_hours ? actualProgress / man_hours : null;
+                        productivity_cost = cost && cost !== 0 ? cost / actualProgress : null;
+                        productivity = man_hours && man_hours !== 0 ? actualProgress / man_hours : null;
                         return [4 /*yield*/, CONNECTION.query(projectDetail_1.projectDetailQuerys.update.all, [
                                 userId,
                                 name,
