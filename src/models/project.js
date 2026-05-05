@@ -74,7 +74,7 @@ const QUERY = {
             OR PD.${projectDetailTable.COLUMN.DUE_DATE} LIKE ?
             OR PD.${projectDetailTable.COLUMN.FINISH_DATE} LIKE ?
             ) 
-            ORDER BY CP.${table.COLUMN.ID} ASC`,
+            ORDER BY CP.${table.COLUMN.PROJECT_NO} ASC`,
         onlyOne: `SELECT 
         CP.${table.COLUMN.ID}, 
         CP.${table.COLUMN.COMPANY_ID}, 
