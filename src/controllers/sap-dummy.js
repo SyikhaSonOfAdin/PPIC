@@ -41,6 +41,7 @@ const getSummary = async (req, res) => {
     return res.status(200).json({
       success: true,
       last_update: response.last_update ?? "-",
+      groups: response.groups ?? [],
       data: response.data,
       pagination: response.pagination,
     });
