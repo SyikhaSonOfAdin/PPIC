@@ -282,7 +282,7 @@ var sapDummyController = {
                                 });
                             }
                             else {
-                                res.send(response_2);
+                                res.status(202).send(response_2);
                             }
                             return [3 /*break*/, 4];
                         case 3:
