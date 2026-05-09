@@ -28,8 +28,8 @@ const app = express();
 const port = 3000;
 
 const corsOptions = {
-    origin: 'https://ppic.syikha.com',
-    // origin: ['http://localhost:5173', 'http://localhost:5174'],
+    // origin: 'https://ppic.syikha.com',
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
 };
 

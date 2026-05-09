@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
+    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
@@ -58,7 +58,14 @@ exports.categoryServices = {
                 case 3:
                     _b.trys.push([3, 5, 6, 7]);
                     id = (0, uuid_1.v7)();
-                    return [4 /*yield*/, CONNECTION.query(category_1.categoryQuerys.insert, [id, companyId, userId, name, description, unitOfMeasurement])];
+                    return [4 /*yield*/, CONNECTION.query(category_1.categoryQuerys.insert, [
+                            id,
+                            companyId,
+                            userId,
+                            name,
+                            description,
+                            unitOfMeasurement,
+                        ])];
                 case 4:
                     _b.sent();
                     return [2 /*return*/, id];
@@ -90,7 +97,13 @@ exports.categoryServices = {
                     _b.label = 3;
                 case 3:
                     _b.trys.push([3, 5, 6, 7]);
-                    return [4 /*yield*/, CONNECTION.query(category_1.categoryQuerys.update, [name, description, unitOfMeasurement, userId, categoryId])];
+                    return [4 /*yield*/, CONNECTION.query(category_1.categoryQuerys.update, [
+                            name,
+                            description,
+                            unitOfMeasurement,
+                            userId,
+                            categoryId,
+                        ])];
                 case 4:
                     _b.sent();
                     return [3 /*break*/, 7];
@@ -138,7 +151,7 @@ exports.categoryServices = {
                     case 7: return [2 /*return*/];
                 }
             });
-        }); }
+        }); },
     },
     get: {
         all: function (companyId, connection) { return __awaiter(void 0, void 0, void 0, function () {
@@ -204,6 +217,38 @@ exports.categoryServices = {
                     case 7: return [2 /*return*/];
                 }
             });
-        }); }
-    }
+        }); },
+        oneByName: function (name, connection) { return __awaiter(void 0, void 0, void 0, function () {
+            var CONNECTION, _a, data, error_6;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = connection;
+                        if (_a) return [3 /*break*/, 2];
+                        return [4 /*yield*/, db_1.PPIC.getConnection()];
+                    case 1:
+                        _a = (_b.sent());
+                        _b.label = 2;
+                    case 2:
+                        CONNECTION = _a;
+                        _b.label = 3;
+                    case 3:
+                        _b.trys.push([3, 5, 6, 7]);
+                        return [4 /*yield*/, CONNECTION.query(category_1.categoryQuerys.select.byName, ["%".concat(name, "%")])];
+                    case 4:
+                        data = (_b.sent())[0];
+                        return [2 /*return*/, data];
+                    case 5:
+                        error_6 = _b.sent();
+                        throw error_6;
+                    case 6:
+                        if (!connection && CONNECTION) {
+                            CONNECTION.release();
+                        }
+                        return [7 /*endfinally*/];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        }); },
+    },
 };

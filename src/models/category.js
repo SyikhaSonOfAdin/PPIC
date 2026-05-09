@@ -22,6 +22,7 @@ const QUERY = {
     select: {
         all: `SELECT PC.${table.COLUMN.ID}, PC.${table.COLUMN.NAME}, PC.${table.COLUMN.DESCRIPTION}, PC.${table.COLUMN.UOM}, DATE_FORMAT(PC.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, U.${userTable.COLUMN.USERNAME} AS INPUT_BY FROM ${table.TABLE} AS PC JOIN ${userTable.TABLE} AS U ON PC.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID} WHERE PC.${table.COLUMN.COMPANY_ID} = ?`,
         onlyOne: `SELECT PC.${table.COLUMN.ID}, PC.${table.COLUMN.NAME}, PC.${table.COLUMN.DESCRIPTION}, PC.${table.COLUMN.UOM}, DATE_FORMAT(PC.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, U.${userTable.COLUMN.USERNAME} AS INPUT_BY FROM ${table.TABLE} AS PC JOIN ${userTable.TABLE} AS U ON PC.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID} WHERE PC.${table.COLUMN.ID} = ?`,
+        byName: `SELECT PC.${table.COLUMN.ID}, PC.${table.COLUMN.NAME}, PC.${table.COLUMN.DESCRIPTION}, PC.${table.COLUMN.UOM}, DATE_FORMAT(PC.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, U.${userTable.COLUMN.USERNAME} AS INPUT_BY FROM ${table.TABLE} AS PC JOIN ${userTable.TABLE} AS U ON PC.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID} WHERE PC.${table.COLUMN.NAME} LIKE ?`,
     }
 }
 
