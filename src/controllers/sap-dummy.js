@@ -3,33 +3,37 @@ const sapDummyServices = require("../services/sap-dummy").default;
 
 const VALID_STAGES = new Set([
   "request_purchase",
-  "purchase_order",
-  "goods_receive_purchase_order",
-  "inventory_transfer_request",
-  "inventory_transfer",
-  "goods_issue",
-  "goods_receipt",
+  "use_stock",
   "request_purchase_kbn",
+  "use_stock_kbn",
+  "purchase_order",
   "purchase_order_kbn",
+  "goods_receive_purchase_order",
   "goods_receive_purchase_order_kbn",
+  "inventory_transfer_request",
   "inventory_transfer_request_kbn",
+  "inventory_transfer",
   "inventory_transfer_kbn",
+  "goods_issue",
   "goods_issue_kbn",
+  "goods_receipt",
   "goods_receipt_kbn",
 ]);
 
 const getSummary = async (req, res) => {
   const { projectNo } = req.params;
-  const { s, page } = req.query;
+  const { s, page, group } = req.query;
   const pageNum = Math.max(1, parseInt(page ?? "1", 10) || 1);
 
-  if (!projectNo) return res.status(400).json({ message: "Invalid Parameters" });
+  if (!projectNo)
+    return res.status(400).json({ message: "Invalid Parameters" });
 
   try {
     const response = await sapDummyServices.get.summary.projectNo(
       projectNo,
       pageNum,
       s ?? "",
+      group ?? "",
     );
 
     if (!response.success) return res.status(502).json(response);
@@ -58,15 +62,17 @@ const getSummary = async (req, res) => {
  */
 const checkStatus = async (req, res) => {
   const { projectNo } = req.params;
-  const { s, page } = req.query;
+  const { s, page, group } = req.query;
   const pageNum = Math.max(1, parseInt(page ?? "1", 10) || 1);
 
-  if (!projectNo) return res.status(400).json({ message: "Invalid Parameters" });
+  if (!projectNo)
+    return res.status(400).json({ message: "Invalid Parameters" });
 
   try {
     const statusResponse = await sapDummyServices.get.status.projectNo(
       projectNo,
       s ?? "",
+      group ?? "",
     );
 
     // SAP-Connect Redis middleware returns { success: false } when update is running
@@ -82,6 +88,7 @@ const checkStatus = async (req, res) => {
       projectNo,
       pageNum,
       s ?? "",
+      group ?? "",
     );
 
     if (!summaryResponse.success) return res.status(502).json(summaryResponse);
@@ -107,7 +114,7 @@ const sapDummyController = {
     by: {
       projectNo: async (req, res) => {
         const { projectNo, identCode } = req.params;
-        const { s, p } = req.query;
+        const { s, p, group } = req.query;
 
         if (!projectNo)
           return res.status(400).json({ message: "Invalid Parameters" });
@@ -115,10 +122,16 @@ const sapDummyController = {
         try {
           if (identCode) {
             if (!p || !VALID_STAGES.has(p)) {
-              return res.status(400).json({ message: "Invalid stage parameter" });
+              return res
+                .status(400)
+                .json({ message: "Invalid stage parameter" });
             }
 
-            const response = await sapDummyServices.get.by.projectNo(projectNo, s);
+            const response = await sapDummyServices.get.by.projectNo(
+              projectNo,
+              s,
+              group ?? "",
+            );
 
             if (response.success === false) {
               return res.status(502).json(response);
@@ -140,7 +153,6 @@ const sapDummyController = {
                     : null,
                 });
               });
-
             return res.status(200).json({
               success: true,
               last_update: response.data?.last_update ?? "-",
@@ -171,7 +183,8 @@ const sapDummyController = {
             if (!projectNo)
               return res.status(400).json({ message: "Invalid Parameters" });
 
-            const response = await sapDummyServices.update.by.projectNo(projectNo);
+            const response =
+              await sapDummyServices.update.by.projectNo(projectNo);
             res.status(200).json(response);
           } catch (error) {
             console.error(error);

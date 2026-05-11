@@ -26,12 +26,13 @@ const sapDummyServices = {
   },
   get: {
     summary: {
-      projectNo: async (projectNo, page = 1, searchTerms = "") => {
+      projectNo: async (projectNo, page = 1, searchTerms = "", group = "") => {
         try {
           const encodedProjectNo = encodeURIComponent(projectNo);
           const encodedSearch = encodeURIComponent(searchTerms);
+          const encodedGroup = encodeURIComponent(group);
           const response = await axios.get(
-            `${SAP_URL}/get/summary/${encodedProjectNo}?page=${page}&s=${encodedSearch}`,
+            `${SAP_URL}/get/summary/${encodedProjectNo}?page=${page}&s=${encodedSearch}&group=${encodedGroup}`,
             { timeout: AXIOS_TIMEOUT },
           );
           return response.data;
@@ -41,12 +42,13 @@ const sapDummyServices = {
       },
     },
     by: {
-      projectNo: async (projectNo, searchTerms) => {
+      projectNo: async (projectNo, searchTerms, group = "") => {
         try {
           const encodedProjectNo = encodeURIComponent(projectNo);
           const encodedSearch = encodeURIComponent(searchTerms ?? "");
+          const encodedGroup = encodeURIComponent(group);
           const response = await axios.get(
-            `${SAP_URL}/get/single/${encodedProjectNo}?s=${encodedSearch}`,
+            `${SAP_URL}/get/single/${encodedProjectNo}?s=${encodedSearch}&group=${encodedGroup}`,
             { timeout: AXIOS_TIMEOUT },
           );
           return response.data;
@@ -56,12 +58,13 @@ const sapDummyServices = {
       },
     },
     status: {
-      projectNo: async (projectNo, searchTerms) => {
+      projectNo: async (projectNo, searchTerms, group = "") => {
         try {
           const encodedProjectNo = encodeURIComponent(projectNo);
           const encodedSearch = encodeURIComponent(searchTerms ?? "");
+          const encodedGroup = encodeURIComponent(group);
           const response = await axios.get(
-            `${SAP_URL}/get/check/status/${encodedProjectNo}?s=${encodedSearch}`,
+            `${SAP_URL}/get/check/status/${encodedProjectNo}?s=${encodedSearch}&group=${encodedGroup}`,
             { timeout: AXIOS_TIMEOUT },
           );
           return response.data;
