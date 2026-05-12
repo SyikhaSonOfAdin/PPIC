@@ -41,6 +41,7 @@ const QUERY = {
             PD.${projectDetailTable.COLUMN.MAN_HOURS},
             PD.${projectDetailTable.COLUMN.PRODUCTIVITY_COST},
             C.${categoryTable.COLUMN.ID} AS CATEGORY_ID,  
+            C.${categoryTable.COLUMN.NAME} AS CATEGORY,  
             C.${categoryTable.COLUMN.UOM}, 
             PD.${projectDetailTable.COLUMN.CAPACITY}, 
             PD.${projectDetailTable.COLUMN.WORK_PLACE}, 
