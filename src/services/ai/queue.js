@@ -37,20 +37,16 @@ function isLockError(err) {
 
 // =============================================================================
 // SummaryQueue: fastq concurrency=1 + async-retry per DB write
-// =============================================================================
+const COOLDOWN_MS = 5 * 60 * 1000;
+
 class SummaryQueue {
   constructor() {
-    // fastq.promise: worker async, queue serialized (concurrency=1).
-    // Job tunggal per waktu = tidak ada self-contention pada row yang sama.
     this._queue = fastq.promise(this._worker.bind(this), 1);
-
-    // State tracking untuk endpoint /status dan dedup.
-    // Business rule kalian (re-enqueue saat dirty) bukan tanggung jawab
-    // library queue manapun; kita maintain di level aplikasi.
     this._statusMap = new Map();
     this._pendingSet = new Set();
     this._dirtySet = new Set();
     this._processing = null;
+    this._cooldownTimers = new Map();
   }
 
   enqueue(projectId) {
@@ -60,26 +56,39 @@ class SummaryQueue {
       return;
     }
 
-    // Sedang processing: tandai dirty, re-enqueue otomatis setelah selesai.
     if (this._processing === projectId) {
       this._dirtySet.add(projectId);
       this._statusMap.set(projectId, "dirty");
       return;
     }
 
-    // Sudah di queue (waiting): tidak perlu duplikasi.
     if (this._pendingSet.has(projectId)) {
       return;
+    }
+
+    if (this._cooldownTimers.has(projectId)) {
+      clearTimeout(this._cooldownTimers.get(projectId));
+      this._cooldownTimers.delete(projectId);
+      this._statusMap.delete(projectId);
     }
 
     this._pendingSet.add(projectId);
     this._statusMap.set(projectId, "pending");
 
-    // push() returns Promise. Worker sudah handle semua error internally,
-    // jadi catch ini hanya safety net untuk error yang lolos dari fastq sendiri.
     this._queue.push(projectId).catch((err) => {
       console.error("[ai-queue] unexpected queue error", projectId, err);
     });
+  }
+
+  _scheduleCooldown(projectId) {
+    if (this._cooldownTimers.has(projectId)) {
+      clearTimeout(this._cooldownTimers.get(projectId));
+    }
+    const timer = setTimeout(() => {
+      this._statusMap.delete(projectId);
+      this._cooldownTimers.delete(projectId);
+    }, COOLDOWN_MS);
+    this._cooldownTimers.set(projectId, timer);
   }
 
   getStatus(projectId) {
@@ -107,8 +116,10 @@ class SummaryQueue {
     try {
       await this._process(projectId);
       this._statusMap.set(projectId, "ready");
+      this._scheduleCooldown(projectId);
     } catch (err) {
       this._statusMap.set(projectId, "failed");
+      this._scheduleCooldown(projectId);
       console.error("[ai-queue] process failed", projectId, err.message ?? err);
     } finally {
       this._processing = null;
@@ -128,9 +139,11 @@ class SummaryQueue {
   async _process(projectId) {
     const model = geminiServices.getModelName();
 
-    const [project, remarks] = await Promise.all([
+    const [project, remarks, plans, actual] = await Promise.all([
       aiSummaryServices.getProjectContext(projectId),
       aiSummaryServices.getRemarks(projectId),
+      aiSummaryServices.getPlans(projectId),
+      aiSummaryServices.getActual(projectId),
     ]);
 
     if (!project) {
@@ -149,6 +162,8 @@ class SummaryQueue {
       summary = await geminiServices.summarizeProjectRemarks({
         project,
         remarks,
+        plans,
+        actual,
       });
     } catch (err) {
       // Persist FAILED status, lalu lempar error asli ke worker.

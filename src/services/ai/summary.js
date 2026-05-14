@@ -8,6 +8,8 @@ const {
 const { projectTable } = require("../../models/project");
 const { projectDetailTable } = require("../../models/projectDetail");
 const { remarkQuerys } = require("../../models/journalRemark");
+const { actualQuerys } = require("../../models/projectActual");
+const { plansQuerys } = require("../../models/projectPlans");
 
 const STATUS = {
   PENDING: "pending",
@@ -67,7 +69,22 @@ const selectProjectContextSQL = `SELECT
   P.${projectTable.COLUMN.ID} AS ID,
   P.${projectTable.COLUMN.PROJECT_NO} AS PROJECT_NO,
   P.${projectTable.COLUMN.CLIENT} AS CLIENT,
-  PD.${projectDetailTable.COLUMN.NAME} AS DETAIL_NAME
+  PD.${projectDetailTable.COLUMN.NAME} AS DETAIL_NAME,
+  PD.${projectDetailTable.COLUMN.SPK} AS SPK,
+  PD.${projectDetailTable.COLUMN.DESCRIPTION} AS DESCRIPTION,
+  PD.${projectDetailTable.COLUMN.PPM} AS PPM,
+  PD.${projectDetailTable.COLUMN.CAPACITY} AS CAPACITY,
+  PD.${projectDetailTable.COLUMN.WORK_PLACE} AS WORK_PLACE,
+  DATE_FORMAT(PD.${projectDetailTable.COLUMN.START_DATE}, '%Y-%m-%d') AS START_DATE,
+  DATE_FORMAT(PD.${projectDetailTable.COLUMN.DUE_DATE}, '%Y-%m-%d') AS DUE_DATE,
+  DATE_FORMAT(PD.${projectDetailTable.COLUMN.FINISH_DATE}, '%Y-%m-%d') AS FINISH_DATE,
+  PD.${projectDetailTable.COLUMN.DELIVERED} AS DELIVERED,
+  DATE_FORMAT(PD.${projectDetailTable.COLUMN.DELIVERY_DATE}, '%Y-%m-%d') AS DELIVERY_DATE,
+  PD.${projectDetailTable.COLUMN.PRODUCTIVITY} AS PRODUCTIVITY,
+  PD.${projectDetailTable.COLUMN.BUDGET} AS BUDGET,
+  PD.${projectDetailTable.COLUMN.COST} AS COST,
+  PD.${projectDetailTable.COLUMN.MAN_HOURS} AS MAN_HOURS,
+  PD.${projectDetailTable.COLUMN.PRODUCTIVITY_COST} AS PRODUCTIVITY_COST
   FROM ${projectTable.TABLE} AS P
   LEFT JOIN ${projectDetailTable.TABLE} AS PD
     ON P.${projectTable.COLUMN.ID} = PD.${projectDetailTable.COLUMN.PROJECT_ID}
@@ -174,6 +191,24 @@ const aiSummaryServices = {
     try {
       // await prepareConnection(CONN);
       const [rows] = await CONN.query(remarkQuerys.select.onlyOne, [projectId]);
+      return rows ?? [];
+    } finally {
+      CONN.release();
+    }
+  },
+  getPlans: async (projectId) => {
+    const CONN = await PPIC.getConnection();
+    try {
+      const [rows] = await CONN.query(plansQuerys.select.all, [projectId]);
+      return rows ?? [];
+    } finally {
+      CONN.release();
+    }
+  },
+  getActual: async (projectId) => {
+    const CONN = await PPIC.getConnection();
+    try {
+      const [rows] = await CONN.query(actualQuerys.select.all, [projectId]);
       return rows ?? [];
     } finally {
       CONN.release();
