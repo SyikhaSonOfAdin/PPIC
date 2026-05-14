@@ -3,6 +3,7 @@ const { actualServices } = require("../services/projectActual");
 const { remarkServices } = require("../services/journalRemark");
 const { emailServices } = require("../services/email")
 const { userServices } = require("../services/user");
+const { summaryQueue } = require("../services/ai/queue");
 const { PPIC } = require("../config/db");
 
 const journalRemarkController = {
@@ -11,6 +12,7 @@ const journalRemarkController = {
         if (!projectId || !userId || !description || !deadline || !departmentId || !status) return res.status(400).json({ message: "Invalid Parameters" })
         try {
             const id = await remarkServices.add(projectId, userId, departmentId, description, deadline, status, solution)
+            summaryQueue.enqueue(projectId)
             return res.status(200).json({
                 message: "Remark Journal added successfully",
                 data: [{
@@ -60,6 +62,21 @@ const journalRemarkController = {
         if (!remarkId || !userId || !description || !deadline || !departmentId || !status) return res.status(400).json({ message: "Invalid Parameters" })
         try {
             await remarkServices.edit(remarkId, userId, description, deadline, departmentId, status, solution)
+            try {
+                const connection = await PPIC.getConnection()
+                try {
+                    const [rows] = await connection.query(
+                        "SELECT PROJECT_ID FROM project_remark WHERE ID = ? LIMIT 1",
+                        [remarkId]
+                    )
+                    const projectId = rows?.[0]?.PROJECT_ID
+                    if (projectId) summaryQueue.enqueue(projectId)
+                } finally {
+                    connection.release()
+                }
+            } catch (e) {
+                console.error("[ai-queue] enqueue on edit failed", e?.message ?? e)
+            }
             return res.status(200).json({
                 message: "Remark Journal edited successfully",
                 data: []
