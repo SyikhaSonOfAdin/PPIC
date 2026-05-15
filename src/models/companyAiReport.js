@@ -1,0 +1,81 @@
+"use strict";
+
+const table = {
+  TABLE: "company_ai_report",
+  COLUMN: {
+    ID: "ID",
+    COMPANY_ID: "COMPANY_ID",
+    EXECUTIVE_SUMMARY: "EXECUTIVE_SUMMARY",
+    KEY_FINDINGS: "KEY_FINDINGS",
+    RECOMMENDATIONS: "RECOMMENDATIONS",
+    RISK_ALERTS: "RISK_ALERTS",
+    CHARTS: "CHARTS",
+    PROJECT_COUNT: "PROJECT_COUNT",
+    MODEL: "MODEL",
+    STATUS: "STATUS",
+    ERROR_MESSAGE: "ERROR_MESSAGE",
+    GENERATED_AT: "GENERATED_AT",
+    UPDATED_AT: "UPDATED_AT",
+  },
+};
+
+const DDL = `CREATE TABLE IF NOT EXISTS ${table.TABLE} (
+  ${table.COLUMN.ID} CHAR(36) NOT NULL,
+  ${table.COLUMN.COMPANY_ID} CHAR(36) NOT NULL,
+  ${table.COLUMN.EXECUTIVE_SUMMARY} TEXT NULL,
+  ${table.COLUMN.KEY_FINDINGS} LONGTEXT NULL,
+  ${table.COLUMN.RECOMMENDATIONS} LONGTEXT NULL,
+  ${table.COLUMN.RISK_ALERTS} LONGTEXT NULL,
+  ${table.COLUMN.CHARTS} LONGTEXT NULL,
+  ${table.COLUMN.PROJECT_COUNT} INT NOT NULL DEFAULT 0,
+  ${table.COLUMN.MODEL} VARCHAR(100) NULL,
+  ${table.COLUMN.STATUS} VARCHAR(20) NOT NULL DEFAULT 'pending',
+  ${table.COLUMN.ERROR_MESSAGE} TEXT NULL,
+  ${table.COLUMN.GENERATED_AT} DATETIME NULL,
+  ${table.COLUMN.UPDATED_AT} DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (${table.COLUMN.ID}),
+  UNIQUE KEY uq_${table.TABLE}_company (${table.COLUMN.COMPANY_ID})
+) ENGINE=InnoDB`;
+
+const QUERY = {
+  ddl: DDL,
+  selectByCompanyId: `SELECT
+    ${table.COLUMN.ID},
+    ${table.COLUMN.COMPANY_ID},
+    ${table.COLUMN.EXECUTIVE_SUMMARY},
+    ${table.COLUMN.KEY_FINDINGS},
+    ${table.COLUMN.RECOMMENDATIONS},
+    ${table.COLUMN.RISK_ALERTS},
+    ${table.COLUMN.CHARTS},
+    ${table.COLUMN.PROJECT_COUNT},
+    ${table.COLUMN.MODEL},
+    ${table.COLUMN.STATUS},
+    ${table.COLUMN.ERROR_MESSAGE},
+    DATE_FORMAT(${table.COLUMN.GENERATED_AT}, '%Y-%m-%dT%H:%i:%sZ') AS ${table.COLUMN.GENERATED_AT},
+    DATE_FORMAT(${table.COLUMN.UPDATED_AT}, '%Y-%m-%dT%H:%i:%sZ') AS ${table.COLUMN.UPDATED_AT}
+    FROM ${table.TABLE}
+    WHERE ${table.COLUMN.COMPANY_ID} = ?
+    LIMIT 1`,
+  insertResult: `INSERT INTO ${table.TABLE}
+    (${table.COLUMN.ID}, ${table.COLUMN.COMPANY_ID}, ${table.COLUMN.EXECUTIVE_SUMMARY},
+     ${table.COLUMN.KEY_FINDINGS}, ${table.COLUMN.RECOMMENDATIONS}, ${table.COLUMN.RISK_ALERTS},
+     ${table.COLUMN.CHARTS}, ${table.COLUMN.PROJECT_COUNT}, ${table.COLUMN.MODEL},
+     ${table.COLUMN.STATUS}, ${table.COLUMN.ERROR_MESSAGE}, ${table.COLUMN.GENERATED_AT})
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+  updateResult: `UPDATE ${table.TABLE} SET
+    ${table.COLUMN.EXECUTIVE_SUMMARY} = ?,
+    ${table.COLUMN.KEY_FINDINGS} = ?,
+    ${table.COLUMN.RECOMMENDATIONS} = ?,
+    ${table.COLUMN.RISK_ALERTS} = ?,
+    ${table.COLUMN.CHARTS} = ?,
+    ${table.COLUMN.PROJECT_COUNT} = ?,
+    ${table.COLUMN.MODEL} = ?,
+    ${table.COLUMN.STATUS} = ?,
+    ${table.COLUMN.ERROR_MESSAGE} = ?,
+    ${table.COLUMN.GENERATED_AT} = NOW()
+    WHERE ${table.COLUMN.COMPANY_ID} = ?`,
+  existsByCompanyId: `SELECT ${table.COLUMN.ID}, DATE(${table.COLUMN.GENERATED_AT}) AS GENERATED_DATE
+    FROM ${table.TABLE} WHERE ${table.COLUMN.COMPANY_ID} = ? LIMIT 1`,
+};
+
+module.exports = { companyAiReportQuerys: QUERY, companyAiReportTable: table };
