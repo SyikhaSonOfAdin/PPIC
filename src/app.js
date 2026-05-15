@@ -7,7 +7,6 @@ const { productivityPeriodRouter } = require('./routes/productivityPeriod');
 const { delayedMaterialRouter } = require('./routes/delayedMaterial');
 const { journalDelaysRouter } = require('./routes/journalDelays');
 const { journalRemarkRouter } = require('./routes/journalRemark');
-const { aiCompanyReportRouter } = require('./routes/aiCompanyReport');
 const { aiSummaryRouter } = require('./routes/aiSummary');
 const { projectActualRouter } = require('./routes/projectActual');
 const { projectPlansRouter } = require('./routes/projectPlans');
@@ -30,8 +29,8 @@ const app = express();
 const port = 3000;
 
 const corsOptions = {
-    // origin: 'https://ppic.syikha.com',
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: 'https://ppic.syikha.com',
+    // origin: ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
 };
 
@@ -50,7 +49,6 @@ app.use("/productivity/period", productivityPeriodRouter);
 app.use("/journal/delays", journalDelaysRouter);
 app.use("/journal/remark", journalRemarkRouter);
 app.use("/ai", aiSummaryRouter);
-app.use("/ai", aiCompanyReportRouter);
 app.use("/project/actual", projectActualRouter);
 app.use("/project/plans", projectPlansRouter);
 app.use("/permission", permissionRouter);
