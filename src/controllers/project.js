@@ -330,22 +330,13 @@ const projectControllers = {
   },
   get: {
     all: async (req, res, next) => {
-      /**
-       * @param companyId contains the company identifier of assigned user
-       */
       const companyId = req.params.companyId;
-      /**
-       * @param s is an @alias searchQuery
-       */
       const s = req.query.s;
-      /**
-       * @param m is an @alias monthIndex
-       */
       const m = req.query.m;
-      /**
-       * @param y is an @alias year
-       */
       const y = req.query.y;
+      const status = req.query.status;
+      const page = req.query.page ? Math.max(1, parseInt(req.query.page, 10) || 1) : null;
+      const limit = req.query.limit ? Math.max(1, parseInt(req.query.limit, 10) || 10) : null;
 
       if (!companyId)
         return res.status(400).json({ message: "Invalid Parameter" });
@@ -359,6 +350,8 @@ const projectControllers = {
         try {
           await connection.beginTransaction();
           const data = await projectServices.get.all(companyId, s, connection);
+          const VALID_STATUSES = ['On Going', 'Ahead', 'On Time', 'Delayed'];
+          const statusFilter = status && VALID_STATUSES.includes(status) ? status : null;
           const projects = (
             await Promise.all(
               data.map(async (item) => {
@@ -471,12 +464,42 @@ const projectControllers = {
             )
           ).filter((item) => item !== null);
 
+          const stats = {
+            total: projects.length,
+            on_going: projects.filter((p) => p.STATUS === 'On Going').length,
+            ahead: projects.filter((p) => p.STATUS === 'Ahead').length,
+            on_time: projects.filter((p) => p.STATUS === 'On Time').length,
+            delayed: projects.filter((p) => p.STATUS === 'Delayed').length,
+          };
+
+          const filteredProjects = projects
+            .filter((item) => !statusFilter || item.STATUS === statusFilter);
           await connection.commit();
+
+          const total = filteredProjects.length;
+          let paginatedProjects = filteredProjects;
+          let pagination = null;
+
+          if (page !== null && limit !== null) {
+            const offset = (page - 1) * limit;
+            paginatedProjects = filteredProjects.slice(offset, offset + limit);
+            pagination = {
+              total,
+              page,
+              limit,
+              total_pages: Math.ceil(total / limit),
+              has_next: page < Math.ceil(total / limit),
+              has_prev: page > 1,
+            };
+          }
+
           return res.status(200).json({
             message: "Get Project successfully",
             data: {
               period: periodYear,
-              projects: projects,
+              stats,
+              projects: paginatedProjects,
+              ...(pagination && { pagination }),
             },
           });
         } catch (error) {

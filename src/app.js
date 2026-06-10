@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { default: welderRejectionRateRoute } = require('./extensions/welder_rejection_rate/module/route');
+const { phaseScheduleRouter } = require('./routes/phaseSchedule');
 const { delayedMaterialListDetailRouter } = require('./routes/delayedMaterialDetail');
 const { delayedMaterialListRouter } = require('./routes/delayedMaterialList');
 const { projectProductivityRouter } = require('./routes/projectProductivity');
@@ -26,11 +27,10 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT ?? 3000;
 
 const corsOptions = {
-    origin: 'https://ppic.syikha.com',
-    // origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: process.env.ORIGIN ? process.env.ORIGIN.split(',') : [],
     credentials: true,
 };
 
@@ -42,6 +42,7 @@ app.use(express.static(path.join(__dirname, '')));
 
 app.use("/journal/material/delayed/list/detail", delayedMaterialListDetailRouter);
 app.use("/extensions/welder_rejection_rate", welderRejectionRateRoute);
+app.use("/project/phase-schedule", phaseScheduleRouter);
 app.use("/journal/material/delayed/list", delayedMaterialListRouter);
 app.use("/productivity/progress", projectProductivityRouter);
 app.use("/journal/material/delayed", delayedMaterialRouter);

@@ -14,16 +14,6 @@ Data yang Anda terima:
 2. PROGRESS PLANS: rencana progress mingguan/bulanan dalam persentase dan jumlah (amount).
 3. PROGRESS ACTUAL: realisasi progress mingguan/bulanan dalam persentase dan jumlah (amount).
 4. REMARKS: catatan masalah, obstacle, dan solusi dari tim.
-5. KONTEKS WAKTU: tanggal hari ini, status timeline, sisa hari/keterlambatan, perbandingan progress vs waktu berjalan.
-
-**PENTING - AWARENESS TEMPORAL:**
-- Anda HARUS menggunakan tanggal hari ini sebagai referensi utama
-- Bandingkan due date dengan hari ini untuk menentukan apakah overdue
-- Hitung gap antara % progress aktual vs % waktu yang sudah berjalan
-- Jika progress < waktu berjalan (misal 40% done tapi 60% waktu lewat) = AT RISK
-- Jika sudah lewat due date tanpa finish = CRITICAL/OVERDUE
-- Deadline dekat (<7 hari) dengan progress rendah = URGENT
-- health_score HARUS mencerminkan urgency temporal, bukan hanya angka progress
 
 Analisis yang harus dihasilkan:
 
@@ -134,69 +124,7 @@ const RESPONSE_SCHEMA = {
 };
 
 const buildPrompt = (project, remarks, plans, actual) => {
-  const today = new Date();
-  const startDate = project.START_DATE ? new Date(project.START_DATE) : null;
-  const dueDate = project.DUE_DATE ? new Date(project.DUE_DATE) : null;
-  const finishDate = project.FINISH_DATE ? new Date(project.FINISH_DATE) : null;
-  
-  let timeStatus = "Unknown";
-  let daysInfo = "";
-  let timeProgress = null;
-  
-  if (startDate && dueDate) {
-    const totalDuration = dueDate - startDate;
-    const elapsed = today - startDate;
-    timeProgress = totalDuration > 0 ? (elapsed / totalDuration * 100).toFixed(1) : null;
-    
-    if (finishDate) {
-      const diff = Math.ceil((finishDate - dueDate) / (1000 * 60 * 60 * 24));
-      if (diff <= 0) {
-        timeStatus = "Completed On Time";
-        daysInfo = `Selesai ${Math.abs(diff)} hari sebelum deadline`;
-      } else {
-        timeStatus = "Completed Late";
-        daysInfo = `Selesai terlambat ${diff} hari`;
-      }
-    } else {
-      const diff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
-      if (diff > 0) {
-        timeStatus = "In Progress";
-        daysInfo = `Sisa ${diff} hari sampai deadline`;
-      } else {
-        timeStatus = "OVERDUE";
-        daysInfo = `TERLAMBAT ${Math.abs(diff)} hari dari deadline`;
-      }
-    }
-  }
-  
-  const totalPlan = plans?.reduce((s, p) => s + (parseFloat(p.AMOUNT) || 0), 0) ?? 0;
-  const totalActual = actual?.reduce((s, a) => s + (parseFloat(a.AMOUNT) || 0), 0) ?? 0;
-  const capacity = parseFloat(project.CAPACITY) || 0;
-  const actualProgress = capacity > 0 ? ((totalActual / capacity) * 100).toFixed(1) : "0";
-  
-  let progressHealth = "Unknown";
-  if (timeProgress && actualProgress) {
-    const gap = parseFloat(actualProgress) - parseFloat(timeProgress);
-    if (gap >= 10) progressHealth = "AHEAD (progress lebih cepat dari waktu)";
-    else if (gap >= 0) progressHealth = "ON TRACK (progress sesuai waktu)";
-    else if (gap >= -10) progressHealth = "SLIGHTLY BEHIND (progress sedikit tertinggal)";
-    else progressHealth = "SIGNIFICANTLY BEHIND (progress jauh tertinggal - RISK TINGGI)";
-  }
-  
-  const timeContext = [
-    `HARI INI          : ${today.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`,
-    `Status Timeline   : ${timeStatus}`,
-    daysInfo ? `Informasi Waktu   : ${daysInfo}` : '',
-    timeProgress ? `Waktu Berjalan    : ${timeProgress}% dari total durasi` : '',
-    `Progress Aktual   : ${actualProgress}%`,
-    progressHealth !== "Unknown" ? `Progress vs Waktu : ${progressHealth}` : '',
-  ].filter(Boolean).join("\n");
-
   const detail = [
-    `=== KONTEKS WAKTU REAL-TIME ===`,
-    timeContext,
-    "",
-    "=== PROJECT DETAIL ===",
     `Project No    : ${project.PROJECT_NO ?? "-"}`,
     `Client        : ${project.CLIENT ?? "-"}`,
     `Nama Project  : ${project.DETAIL_NAME ?? "-"}`,
@@ -205,9 +133,9 @@ const buildPrompt = (project, remarks, plans, actual) => {
     `PPM           : ${project.PPM ?? "-"}`,
     `Lokasi        : ${project.WORK_PLACE ?? "-"}`,
     `Kapasitas     : ${project.CAPACITY ?? "-"}`,
-    `Tanggal Mulai : ${project.START_DATE ?? "-"} ${startDate ? `(${Math.ceil((today - startDate) / (1000*60*60*24))} hari yang lalu)` : ''}`,
-    `Due Date      : ${project.DUE_DATE ?? "-"} ${dueDate && !finishDate ? (dueDate > today ? `(${Math.ceil((dueDate - today) / (1000*60*60*24))} hari lagi)` : `(LEWAT ${Math.ceil((today - dueDate) / (1000*60*60*24))} hari)`) : ''}`,
-    `Finish Date   : ${project.FINISH_DATE ?? "-"} ${finishDate ? `(selesai ${Math.ceil((today - finishDate) / (1000*60*60*24))} hari yang lalu)` : '(belum selesai)'}`,
+    `Tanggal Mulai : ${project.START_DATE ?? "-"}`,
+    `Due Date      : ${project.DUE_DATE ?? "-"}`,
+    `Finish Date   : ${project.FINISH_DATE ?? "-"}`,
     `Delivered     : ${project.DELIVERED ? "Ya" : "Belum"}`,
     `Delivery Date : ${project.DELIVERY_DATE ?? "-"}`,
     `Budget        : ${project.BUDGET != null ? project.BUDGET : "-"}`,
@@ -235,6 +163,9 @@ const buildPrompt = (project, remarks, plans, actual) => {
         .join("\n")
     : "  (tidak ada data actual)";
 
+  const totalPlan = plans?.reduce((s, p) => s + (parseFloat(p.AMOUNT) || 0), 0) ?? 0;
+  const totalActual = actual?.reduce((s, a) => s + (parseFloat(a.AMOUNT) || 0), 0) ?? 0;
+  const capacity = parseFloat(project.CAPACITY) || 0;
   const planPct = capacity > 0 ? ((totalPlan / capacity) * 100).toFixed(1) : "-";
   const actualPct = capacity > 0 ? ((totalActual / capacity) * 100).toFixed(1) : "-";
   const deviation = capacity > 0 ? ((totalActual - totalPlan) / capacity * 100).toFixed(1) : "-";
@@ -263,6 +194,7 @@ const buildPrompt = (project, remarks, plans, actual) => {
     : "(Belum ada remark untuk project ini)";
 
   return [
+    "=== PROJECT DETAIL ===",
     detail,
     "",
     "=== RINGKASAN PROGRESS ===",

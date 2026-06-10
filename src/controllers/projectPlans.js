@@ -12,8 +12,10 @@ const projectPlansController = {
             try {
                 await connection.beginTransaction()
                 const numberOfRows = await plansServices.get.numberOfRows(projectId, connection)
-                const plansId = await plansServices.add(projectId, userId, periodYear, periodMonth, percentage, amount, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`, connection)
-                const actualId = await actualServices.add(projectId, userId, periodYear, periodMonth, 0, 0, `Week ${parseInt(numberOfRows[0].NUMBER_OF_ROWS) + 1}`, connection)
+                const week = Number(numberOfRows[0].NUMBER_OF_ROWS) + 1
+                console.log(week)
+                const plansId = await plansServices.add(projectId, userId, periodYear, periodMonth, percentage, amount, `Week ${week}`, connection)
+                const actualId = await actualServices.add(projectId, userId, periodYear, periodMonth, 0, 0, `Week ${week}`, connection)
                 await connection.commit()
                 
                 return res.status(200).json({

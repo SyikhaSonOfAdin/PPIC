@@ -41,15 +41,15 @@ var axios_1 = require("axios");
 var welderRejectionRateController = {
     access: function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
         var _a, project_id, project_no, project_name, client, username, _b, email, user, company, params, data, error_1;
-        var _c;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
+        var _c, _d, _e, _f, _g;
+        return __generator(this, function (_h) {
+            switch (_h.label) {
                 case 0:
                     _a = req.body, project_id = _a.project_id, project_no = _a.project_no, project_name = _a.project_name, client = _a.client, username = _a.username;
                     _b = req.u, email = _b.email, user = _b.user, company = _b.company;
-                    _d.label = 1;
+                    _h.label = 1;
                 case 1:
-                    _d.trys.push([1, 3, , 4]);
+                    _h.trys.push([1, 3, , 4]);
                     params = {
                         project_id: project_id,
                         project_no: project_no,
@@ -61,9 +61,15 @@ var welderRejectionRateController = {
                         company_name: company.name,
                         company_id: company.id,
                     };
-                    return [4 /*yield*/, axios_1.default.post("".concat(url_conf_1.WELDER_REJECTION_RATE_APP.server, "/register"), params)];
+                    return [4 /*yield*/, axios_1.default.post("".concat(url_conf_1.WELDER_REJECTION_RATE_APP.server, "/register-s2s"), // ← Changed from /register
+                        params, {
+                            headers: {
+                                "x-server-key": process.env.QC_SERVER_KEY, // ← Add server key
+                                "Content-Type": "application/json",
+                            },
+                        })];
                 case 2:
-                    data = (_d.sent()).data;
+                    data = (_h.sent()).data;
                     return [2 /*return*/, res.status(200).json({
                             message: "Access Granted",
                             data: {
@@ -71,9 +77,11 @@ var welderRejectionRateController = {
                             },
                         })];
                 case 3:
-                    error_1 = _d.sent();
-                    res.status(500).json({
-                        message: error_1.message,
+                    error_1 = _h.sent();
+                    // ✅ Better error handling
+                    console.error("[QC Registration Error]:", ((_d = error_1.response) === null || _d === void 0 ? void 0 : _d.data) || error_1.message);
+                    res.status(((_e = error_1.response) === null || _e === void 0 ? void 0 : _e.status) || 500).json({
+                        message: ((_g = (_f = error_1.response) === null || _f === void 0 ? void 0 : _f.data) === null || _g === void 0 ? void 0 : _g.message) || error_1.message,
                     });
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/];

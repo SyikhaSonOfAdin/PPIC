@@ -165,7 +165,7 @@ const journalRemarkController = {
     sendEmail: async (req, res) => {
         const companyId = req.params.companyId
         const { to, data_type, data_from } = req.query
-
+        console.log({ to, data_type, data_from })
         if (!companyId) return res.status(400).json({ message: "Invalid Parameters" })
 
         try {
@@ -175,7 +175,7 @@ const journalRemarkController = {
                     const departments = await departmentServices.get.all(companyId, connection)
                     departments.forEach(async dep => {
                         const data = await remarkServices.get.all.byDepId(companyId, dep.ID, connection)
-                        const users = await userServices.get.byDepId(dep.ID, connection)
+                        const users = await userServices.get.byDepId(dep.ID, connection)                        
                         if (data.length > 0) {
                             const htmlStatic = emailServices.template.projectRemark(dep.COMPANY_NAME, dep.NAME, data)
                             const emails = users.length > 1 ? users.map(u => (u.EMAIL)).join(", ") : users.map(u => (u.EMAIL))[0]
@@ -216,9 +216,10 @@ const journalRemarkController = {
                     const departments = await departmentServices.get.onlyOne(to, connection)
                     const data = await remarkServices.get.all.byDepId(companyId, data_from, connection)
                     const users = await userServices.get.byDepId(to, connection)
+                    console.log(users)
                     if (data.length > 0) {
                         const htmlStatic = emailServices.template.projectRemark(departments.COMPANY_NAME, departments.NAME, data)
-                        const emails = users.length > 1 ? users.map(u => (u.EMAIL)).join(", ") : users.map(u => (u.EMAIL))[0]
+                        const emails = users.length > 1 ? users.map(u => (u.EMAIL)).join(", ") : users.map(u => (u.EMAIL))[0]                        
                         if (emails) {
                             await emailServices.sendEmail(
                                 emails,

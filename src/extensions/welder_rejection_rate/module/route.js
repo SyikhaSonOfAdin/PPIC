@@ -1,9 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var jwt_1 = require("../../../middlewares/jwt");
-var express_1 = require("express");
-var controller_1 = require("./controller");
-var welderRejectionRateRoute = (0, express_1.Router)();
+const jwt_1 = require("../../../middlewares/jwt");
+const express_1 = require("express");
+const controller_1 = __importDefault(require("./controller"));
+const welderRejectionRateRoute = (0, express_1.Router)();
 welderRejectionRateRoute.get("/overall/:project_id", jwt_1.jwtServices.verifyToken.byHeader, 
 // @ts-ignore
 controller_1.default.getOverall);

@@ -209,6 +209,10 @@ const userControllers = {
             }
         },
     },
+    logout: async (req, res, next) => {
+        res.clearCookie('auth_token', { path: '/' });
+        return res.status(200).json({ message: 'Logout successful' });
+    },
     login: async (req, res, next) => {
         const { email, password } = req.body
         if (!email || !password) return res.status(400).json({ message: "Invalid Parameter" })
@@ -230,7 +234,7 @@ const userControllers = {
                 res.cookie('auth_token', token, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production', // HTTPS di production
-                    sameSite: 'none',
+                    sameSite: 'lax',
                     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 hari
                     path: '/'
                 });
@@ -245,7 +249,7 @@ const userControllers = {
                         pId: user.PROJECT_ID,
                         eAddr: user.EMAIL,
                         t: "ignore",
-                        version: "1.4.7"
+                        version: "1.6.0"
                     }]
                 })
             }
