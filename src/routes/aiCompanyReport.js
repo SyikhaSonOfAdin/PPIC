@@ -1,5 +1,6 @@
 const { aiCompanyReportController } = require("../controllers/aiCompanyReport");
 const { jwtServices } = require("../middlewares/jwt");
+const { rateLimiter } = require("../middlewares/rateLimiter");
 const express = require("express");
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.get(
 router.post(
   "/company/report/generate/:companyId",
   jwtServices.verifyToken.byHeader,
+  rateLimiter,
   aiCompanyReportController.generate,
 );
 

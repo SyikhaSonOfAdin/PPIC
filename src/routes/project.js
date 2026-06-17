@@ -1,6 +1,7 @@
 const { projectControllers } = require("../controllers/project");
 const { privilege } = require("../middlewares/privilege");
 const { jwtServices } = require("../middlewares/jwt");
+const { rateLimiter } = require("../middlewares/rateLimiter");
 const express = require("express");
 const Storage = require("../middlewares/storage");
 const router = express.Router();
@@ -10,12 +11,14 @@ const storage = new Storage();
 router.post(
   "/add",
   jwtServices.verifyToken.byHeader,
+  rateLimiter,
   privilege.hasPrivilege("01987838-08c3-7772-9ed6-c473ae329470"),
   projectControllers.add,
 );
 router.post(
   "/copy",
   jwtServices.verifyToken.byHeader,
+  rateLimiter,
   privilege.hasPrivilege("01987838-08c3-7772-9ed6-c473ae329470"),
   projectControllers.copy,
 );
