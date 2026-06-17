@@ -16,11 +16,12 @@ const { aiSummaryServices } = require("./summary");
 const TRANSIENT_CODES = new Set([
   "ER_LOCK_DEADLOCK",
   "ER_LOCK_WAIT_TIMEOUT",
+  "ER_CHECKREAD",
   "PROTOCOL_CONNECTION_LOST",
   "ECONNRESET",
   "ETIMEDOUT",
 ]);
-const TRANSIENT_ERRNOS = new Set([1205, 1213]); // lock wait timeout, deadlock
+const TRANSIENT_ERRNOS = new Set([1020, 1205, 1213]);
 const TRANSIENT_MSG_RE =
   /Record has changed|Lock wait timeout|Deadlock found|timed out/i;
 
@@ -46,6 +47,7 @@ class SummaryQueue {
     this._pendingSet = new Set();
     this._dirtySet = new Set();
     this._processing = null;
+    this._processingSet = new Set();
     this._cooldownTimers = new Map();
   }
 
@@ -56,7 +58,8 @@ class SummaryQueue {
       return;
     }
 
-    if (this._processing === projectId) {
+    if (this._processingSet.has(projectId)) {
+      console.log(`[ai-queue] skip ${projectId} - already processing`);
       this._dirtySet.add(projectId);
       this._statusMap.set(projectId, "dirty");
       return;
@@ -110,6 +113,7 @@ class SummaryQueue {
   async _worker(projectId) {
     this._pendingSet.delete(projectId);
     this._processing = projectId;
+    this._processingSet.add(projectId);
     this._statusMap.set(projectId, "processing");
     this._dirtySet.delete(projectId);
 
@@ -123,9 +127,8 @@ class SummaryQueue {
       console.error("[ai-queue] process failed", projectId, err.message ?? err);
     } finally {
       this._processing = null;
+      this._processingSet.delete(projectId);
 
-      // Dirty: ada enqueue baru saat processing — schedule re-process.
-      // setImmediate supaya tidak bertumpuk di stack yang sama.
       if (this._dirtySet.has(projectId)) {
         this._dirtySet.delete(projectId);
         setImmediate(() => this.enqueue(projectId));
@@ -223,11 +226,11 @@ class SummaryQueue {
         }
       },
       {
-        retries: 3, // total 4 attempts (1 + 3 retries)
+        retries: 3,
         factor: 2,
-        minTimeout: 150,
-        maxTimeout: 2000,
-        randomize: true, // jitter
+        minTimeout: 200,
+        maxTimeout: 3000,
+        randomize: true,
         onRetry: (err, attempt) => {
           console.warn(
             `[ai-queue] retry attempt=${attempt}/3 project=${projectId} ` +

@@ -130,11 +130,25 @@ const callOpenRouter = async (messages, schema) => {
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.error('[OpenRouter] API error:', response.status, errorText.substring(0, 500));
     throw new Error(`OpenRouter API error: ${response.status} - ${errorText}`);
   }
 
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content ?? "";
+  const text = await response.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (parseError) {
+    console.error('[OpenRouter] Non-JSON response:', text.substring(0, 1000));
+    throw new Error('OpenRouter returned non-JSON response');
+  }
+
+  if (!data.choices?.[0]?.message?.content) {
+    console.error('[OpenRouter] Missing content in response:', JSON.stringify(data).substring(0, 500));
+    throw new Error('OpenRouter response missing content');
+  }
+
+  return data.choices[0].message.content;
 };
 
 const geminiCompanyServices = {
