@@ -49,7 +49,7 @@ function checkRateLimit(userId, method, path) {
 }
 
 const rateLimiter = (req, res, next) => {
-  const userId = req.user?.userId;
+  const userId = req.user?.user?.id;
   if (!userId) return next();
 
   const method = req.method;
