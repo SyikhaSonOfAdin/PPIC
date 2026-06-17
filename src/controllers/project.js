@@ -7,6 +7,7 @@ const { projectServices } = require("../services/project");
 const { othersQuerys } = require("../models/others");
 const { PPIC } = require("../config/db");
 const { progressPercentage } = require("../utils");
+const { generatePeriods, getIntervalDays } = require("../utils/periodGenerator");
 
 const projectControllers = {
   add: async (req, res, next) => {
@@ -29,6 +30,8 @@ const projectControllers = {
       budget,
       cost,
       man_hours,
+      periodInterval,
+      periodType,
     } = req.body;
     if (
       !companyId ||
@@ -73,9 +76,52 @@ const projectControllers = {
             budget,
             cost,
             man_hours,
+            periodInterval,
+            periodType,
           },
           connection,
         );
+
+        // Auto-generate periods if periodInterval and periodType provided
+        if (periodInterval && periodType) {
+          console.log('[AUTO-GENERATE] periodType:', periodType, 'periodInterval:', periodInterval);
+          const intervalDays = getIntervalDays(periodType, periodInterval);
+          console.log('[AUTO-GENERATE] intervalDays:', intervalDays);
+          const periods = generatePeriods(startDate, dueDate, intervalDays, periodType);
+          console.log('[AUTO-GENERATE] Generated periods:', periods.length);
+
+          // Insert plans and actuals for each period
+          for (const period of periods) {
+            const periodYear = period.start.getFullYear();
+            const periodMonth = period.start;
+
+            console.log(`[AUTO-GENERATE] Inserting ${period.week}: year=${periodYear}, month=${periodMonth.toISOString().split('T')[0]}`);
+            
+            await plansServices.add(
+              projectId,
+              userId,
+              periodYear,
+              periodMonth,
+              0, // default percentage
+              0, // default amount
+              period.week,
+              connection,
+            );
+            console.log(`[AUTO-GENERATE] Plans inserted for ${period.week}`);
+            
+            await actualServices.add(
+              projectId,
+              userId,
+              periodYear,
+              periodMonth,
+              0, // default percentage
+              0, // default amount
+              period.week,
+              connection,
+            );
+            console.log(`[AUTO-GENERATE] Actual inserted for ${period.week}`);
+          }
+        }
         await connection.commit();
         return res.status(200).json({
           message: "Project added successfully",

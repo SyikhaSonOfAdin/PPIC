@@ -21,6 +21,8 @@ const table = {
     COST: "COST",
     MAN_HOURS: "MAN_HOURS",
     PRODUCTIVITY_COST: "PRODUCTIVITY_COST",
+    PERIOD_INTERVAL: "PERIOD_INTERVAL",
+    PERIOD_TYPE: "PERIOD_TYPE",
   },
 };
 
@@ -46,9 +48,11 @@ const QUERY = {
     ${table.COLUMN.BUDGET}, 
     ${table.COLUMN.COST},
     ${table.COLUMN.MAN_HOURS},
-    ${table.COLUMN.PRODUCTIVITY_COST}
+    ${table.COLUMN.PRODUCTIVITY_COST},
+    ${table.COLUMN.PERIOD_INTERVAL},
+    ${table.COLUMN.PERIOD_TYPE}
     ) 
-    VALUES (NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+    VALUES (NOW(),?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
   update: {
     all: `UPDATE ${table.TABLE} SET 
             ${table.COLUMN.INPUT_BY} = ?, 
@@ -91,7 +95,9 @@ const QUERY = {
         ${table.COLUMN.BUDGET}, 
         ${table.COLUMN.COST},
         ${table.COLUMN.MAN_HOURS},
-        ${table.COLUMN.PRODUCTIVITY_COST}
+        ${table.COLUMN.PRODUCTIVITY_COST},
+        ${table.COLUMN.PERIOD_INTERVAL},
+        ${table.COLUMN.PERIOD_TYPE}
         FROM ${table.TABLE} WHERE ${table.COLUMN.PROJECT_ID} = ?`,
     all: `SELECT * FROM ${table.TABLE}`,
   },

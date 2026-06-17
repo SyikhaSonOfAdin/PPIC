@@ -188,7 +188,7 @@ const buildProjectCard = (group, appUrl) => {
               <table cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td>
-                    <a href="${appUrl}/projects/${group.project_id}?tab=remarks"
+                    <a href="${appUrl}/d/${group.project_id}?open-tabs=remark"
                       target="_blank"
                       style="color:#1e293b;font-weight:700;font-size:16px;
                         text-decoration:none;line-height:24px;">

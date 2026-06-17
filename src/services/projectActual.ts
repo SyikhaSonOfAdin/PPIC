@@ -4,11 +4,11 @@ import { PPIC } from "../config/db";
 import { v7 } from "uuid";
 
 export const actualServices = {
-    add: async (projectId: string, userId: string, start: Date, end: Date, percentage: number, amount: number, week: string, connection?: PoolConnection) => {
+    add: async (projectId: string, userId: string, periodYear: number, periodMonth: Date, percentage: number, amount: number, week: string, connection?: PoolConnection) => {
         const CONNECTION: PoolConnection = connection || await PPIC.getConnection()
         try {
             const id: string = v7()
-            await CONNECTION.query(actualQuerys.insert, [id, projectId, userId, start, end, week, percentage, amount])
+            await CONNECTION.query(actualQuerys.insert, [id, projectId, userId, periodYear, periodMonth, week, percentage, amount])
             if (!connection) await CONNECTION.commit();
             return id
         } catch (error) {

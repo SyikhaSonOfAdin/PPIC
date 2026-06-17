@@ -5,11 +5,11 @@ const projectActual_1 = require("../models/projectActual");
 const db_1 = require("../config/db");
 const uuid_1 = require("uuid");
 exports.actualServices = {
-    add: async (projectId, userId, start, end, percentage, amount, week, connection) => {
+    add: async (projectId, userId, periodYear, periodMonth, percentage, amount, week, connection) => {
         const CONNECTION = connection || await db_1.PPIC.getConnection();
         try {
             const id = (0, uuid_1.v7)();
-            await CONNECTION.query(projectActual_1.actualQuerys.insert, [id, projectId, userId, start, end, week, percentage, amount]);
+            await CONNECTION.query(projectActual_1.actualQuerys.insert, [id, projectId, userId, periodYear, periodMonth, week, percentage, amount]);
             if (!connection)
                 await CONNECTION.commit();
             return id;

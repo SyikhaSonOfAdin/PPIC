@@ -1,5 +1,6 @@
 require('dotenv').config();
 const { default: welderRejectionRateRoute } = require('./extensions/welder_rejection_rate/module/route');
+const { extensionsRouter } = require('./routes/extensions');
 const { phaseScheduleRouter } = require('./routes/phaseSchedule');
 const { delayedMaterialListDetailRouter } = require('./routes/delayedMaterialDetail');
 const { delayedMaterialListRouter } = require('./routes/delayedMaterialList');
@@ -42,6 +43,7 @@ app.use(express.static(path.join(__dirname, '')));
 
 app.use("/journal/material/delayed/list/detail", delayedMaterialListDetailRouter);
 app.use("/extensions/welder_rejection_rate", welderRejectionRateRoute);
+app.use("/extensions", extensionsRouter);
 app.use("/project/phase-schedule", phaseScheduleRouter);
 app.use("/journal/material/delayed/list", delayedMaterialListRouter);
 app.use("/productivity/progress", projectProductivityRouter);

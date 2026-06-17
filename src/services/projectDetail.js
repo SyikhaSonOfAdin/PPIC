@@ -7,7 +7,7 @@ const uuid_1 = require("uuid");
 const utils_1 = require("../utils");
 exports.projectDetailServices = {
     add: async (data, connection) => {
-        const { projectId, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, delivery, budget, cost, man_hours, } = data;
+        const { projectId, userId, name, spk, description, ppm, capacity, workPlace, startDate, dueDate, finishDate, delivery, budget, cost, man_hours, periodInterval, periodType, } = data;
         const CONNECTION = connection || (await db_1.PPIC.getConnection());
         try {
             const id = (0, uuid_1.v7)();
@@ -31,6 +31,8 @@ exports.projectDetailServices = {
                 cost ?? null,
                 man_hours ?? null,
                 null,
+                periodInterval ?? null,
+                periodType ?? null,
             ]);
             if (!connection)
                 await CONNECTION.commit();

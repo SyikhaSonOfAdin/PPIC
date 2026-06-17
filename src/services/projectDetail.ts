@@ -22,6 +22,8 @@ export const projectDetailServices = {
       budget?: number;
       cost?: number;
       man_hours?: number;
+      periodInterval?: number;
+      periodType?: string;
     },
     connection?: PoolConnection,
   ) => {
@@ -41,6 +43,8 @@ export const projectDetailServices = {
       budget,
       cost,
       man_hours,
+      periodInterval,
+      periodType,
     } = data;
     const CONNECTION: PoolConnection =
       connection || (await PPIC.getConnection());
@@ -66,6 +70,8 @@ export const projectDetailServices = {
         cost ?? null,
         man_hours ?? null,
         null,
+        periodInterval ?? null,
+        periodType ?? null,
       ]);
       if (!connection) await CONNECTION.commit();
       return id;
