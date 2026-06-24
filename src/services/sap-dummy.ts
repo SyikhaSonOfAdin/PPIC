@@ -26,13 +26,14 @@ const sapDummyServices = {
   },
   get: {
     summary: {
-      projectNo: async (projectNo: string, page = 1, searchTerms = "", groupFilter = "") => {
+      projectNo: async (projectNo: string, page = 1, searchTerms = "", groupFilter = "", limit = 15) => {
         try {
           const encodedProjectNo = encodeURIComponent(projectNo);
           const encodedSearch = encodeURIComponent(searchTerms);
           const encodedGroup = encodeURIComponent(groupFilter);
+          const safeLimit = Math.min(Math.max(limit, 1), 10000);
           const response = await axios.get(
-            `${SAP_URL}/get/summary/${encodedProjectNo}?page=${page}&s=${encodedSearch}&group=${encodedGroup}`,
+            `${SAP_URL}/get/summary/${encodedProjectNo}?page=${page}&s=${encodedSearch}&group=${encodedGroup}&limit=${safeLimit}`,
             { timeout: AXIOS_TIMEOUT },
           );
           return response.data;

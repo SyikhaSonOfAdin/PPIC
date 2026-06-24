@@ -32,4 +32,11 @@ router.post(
   phaseScheduleControllers.delete.onlyOne
 );
 
+router.put(
+  '/reorder/:projectId',
+  jwtServices.verifyToken.byHeader,
+  privilege.hasPrivilege('01987839-d26e-7772-9ed6-ccd8de97ea37'),
+  phaseScheduleControllers.reorder
+);
+
 module.exports = { phaseScheduleRouter: router };

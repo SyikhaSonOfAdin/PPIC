@@ -28,13 +28,14 @@ const sapDummyController = {
                 try {
                     // prettier-ignore
                     const { projectNo, identCode } = req.params;
-                    const { s, p, page, group } = req.query;
+                    const { s, p, page, group, limit } = req.query;
                     // prettier-ignore
                     if (!projectNo)
                         return res.status(400).json({ message: "Invalid Parameters" });
                     if (!identCode) {
                         const pageNum = Math.max(1, parseInt(page ?? "1", 10) || 1);
-                        const summaryResponse = await sap_dummy_1.default.get.summary.projectNo(projectNo, pageNum, s ?? "", group ?? "");
+                        const limitNum = parseInt(limit ?? "15", 10) || 15;
+                        const summaryResponse = await sap_dummy_1.default.get.summary.projectNo(projectNo, pageNum, s ?? "", group ?? "", limitNum);
                         if (!summaryResponse.success) {
                             return res.status(502).json(summaryResponse);
                         }

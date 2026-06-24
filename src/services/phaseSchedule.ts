@@ -25,6 +25,12 @@ export const phaseScheduleServices = {
         throw new Error('Duplicate phase schedule for this department');
       }
 
+      const [maxOrder] = await CONNECTION.query(
+        phaseScheduleQuerys.select.maxOrderIndex,
+        [projectId]
+      );
+      const orderIndex = (maxOrder[0]?.max_index ?? -10) + 10;
+
       const id: string = v7();
       await CONNECTION.query(phaseScheduleQuerys.insert, [
         id,
@@ -35,6 +41,7 @@ export const phaseScheduleServices = {
         planEndWeek,
         actualStartWeek,
         actualEndWeek,
+        orderIndex,
         userId
       ]);
       if (!connection) await CONNECTION.commit();
@@ -134,6 +141,45 @@ export const phaseScheduleServices = {
         if (!connection && CONNECTION) {
           CONNECTION.release();
         }
+      }
+    }
+  },
+
+  reorder: async (
+    projectId: string,
+    order: Array<{ id: string; orderIndex: number }>,
+    connection?: PoolConnection
+  ) => {
+    const CONNECTION: PoolConnection = connection || await PPIC.getConnection();
+    try {
+      if (!connection) await CONNECTION.beginTransaction();
+
+      const phaseIds = order.map(item => item.id);
+      const [phases] = await CONNECTION.query(
+        phaseScheduleQuerys.select.verifyProjectPhases,
+        [projectId, phaseIds]
+      );
+
+      if ((phases as any[]).length !== phaseIds.length) {
+        throw new Error('Invalid phase IDs or project mismatch');
+      }
+
+      for (const item of order) {
+        await CONNECTION.query(phaseScheduleQuerys.reorder, [
+          item.orderIndex,
+          item.id,
+          projectId
+        ]);
+      }
+
+      if (!connection) await CONNECTION.commit();
+      return { affectedRows: order.length };
+    } catch (error) {
+      if (!connection) await CONNECTION.rollback();
+      throw error;
+    } finally {
+      if (!connection && CONNECTION) {
+        CONNECTION.release();
       }
     }
   }

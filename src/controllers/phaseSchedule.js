@@ -119,6 +119,28 @@ const phaseScheduleControllers = {
         return res.status(500).json({ message: error.message });
       }
     }
+  },
+
+  reorder: async (req, res) => {
+    const { projectId } = req.params;
+    const { order } = req.body;
+
+    if (!projectId || !Array.isArray(order) || order.length === 0) {
+      return res.status(400).json({ message: "Invalid Parameter" });
+    }
+
+    try {
+      const result = await phaseScheduleServices.reorder(projectId, order);
+      return res.status(200).json({
+        message: "Phase order updated successfully",
+        data: { updated: result.affectedRows }
+      });
+    } catch (error) {
+      if (error.message.includes('Invalid phase IDs')) {
+        return res.status(404).json({ message: error.message });
+      }
+      return res.status(500).json({ message: error.message });
+    }
   }
 };
 

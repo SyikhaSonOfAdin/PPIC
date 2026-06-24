@@ -26,10 +26,11 @@ const sapDummyController = {
         try {
           // prettier-ignore
           const { projectNo, identCode } = req.params as {projectNo: string, identCode?: string};
-          const { s, p, page, group } = req.query as {
+          const { s, p, page, group, limit } = req.query as {
             s: string;
             page?: string;
             group?: string;
+            limit?: string;
             p?:
               | "request_purchase"
               | "purchase_order"
@@ -52,11 +53,13 @@ const sapDummyController = {
 
           if (!identCode) {
             const pageNum = Math.max(1, parseInt(page ?? "1", 10) || 1);
+            const limitNum = parseInt(limit ?? "15", 10) || 15;
             const summaryResponse = await sapDummyServices.get.summary.projectNo(
               projectNo,
               pageNum,
               s ?? "",
               group ?? "",
+              limitNum,
             );
 
             if (!summaryResponse.success) {
