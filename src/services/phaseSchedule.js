@@ -12,6 +12,8 @@ exports.phaseScheduleServices = {
             if (duplicate[0].count > 0) {
                 throw new Error('Duplicate phase schedule for this department');
             }
+            const [maxOrder] = await CONNECTION.query(phaseSchedule_1.phaseScheduleQuerys.select.maxOrderIndex, [projectId]);
+            const orderIndex = (maxOrder[0]?.max_index ?? -10) + 10;
             const id = (0, uuid_1.v7)();
             await CONNECTION.query(phaseSchedule_1.phaseScheduleQuerys.insert, [
                 id,
@@ -22,6 +24,7 @@ exports.phaseScheduleServices = {
                 planEndWeek,
                 actualStartWeek,
                 actualEndWeek,
+                orderIndex,
                 userId
             ]);
             if (!connection)
@@ -114,6 +117,38 @@ exports.phaseScheduleServices = {
                 if (!connection && CONNECTION) {
                     CONNECTION.release();
                 }
+            }
+        }
+    },
+    reorder: async (projectId, order, connection) => {
+        const CONNECTION = connection || await db_1.PPIC.getConnection();
+        try {
+            if (!connection)
+                await CONNECTION.beginTransaction();
+            const phaseIds = order.map(item => item.id);
+            const [phases] = await CONNECTION.query(phaseSchedule_1.phaseScheduleQuerys.select.verifyProjectPhases, [projectId, phaseIds]);
+            if (phases.length !== phaseIds.length) {
+                throw new Error('Invalid phase IDs or project mismatch');
+            }
+            for (const item of order) {
+                await CONNECTION.query(phaseSchedule_1.phaseScheduleQuerys.reorder, [
+                    item.orderIndex,
+                    item.id,
+                    projectId
+                ]);
+            }
+            if (!connection)
+                await CONNECTION.commit();
+            return { affectedRows: order.length };
+        }
+        catch (error) {
+            if (!connection)
+                await CONNECTION.rollback();
+            throw error;
+        }
+        finally {
+            if (!connection && CONNECTION) {
+                CONNECTION.release();
             }
         }
     }

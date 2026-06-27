@@ -160,11 +160,20 @@ exports.userServices = {
         },
     },
     get: {
-        all: async (companyId, connection) => {
+        all: async (companyId, page = 1, limit = 10, search = '', connection) => {
             const CONNECTION = connection || (await db_1.PPIC.getConnection());
             try {
-                const [data] = await CONNECTION.query(user_1.userQuerys.get.all.all, [companyId]);
-                return data;
+                const offset = (page - 1) * limit;
+                const searchPattern = `%${search}%`;
+                const [countResult] = await CONNECTION.query(user_1.userQuerys.get.all.count, [companyId, searchPattern, searchPattern]);
+                const total = countResult[0].total;
+                const [data] = await CONNECTION.query(user_1.userQuerys.get.all.all, [companyId, searchPattern, searchPattern, limit, offset]);
+                return {
+                    data: data,
+                    total,
+                    page,
+                    limit
+                };
             }
             catch (error) {
                 throw error;

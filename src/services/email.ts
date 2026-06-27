@@ -1,9 +1,9 @@
 import * as nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({  
   host: process.env.EMAIL_HOST,
-  port: 465,
-  secure: true,
+  port: Number(process.env.EMAIL_HOST_PORT) || 465,
+  secure: false,
   auth: {
     user: process.env.EMAIL_HOST_USER,
     pass: process.env.PASSWORD_EMAIL,
@@ -185,7 +185,7 @@ const buildProjectCard = (group: ProjectGroup, appUrl: string): string => {
               <table cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td>
-                    <a href="${appUrl}/d/${group.project_id}?open-tabs=remark"
+                    <a href="${appUrl}/projects/${group.project_id}?tab=remarks"
                       target="_blank"
                       style="color:#1e293b;font-weight:700;font-size:16px;
                         text-decoration:none;line-height:24px;">
@@ -239,7 +239,7 @@ export const emailServices = {
     from?: string,
   ) => {
     const options = {
-      from: `${from} <${process.env.EMAIL_HOST_USER}>`,
+      from: 'Syikha Creative Production <noreply@ppic.syikha.it.com>',
       to,
       subject,
       text,

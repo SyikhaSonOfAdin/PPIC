@@ -541,6 +541,162 @@ npm run build  # Compiles src/**/*.ts to src/**/*.js
 
 ---
 
+## Attachment Endpoints
+
+Base path: `/attachment`
+
+### POST /add
+Upload new project attachment.
+
+**Auth:** Required (JWT header)
+**Privilege:** Project Add
+**Content-Type:** `multipart/form-data`
+
+**Form Data:**
+- `file`: File upload
+- `projectId`: UUID
+- `userId`: UUID
+- `label`: Enum (`common`, `packing list`, `transfer slip`, `surat jalan`, `qc`)
+- `description`: Optional text
+
+**Response 200:**
+```json
+{
+  "message": "Attachment saved successfully",
+  "data": [{ "attachmentId": "uuid" }]
+}
+```
+
+### POST /delete-one
+Delete attachment with graceful file handling.
+
+**Auth:** Required (JWT header)
+**Privilege:** `019983c4-60d6-788c-8485-7469d8332169` (Attachment Delete)
+
+**Request Body:**
+```json
+{
+  "rowId": "attachment-uuid"
+}
+```
+
+**Behavior:**
+1. **Database-first deletion:** Record deleted before file operation
+2. **File not found:** Returns 200 with warning message
+3. **File deletion failed:** Returns 200 with warning (database already cleaned)
+4. **Full success:** Returns 200 without warnings
+
+**Response 200 (File Missing):**
+```json
+{
+  "message": "Attachment deleted successfully (file not found on disk)",
+  "data": [],
+  "warning": "Physical file was already missing"
+}
+```
+
+**Response 200 (File Deletion Failed):**
+```json
+{
+  "message": "Attachment record deleted, but file deletion failed",
+  "data": [],
+  "warning": "Physical file could not be deleted"
+}
+```
+
+**Response 200 (Success):**
+```json
+{
+  "message": "Attachment deleted successfully",
+  "data": []
+}
+```
+
+**Response 404:**
+```json
+{
+  "message": "Attachment not found in database",
+  "data": []
+}
+```
+
+**Error Handling:**
+- `fs.access()` checks file existence before deletion
+- Logs warnings for missing files
+- Transaction rollback on database errors
+- Server never crashes on missing files
+
+### GET /get/:projectId
+List all attachments for project.
+
+**Query Parameters:**
+- `label`: Required (`common`, `packing list`, `transfer slip`, `surat jalan`, `qc`)
+- `s`: Optional search term
+
+**Response 200:**
+```json
+{
+  "message": "Get Attachments data successfully",
+  "data": [
+    {
+      "ID": "uuid",
+      "PROJECT_ID": "uuid",
+      "FILE_NAME": "document.pdf",
+      "DESCRIPTION": "Project document",
+      "LABEL": "common",
+      "CREATED_AT": "2026-06-18T10:00:00Z"
+    }
+  ]
+}
+```
+
+### GET /download/:attachmentId
+Download attachment file with existence check.
+
+**Auth:** Required (JWT header)
+
+**Response 200:** File download (binary)
+
+**Response 404 (Not in DB):**
+```json
+{
+  "message": "Attachment not found in database"
+}
+```
+
+**Response 404 (File Missing):**
+```json
+{
+  "message": "File not found on server",
+  "fileName": "missing-file.pdf"
+}
+```
+
+**Error Handling:**
+- `fs.access()` checks file existence before `res.sendFile()`
+- Returns 404 if file missing (never crashes)
+- Logs error with file path
+
+### POST /edit
+Edit attachment description.
+
+**Request Body:**
+```json
+{
+  "rowId": "uuid",
+  "userId": "uuid",
+  "description": "Updated description"
+}
+```
+
+**Files:**
+- **Controller:** `src/controllers/attachment.js`
+- **Service:** `src/services/attachment.ts`
+- **Routes:** `src/routes/attachment.js`
+- **Upload Path:** `uploads/ppic/`
+
+---
+
 ## Migrations
 
 ### Executed
@@ -571,6 +727,15 @@ All tables use `utf8mb4_general_ci` to match existing schema and prevent join er
 ### Issue: Encryption Key Invalid Length
 **Status:** ✅ Fixed
 **Solution:** Convert hex string to Buffer in `src/utils/crypto.js`
+
+### Issue: Server Crash on Delete Attachment When File Missing
+**Status:** ✅ Fixed (2026-06-18)
+**Solution:** 
+- Added `fs.access()` check before file deletion
+- Database-first deletion strategy (commit before file operation)
+- Graceful fallback: returns 200 with warning if file missing
+- Same protection applied to download endpoint
+- Comprehensive error logging without server crash
 
 ---
 
@@ -609,14 +774,62 @@ All tables use `utf8mb4_general_ci` to match existing schema and prevent join er
 
 ---
 
+## Security
+
+### Security Audit Report
+
+**Status:** ⚠️ **MODERATE RISK** - Action Required  
+**Audit Date:** 2026-06-19  
+**Total Issues Found:** 22 vulnerabilities
+
+**Severity Breakdown:**
+- 🔴 **Critical:** 3 (Immediate action required)
+- 🟠 **High:** 5 (Fix within 1 week)
+- 🟡 **Medium:** 8 (Fix within 1 month)
+- 🟢 **Low:** 6 (Plan for next quarter)
+
+**Documentation:**
+- **Full Report:** `SECURITY_AUDIT.md` (35KB technical details)
+- **Executive Summary:** `SECURITY_EXECUTIVE_SUMMARY.md` (for management)
+- **Quick Fix Guide:** `SECURITY_QUICK_FIX.md` (15-minute setup)
+- **Auto Script:** `scripts/security-quick-fix.sh`
+
+**Top 3 Critical Issues:**
+1. No security headers (Helmet.js) - XSS/clickjacking vulnerable
+2. Missing CSRF protection - Cross-site request forgery attacks possible
+3. Weak JWT secret validation - Token brute force risk
+
+**Immediate Action Items:**
+```bash
+# Run quick fix script
+./scripts/security-quick-fix.sh
+
+# Install packages
+npm install helmet csurf express-rate-limit express-validator
+
+# Apply code changes per SECURITY_QUICK_FIX.md
+# Update .env with strong secrets
+# Restart server
+```
+
+**Timeline:**
+- **Week 1:** Fix critical issues (4 hours)
+- **Week 2:** Fix high-priority (3 days)
+- **Month 1:** Fix medium-priority (1 week)
+- **Quarter 1:** Fix low-priority (ongoing)
+
+**See SECURITY_AUDIT.md for complete details and code examples.**
+
+---
+
 ## Next Steps for AI Agent
 
-1. **Monitor Extension Usage:** Track external API call patterns and errors
-2. **Implement Rate Limiting:** Per-company quotas for extension data fetches
-3. **Add Schema Validation:** Validate external API responses against saved schemas
-4. **Enhance Caching:** Implement Redis for distributed caching
-5. **Add Webhooks:** Support external APIs pushing data to extensions
-6. **Security Audit Fixes:** Address findings in `SECURITY_AUDIT.md`
+1. **URGENT - Security Fixes:** Implement critical and high-priority fixes from audit
+2. **Monitor Extension Usage:** Track external API call patterns and errors
+3. **Implement Rate Limiting:** Per-company quotas for extension data fetches
+4. **Add Schema Validation:** Validate external API responses against saved schemas
+5. **Enhance Caching:** Implement Redis for distributed caching
+6. **Add Webhooks:** Support external APIs pushing data to extensions
 7. **Extension Analytics:** Dashboard for API call metrics per extension
 8. **Period Bulk Edit:** Allow users to edit multiple periods at once
 9. **Period Templates:** Save period configurations as reusable templates
@@ -635,5 +848,6 @@ All tables use `utf8mb4_general_ci` to match existing schema and prevent join er
 
 ---
 
-**Last Updated:** 2026-06-14
-**Version:** 1.3.0
+**Last Updated:** 2026-06-19  
+**Version:** 1.4.0  
+**Security Audit:** 2026-06-19 (Action Required)

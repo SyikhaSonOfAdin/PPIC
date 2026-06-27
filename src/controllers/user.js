@@ -145,12 +145,23 @@ const userControllers = {
     get: {
         all: async (req, res, next) => {
             const companyId = req.params.companyId
+            const page = parseInt(req.query.page) || 1
+            const limit = parseInt(req.query.limit) || 10
+            const search = req.query.search || ''
+
             if (!companyId) return res.status(400).json({ message: "Invalid Parameter" })
+
             try {
-                const data = await userServices.get.all(companyId)
+                const result = await userServices.get.all(companyId, page, limit, search)
                 return res.status(200).json({
                     message: "Get User successfully",
-                    data: data
+                    data: result.data,
+                    pagination: {
+                        total: result.total,
+                        page: result.page,
+                        limit: result.limit,
+                        totalPages: Math.ceil(result.total / result.limit)
+                    }
                 })
             } catch (error) {
                 res.status(500).json({

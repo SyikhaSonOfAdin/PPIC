@@ -32,6 +32,7 @@ const projectControllers = {
       man_hours,
       periodInterval,
       periodType,
+      advancedPeriodSettings,
     } = req.body;
     if (
       !companyId ||
@@ -85,25 +86,36 @@ const projectControllers = {
         // Auto-generate periods if periodInterval and periodType provided
         if (periodInterval && periodType) {
           console.log('[AUTO-GENERATE] periodType:', periodType, 'periodInterval:', periodInterval);
+          if (advancedPeriodSettings) {
+            console.log('[AUTO-GENERATE] Advanced settings:', JSON.stringify(advancedPeriodSettings));
+          }
+          
           const intervalDays = getIntervalDays(periodType, periodInterval);
           console.log('[AUTO-GENERATE] intervalDays:', intervalDays);
-          const periods = generatePeriods(startDate, dueDate, intervalDays, periodType);
+          
+          const advancedSettings = {
+            ...advancedPeriodSettings,
+            capacity: parseFloat(capacity) || 0,
+          };
+          
+          const periods = generatePeriods(startDate, dueDate, intervalDays, periodType, advancedSettings);
           console.log('[AUTO-GENERATE] Generated periods:', periods.length);
 
-          // Insert plans and actuals for each period
           for (const period of periods) {
             const periodYear = period.start.getFullYear();
             const periodMonth = period.start;
+            const defaultPercentage = period.defaultPercentage || 0;
+            const defaultAmount = period.defaultAmount || 0;
 
-            console.log(`[AUTO-GENERATE] Inserting ${period.week}: year=${periodYear}, month=${periodMonth.toISOString().split('T')[0]}`);
+            console.log(`[AUTO-GENERATE] Inserting ${period.week}: year=${periodYear}, month=${periodMonth.toISOString().split('T')[0]}, pct=${defaultPercentage}%, amt=${defaultAmount}`);
             
             await plansServices.add(
               projectId,
               userId,
               periodYear,
               periodMonth,
-              0, // default percentage
-              0, // default amount
+              defaultPercentage,
+              defaultAmount,
               period.week,
               connection,
             );
@@ -114,8 +126,8 @@ const projectControllers = {
               userId,
               periodYear,
               periodMonth,
-              0, // default percentage
-              0, // default amount
+              0,
+              0,
               period.week,
               connection,
             );

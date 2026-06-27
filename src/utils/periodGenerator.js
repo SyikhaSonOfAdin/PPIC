@@ -1,20 +1,22 @@
-/**
- * Generate period dates based on start date, due date, interval, and type
- * @param {string} startDate - Start date in YYYY-MM-DD format
- * @param {string} dueDate - Due date in YYYY-MM-DD format
- * @param {number} intervalDays - Number of days between periods
- * @param {string} periodType - Type of period (weekly, monthly, custom)
- * @returns {Array<{start: Date, end: Date, week: string}>} Array of period objects
- */
-function generatePeriods(startDate, dueDate, intervalDays, periodType = 'weekly') {
+function generatePeriods(startDate, dueDate, intervalDays, periodType = 'weekly', advancedSettings = {}) {
   const periods = [];
   const start = new Date(startDate);
   const end = new Date(dueDate);
+  const capacity = advancedSettings.capacity || 0;
   
   let currentStart = new Date(start);
-  let periodCount = 1;
   
-  // Determine period label prefix based on type
+  if (advancedSettings.startOffset) {
+    const offsetDays = advancedSettings.startOffsetUnit === 'weeks' 
+      ? advancedSettings.startOffset * 7
+      : advancedSettings.startOffsetUnit === 'months'
+      ? advancedSettings.startOffset * 30
+      : advancedSettings.startOffset;
+    currentStart.setDate(currentStart.getDate() + offsetDays);
+    console.log(`[PERIOD] Applied start offset: +${offsetDays} days`);
+  }
+  
+  let periodCount = 1;
   let periodPrefix = 'Week';
   if (periodType === 'monthly') {
     periodPrefix = 'Month';
@@ -22,24 +24,65 @@ function generatePeriods(startDate, dueDate, intervalDays, periodType = 'weekly'
     periodPrefix = 'Period';
   }
   
+  if (advancedSettings.labelFormat) {
+    periodPrefix = '';
+  }
+  
   while (currentStart < end) {
     const currentEnd = new Date(currentStart);
     currentEnd.setDate(currentEnd.getDate() + intervalDays - 1);
     
-    // Don't exceed the project due date
     if (currentEnd > end) {
       currentEnd.setTime(end.getTime());
     }
     
+    let label = advancedSettings.labelFormat 
+      ? advancedSettings.labelFormat.replace('{n}', periodCount)
+      : `${periodPrefix} ${periodCount}`;
+    
     periods.push({
       start: new Date(currentStart),
       end: new Date(currentEnd),
-      week: `${periodPrefix} ${periodCount}`,
+      week: label,
     });
     
-    // Move to next period
     currentStart.setDate(currentStart.getDate() + intervalDays);
     periodCount++;
+  }
+  
+  if (advancedSettings.bufferPercentage && advancedSettings.bufferPercentage > 0) {
+    const bufferDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24) * advancedSettings.bufferPercentage / 100);
+    const bufferEnd = new Date(end);
+    bufferEnd.setDate(bufferEnd.getDate() + bufferDays);
+    
+    const bufferLabel = advancedSettings.labelFormat 
+      ? advancedSettings.labelFormat.replace('{n}', periodCount)
+      : `${periodPrefix} ${periodCount}`;
+    
+    periods.push({
+      start: new Date(end),
+      end: bufferEnd,
+      week: bufferLabel,
+      isBuffer: true,
+    });
+    console.log(`[PERIOD] Added ${advancedSettings.bufferPercentage}% buffer: ${bufferDays} days`);
+  }
+  
+  if (advancedSettings.distributeByCapacity && capacity > 0) {
+    const totalPeriods = periods.filter(p => !p.isBuffer).length;
+    const amountPerPeriod = capacity / totalPeriods;
+    const percentagePerPeriod = 100 / totalPeriods;
+    
+    periods.forEach((period, index) => {
+      if (!period.isBuffer) {
+        period.defaultPercentage = Math.round(percentagePerPeriod * 100) / 100;
+        period.defaultAmount = Math.round(amountPerPeriod * 100) / 100;
+      } else {
+        period.defaultPercentage = 0;
+        period.defaultAmount = 0;
+      }
+    });
+    console.log(`[PERIOD] Distributed capacity: ${amountPerPeriod.toFixed(2)} per period (${percentagePerPeriod.toFixed(2)}% each)`);
   }
   
   return periods;

@@ -138,17 +138,35 @@ export const userServices = {
   get: {
     all: async (
       companyId: string,
+      page: number = 1,
+      limit: number = 10,
+      search: string = '',
       connection?: PoolConnection
-    ): Promise<user[]> => {
+    ): Promise<{ data: user[]; total: number; page: number; limit: number }> => {
       const CONNECTION: PoolConnection =
         connection || (await PPIC.getConnection());
 
       try {
+        const offset = (page - 1) * limit;
+        const searchPattern = `%${search}%`;
+
+        const [countResult]: [RowDataPacket[], FieldPacket[]] = await CONNECTION.query(
+          userQuerys.get.all.count,
+          [companyId, searchPattern, searchPattern]
+        );
+        const total = countResult[0].total;
+
         const [data]: [RowDataPacket[], FieldPacket[]] = await CONNECTION.query(
           userQuerys.get.all.all,
-          [companyId]
+          [companyId, searchPattern, searchPattern, limit, offset]
         );
-        return data as user[];
+
+        return {
+          data: data as user[],
+          total,
+          page,
+          limit
+        };
       } catch (error) {
         throw error;
       } finally {

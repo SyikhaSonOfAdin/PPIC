@@ -16,7 +16,8 @@ const table = {
 const QUERY = {
     get: {
         all: {
-            all: `SELECT U.${table.COLUMN.ID}, U.${table.COLUMN.USERNAME}, U.${table.COLUMN.EMAIL}, DATE_FORMAT(U.${table.COLUMN.SINCE}, "%Y-%m-%d") AS INPUT_DATE FROM ${table.TABLE} AS U WHERE U.${table.COLUMN.COMPANY_ID} = ? ORDER BY U.${table.COLUMN.SINCE} ASC`,
+            all: `SELECT U.${table.COLUMN.ID}, U.${table.COLUMN.USERNAME}, U.${table.COLUMN.EMAIL}, DATE_FORMAT(U.${table.COLUMN.SINCE}, "%Y-%m-%d") AS INPUT_DATE FROM ${table.TABLE} AS U WHERE U.${table.COLUMN.COMPANY_ID} = ? AND (U.${table.COLUMN.USERNAME} LIKE ? OR U.${table.COLUMN.EMAIL} LIKE ?) ORDER BY U.${table.COLUMN.SINCE} ASC LIMIT ? OFFSET ?`,
+            count: `SELECT COUNT(*) as total FROM ${table.TABLE} AS U WHERE U.${table.COLUMN.COMPANY_ID} = ? AND (U.${table.COLUMN.USERNAME} LIKE ? OR U.${table.COLUMN.EMAIL} LIKE ?)`,
             withoutDepartment: `SELECT U.${table.COLUMN.ID}, U.${table.COLUMN.USERNAME} FROM ${table.TABLE} AS U WHERE U.${table.COLUMN.COMPANY_ID} = ? AND U.${table.COLUMN.DEPARTMENT_ID} IS NULL`,
             byDepId: `SELECT U.${table.COLUMN.ID}, U.${table.COLUMN.USERNAME}, U.${table.COLUMN.EMAIL} FROM ${table.TABLE} AS U WHERE U.${table.COLUMN.DEPARTMENT_ID} = ?`,
         },
