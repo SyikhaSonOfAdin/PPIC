@@ -34,17 +34,26 @@ const QUERY = {
         }
     },
     select: {
-        all: `SELECT PP.${table.COLUMN.ID}, 
+        all: `SELECT PP.${table.COLUMN.ID},
             U.${userTable.COLUMN.USERNAME} AS INPUT_BY,
-            DATE_FORMAT(PP.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE, 
+            DATE_FORMAT(PP.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE,
             PP.${table.COLUMN.PERIOD_YEAR},
             DATE_FORMAT(PP.${table.COLUMN.PERIOD_MONTH}, '%m-%d') AS PERIOD_MONTH,
             PP.${table.COLUMN.WEEK},
             PP.${table.COLUMN.PERCENTAGE},
-            PP.${table.COLUMN.AMOUNT} 
+            PP.${table.COLUMN.AMOUNT}
             FROM ${table.TABLE} AS PP
-            JOIN ${userTable.TABLE} AS U ON PP.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID} 
-            WHERE PP.${table.COLUMN.PROJECT_ID} = ?`,        
+            JOIN ${userTable.TABLE} AS U ON PP.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID}
+            WHERE PP.${table.COLUMN.PROJECT_ID} = ?`,
+        forAI: `SELECT
+            PP.${table.COLUMN.PERIOD_YEAR},
+            DATE_FORMAT(PP.${table.COLUMN.PERIOD_MONTH}, '%Y-%m-%d') AS PERIOD_MONTH,
+            PP.${table.COLUMN.WEEK},
+            PP.${table.COLUMN.PERCENTAGE},
+            PP.${table.COLUMN.AMOUNT}
+            FROM ${table.TABLE} AS PP
+            WHERE PP.${table.COLUMN.PROJECT_ID} = ?
+            ORDER BY PP.${table.COLUMN.PERIOD_YEAR} ASC, PP.${table.COLUMN.PERIOD_MONTH} ASC`,
         data: `SELECT DATE_FORMAT(${table.COLUMN.PERIOD_MONTH}, '%Y-%m-%d') AS PERIOD_MONTH, ${table.COLUMN.AMOUNT} FROM ${table.TABLE} WHERE ${table.COLUMN.PROJECT_ID} = ? AND YEAR(${table.COLUMN.PERIOD_MONTH}) = ?  ORDER BY ${table.COLUMN.PERIOD_MONTH} ASC`,
         rowsData: `SELECT COUNT(p.${table.COLUMN.ID}) AS NUMBER_OF_ROWS FROM ${table.TABLE} AS p WHERE p.${table.COLUMN.PROJECT_ID} = ?`
     }

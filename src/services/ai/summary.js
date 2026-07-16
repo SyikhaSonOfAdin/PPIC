@@ -7,9 +7,12 @@ const {
 } = require("../../models/projectAiSummary");
 const { projectTable } = require("../../models/project");
 const { projectDetailTable } = require("../../models/projectDetail");
+const { categoryTable } = require("../../models/category");
 const { remarkQuerys } = require("../../models/journalRemark");
 const { actualQuerys } = require("../../models/projectActual");
 const { plansQuerys } = require("../../models/projectPlans");
+const { phaseScheduleQuerys } = require("../../models/phaseSchedule");
+const { projectAttachmentTable } = require("../../models/attachment");
 
 const STATUS = {
   PENDING: "pending",
@@ -69,6 +72,8 @@ const selectProjectContextSQL = `SELECT
   P.${projectTable.COLUMN.ID} AS ID,
   P.${projectTable.COLUMN.PROJECT_NO} AS PROJECT_NO,
   P.${projectTable.COLUMN.CLIENT} AS CLIENT,
+  C.${categoryTable.COLUMN.NAME} AS CATEGORY_NAME,
+  C.${categoryTable.COLUMN.UOM} AS CATEGORY_UOM,
   PD.${projectDetailTable.COLUMN.NAME} AS DETAIL_NAME,
   PD.${projectDetailTable.COLUMN.SPK} AS SPK,
   PD.${projectDetailTable.COLUMN.DESCRIPTION} AS DESCRIPTION,
@@ -88,6 +93,8 @@ const selectProjectContextSQL = `SELECT
   FROM ${projectTable.TABLE} AS P
   LEFT JOIN ${projectDetailTable.TABLE} AS PD
     ON P.${projectTable.COLUMN.ID} = PD.${projectDetailTable.COLUMN.PROJECT_ID}
+  LEFT JOIN ${categoryTable.TABLE} AS C
+    ON P.${projectTable.COLUMN.CATEGORY_ID} = C.${categoryTable.COLUMN.ID}
   WHERE P.${projectTable.COLUMN.ID} = ?
   LIMIT 1`;
 
@@ -189,8 +196,7 @@ const aiSummaryServices = {
   getRemarks: async (projectId) => {
     const CONN = await PPIC.getConnection();
     try {
-      // await prepareConnection(CONN);
-      const [rows] = await CONN.query(remarkQuerys.select.onlyOne, [projectId]);
+      const [rows] = await CONN.query(remarkQuerys.select.forAI, [projectId]);
       return rows ?? [];
     } finally {
       CONN.release();
@@ -199,7 +205,7 @@ const aiSummaryServices = {
   getPlans: async (projectId) => {
     const CONN = await PPIC.getConnection();
     try {
-      const [rows] = await CONN.query(plansQuerys.select.all, [projectId]);
+      const [rows] = await CONN.query(plansQuerys.select.forAI, [projectId]);
       return rows ?? [];
     } finally {
       CONN.release();
@@ -208,7 +214,29 @@ const aiSummaryServices = {
   getActual: async (projectId) => {
     const CONN = await PPIC.getConnection();
     try {
-      const [rows] = await CONN.query(actualQuerys.select.all, [projectId]);
+      const [rows] = await CONN.query(actualQuerys.select.forAI, [projectId]);
+      return rows ?? [];
+    } finally {
+      CONN.release();
+    }
+  },
+  getPhaseSchedules: async (projectId) => {
+    const CONN = await PPIC.getConnection();
+    try {
+      const [rows] = await CONN.query(phaseScheduleQuerys.select.byProject, [projectId]);
+      return rows ?? [];
+    } finally {
+      CONN.release();
+    }
+  },
+  getAttachmentCount: async (projectId) => {
+    const CONN = await PPIC.getConnection();
+    try {
+      const sql = `SELECT ${projectAttachmentTable.COLUMN.LABEL} AS label, COUNT(*) AS count
+        FROM ${projectAttachmentTable.TABLE}
+        WHERE ${projectAttachmentTable.COLUMN.PROJECT_ID} = ?
+        GROUP BY ${projectAttachmentTable.COLUMN.LABEL}`;
+      const [rows] = await CONN.query(sql, [projectId]);
       return rows ?? [];
     } finally {
       CONN.release();

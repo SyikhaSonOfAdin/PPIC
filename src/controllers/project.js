@@ -8,6 +8,8 @@ const { othersQuerys } = require("../models/others");
 const { PPIC } = require("../config/db");
 const { progressPercentage } = require("../utils");
 const { generatePeriods, getIntervalDays } = require("../utils/periodGenerator");
+const { syncProject } = require("../extensions/productivity_app/module/syncProject");
+const { getCostSummary } = require("../extensions/productivity_app/module/getCostSummary");
 
 const projectControllers = {
   add: async (req, res, next) => {
@@ -135,6 +137,7 @@ const projectControllers = {
           }
         }
         await connection.commit();
+        syncProject({ companyId, projectNo, userId });
         return res.status(200).json({
           message: "Project added successfully",
           data: [
@@ -319,6 +322,7 @@ const projectControllers = {
           await plansServices.update.percentage(projectId, connection);
           await actualServices.update.percentage(projectId, connection);
           await connection.commit();
+          syncProject({ companyId: req.body.companyId, projectNo, userId });
           return res.status(200).json({
             message: "Project edited successfully",
             data: [],
@@ -591,10 +595,32 @@ const projectControllers = {
             projectId,
             connection,
           );
-          const { percentage, deviation, actual } = await progressPercentage(
-            projectId,
-            connection,
-          );
+          const { percentage, deviation, actual, actualProgress } =
+            await progressPercentage(projectId, connection);
+
+          // Pull (bukan push) dari Productivity & Budget app -- data manual
+          // di projectDetail TIDAK disentuh sama sekali, ini murni tambahan
+          // section terpisah supaya kedua sumber tetap terlihat berdampingan
+          // (bukan salah satu menimpa yang lain secara diam-diam).
+          let productivityAppSummary = null;
+          const targets = await getCostSummary({
+            companyId: project.COMPANY_ID,
+            projectNo: project.PROJECT_NO,
+          });
+          const match = targets.find((t) => t.dashboard_project_id === projectId);
+          if (match) {
+            // prettier-ignore
+            const productivity_cost = match.cost && match.cost !== 0 && actualProgress !== 0 ? Number(match.cost) / Number(actualProgress) : null;
+            // prettier-ignore
+            const productivity = match.hours && match.hours !== 0 && actualProgress !== 0 ? Number(actualProgress) / Number(match.hours) : null;
+            productivityAppSummary = {
+              BUDGET: match.budget,
+              COST: match.cost,
+              MAN_HOURS: match.hours,
+              PRODUCTIVITY: productivity,
+              PRODUCTIVITY_COST: productivity_cost,
+            };
+          }
 
           return res.status(200).json({
             message: "Get Project successfully",
@@ -610,6 +636,7 @@ const projectControllers = {
                   // prettier-ignore
                   ACTUAL: actual,
                 },
+                productivityAppSummary,
               },
             ],
           });

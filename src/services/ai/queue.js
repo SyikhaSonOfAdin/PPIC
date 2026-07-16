@@ -142,11 +142,13 @@ class SummaryQueue {
   async _process(projectId) {
     const model = geminiServices.getModelName();
 
-    const [project, remarks, plans, actual] = await Promise.all([
+    const [project, remarks, plans, actual, phaseSchedules, attachmentCount] = await Promise.all([
       aiSummaryServices.getProjectContext(projectId),
       aiSummaryServices.getRemarks(projectId),
       aiSummaryServices.getPlans(projectId),
       aiSummaryServices.getActual(projectId),
+      aiSummaryServices.getPhaseSchedules(projectId),
+      aiSummaryServices.getAttachmentCount(projectId),
     ]);
 
     if (!project) {
@@ -167,6 +169,8 @@ class SummaryQueue {
         remarks,
         plans,
         actual,
+        phaseSchedules,
+        attachmentCount,
       });
     } catch (err) {
       // Persist FAILED status, lalu lempar error asli ke worker.

@@ -56,6 +56,29 @@ const QUERY = {
         JOIN ${userTable.TABLE} AS U ON PR.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID} 
         LEFT JOIN ${departmentTable.TABLE} AS D ON PR.${table.COLUMN.DEPARTMENT_ID} = D.${departmentTable.COLUMN.ID}
         WHERE PR.${table.COLUMN.PROJECT_ID} = ?`,
+        forAI: `SELECT
+        PR.${table.COLUMN.ID},
+        PR.${table.COLUMN.STATUS},
+        U.${userTable.COLUMN.USERNAME} AS INPUT_BY,
+        D.${departmentTable.COLUMN.NAME} AS DEPARTMENT_NAME,
+        (
+            SELECT
+            GROUP_CONCAT(${userTable.COLUMN.USERNAME}
+            ORDER BY ${userTable.COLUMN.ID}
+            SEPARATOR ', '
+            )
+            FROM ${userTable.TABLE}
+            WHERE ${userTable.COLUMN.DEPARTMENT_ID} = PR.${table.COLUMN.DEPARTMENT_ID}
+        ) AS PIC,
+        DATE_FORMAT(PR.${table.COLUMN.INPUT_DATE}, '%Y-%m-%d') AS INPUT_DATE,
+        DATE_FORMAT(PR.${table.COLUMN.DEADLINE}, '%Y-%m-%d') AS DEADLINE,
+        PR.${table.COLUMN.SOLUTION},
+        PR.${table.COLUMN.DESCRIPTION}
+        FROM ${table.TABLE} AS PR
+        JOIN ${userTable.TABLE} AS U ON PR.${table.COLUMN.INPUT_BY} = U.${userTable.COLUMN.ID}
+        LEFT JOIN ${departmentTable.TABLE} AS D ON PR.${table.COLUMN.DEPARTMENT_ID} = D.${departmentTable.COLUMN.ID}
+        WHERE PR.${table.COLUMN.PROJECT_ID} = ?
+        ORDER BY PR.${table.COLUMN.INPUT_DATE} DESC`,
         all: {
             forReport: `SELECT 
             PR.${table.COLUMN.ID}, 

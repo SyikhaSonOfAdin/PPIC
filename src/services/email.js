@@ -1,44 +1,41 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
     }
-};
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.emailServices = void 0;
-var nodemailer = require("nodemailer");
-var transporter = nodemailer.createTransport({
+const nodemailer = __importStar(require("nodemailer"));
+const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
     port: Number(process.env.EMAIL_HOST_PORT) || 465,
     secure: false,
@@ -49,13 +46,11 @@ var transporter = nodemailer.createTransport({
 });
 // ─── Shared style helpers ──────────────────────────────────────────────────
 /** Label kecil di atas field (Status, Dept, PIC, dst.) */
-var fieldLabel = function (text) {
-    return "<p style=\"margin:0 0 4px;font-size:10px;font-weight:600;color:#94a3b8;\n    text-transform:uppercase;letter-spacing:.5px;line-height:14px;\">".concat(text, "</p>");
-};
+const fieldLabel = (text) => `<p style="margin:0 0 4px;font-size:10px;font-weight:600;color:#94a3b8;
+    text-transform:uppercase;letter-spacing:.5px;line-height:14px;">${text}</p>`;
 /** Badge status remark */
-var remarkBadge = function (status) {
-    var _a;
-    var map = {
+const remarkBadge = (status) => {
+    const map = {
         Warm: { text: "#fb8c00", bg: "rgba(255,152,0,0.1)", border: "#ff9800" },
         "On Going": {
             text: "#1e88e5",
@@ -63,85 +58,189 @@ var remarkBadge = function (status) {
             border: "#2196f3",
         },
     };
-    var c = (_a = map[status]) !== null && _a !== void 0 ? _a : {
+    const c = map[status] ?? {
         text: "#e53935",
         bg: "rgba(244,67,54,0.1)",
         border: "#f44336",
     };
-    return "<span style=\"display:inline-block;padding:2px 10px;\n    color:".concat(c.text, ";background:").concat(c.bg, ";border:1px solid ").concat(c.border, ";\n    border-radius:20px;font-size:11px;font-weight:600;line-height:18px;\">").concat(status, "</span>");
+    return `<span style="display:inline-block;padding:2px 10px;
+    color:${c.text};background:${c.bg};border:1px solid ${c.border};
+    border-radius:20px;font-size:11px;font-weight:600;line-height:18px;">${status}</span>`;
 };
 /** Badge status project */
-var projectBadge = function (status) {
-    var ok = status === "On Time" || status === "Ahead";
-    var ongoing = status === "On Going";
-    var c = ok
+const projectBadge = (status) => {
+    const ok = status === "On Time" || status === "Ahead";
+    const ongoing = status === "On Going";
+    const c = ok
         ? { text: "#43a047", bg: "rgba(76,175,80,0.1)", border: "#4caf50" }
         : ongoing
             ? { text: "#1e88e5", bg: "rgba(33,150,243,0.1)", border: "#2196f3" }
             : { text: "#e53935", bg: "rgba(244,67,54,0.1)", border: "#f44336" };
-    return "<span style=\"display:inline-block;padding:2px 10px;\n    color:".concat(c.text, ";background:").concat(c.bg, ";border:1px solid ").concat(c.border, ";\n    border-radius:20px;font-size:11px;font-weight:600;line-height:18px;\">").concat(status, "</span>");
+    return `<span style="display:inline-block;padding:2px 10px;
+    color:${c.text};background:${c.bg};border:1px solid ${c.border};
+    border-radius:20px;font-size:11px;font-weight:600;line-height:18px;">${status}</span>`;
 };
 /**
  * Satu remark = card vertikal.
  * PIC dan deskripsi tidak pernah tabrakan karena masing-masing full-width.
  */
-var buildRemarkCard = function (r, isLast) {
-    var hasSolution = r.SOLUTION && r.SOLUTION.trim() !== "";
+const buildRemarkCard = (r, isLast) => {
+    const hasSolution = r.SOLUTION && r.SOLUTION.trim() !== "";
     // Jika ada solusi → description & solution berdampingan (50/50)
     // Jika tidak → description full-width
-    var descSolutionBlock = hasSolution
-        ? "\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:10px;\">\n        <tr>\n          <td width=\"49%\" valign=\"top\"\n            style=\"background:#f8fafc;border-left:3px solid #e2e8f0;\n              border-radius:0 6px 6px 0;padding:10px 12px;\">\n            ".concat(fieldLabel("Deskripsi"), "\n            <p style=\"margin:0;font-size:13px;color:#475569;line-height:21px;\n              word-break:break-word;\">").concat(r.DESCRIPTION, "</p>\n          </td>\n          <td width=\"2%\"></td>\n          <td width=\"49%\" valign=\"top\"\n            style=\"background:#f0fdf4;border-left:3px solid #bbf7d0;\n              border-radius:0 6px 6px 0;padding:10px 12px;\">\n            ").concat(fieldLabel("Solusi"), "\n            <p style=\"margin:0;font-size:13px;color:#166534;line-height:21px;\n              word-break:break-word;\">").concat(r.SOLUTION, "</p>\n          </td>\n        </tr>\n      </table>")
-        : "\n      <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:10px;\">\n        <tr>\n          <td style=\"background:#f8fafc;border-left:3px solid #e2e8f0;\n            border-radius:0 6px 6px 0;padding:10px 12px;\">\n            ".concat(fieldLabel("Deskripsi"), "\n            <p style=\"margin:0;font-size:13px;color:#475569;line-height:21px;\n              word-break:break-word;\">").concat(r.DESCRIPTION, "</p>\n          </td>\n        </tr>\n      </table>");
-    var bottomPad = isLast ? "16px" : "12px";
-    var divider = isLast
+    const descSolutionBlock = hasSolution
+        ? `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px;">
+        <tr>
+          <td width="49%" valign="top"
+            style="background:#f8fafc;border-left:3px solid #e2e8f0;
+              border-radius:0 6px 6px 0;padding:10px 12px;">
+            ${fieldLabel("Deskripsi")}
+            <p style="margin:0;font-size:13px;color:#475569;line-height:21px;
+              word-break:break-word;">${r.DESCRIPTION}</p>
+          </td>
+          <td width="2%"></td>
+          <td width="49%" valign="top"
+            style="background:#f0fdf4;border-left:3px solid #bbf7d0;
+              border-radius:0 6px 6px 0;padding:10px 12px;">
+            ${fieldLabel("Solusi")}
+            <p style="margin:0;font-size:13px;color:#166534;line-height:21px;
+              word-break:break-word;">${r.SOLUTION}</p>
+          </td>
+        </tr>
+      </table>`
+        : `
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px;">
+        <tr>
+          <td style="background:#f8fafc;border-left:3px solid #e2e8f0;
+            border-radius:0 6px 6px 0;padding:10px 12px;">
+            ${fieldLabel("Deskripsi")}
+            <p style="margin:0;font-size:13px;color:#475569;line-height:21px;
+              word-break:break-word;">${r.DESCRIPTION}</p>
+          </td>
+        </tr>
+      </table>`;
+    const bottomPad = isLast ? "16px" : "12px";
+    const divider = isLast
         ? ""
-        : "\n    <tr>\n      <td style=\"padding:0 18px;\">\n        <div style=\"height:1px;background:#f1f5f9;\"></div>\n      </td>\n    </tr>";
-    return "\n    <tr>\n      <td style=\"padding:14px 18px ".concat(bottomPad, ";\">\n\n        <!-- Meta: status / dept / deadline -->\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n          <tr>\n            <td valign=\"top\">\n              ").concat(fieldLabel("Status"), "\n              ").concat(remarkBadge(r.STATUS), "\n            </td>\n            <td valign=\"top\" style=\"padding-left:20px;\">\n              ").concat(fieldLabel("Departemen"), "\n              <p style=\"margin:0;font-size:13px;color:#334155;font-weight:500;\n                line-height:20px;\">").concat(r.DEPARTMENT_NAME, "</p>\n            </td>\n            <td valign=\"top\" align=\"right\" style=\"white-space:nowrap;\">\n              ").concat(fieldLabel("Deadline"), "\n              <p style=\"margin:0;font-size:13px;color:#334155;font-weight:500;\n                line-height:20px;\">").concat(r.DEADLINE, "</p>\n            </td>\n          </tr>\n        </table>\n\n        <!-- PIC \u2014 full width agar nama panjang tidak tabrakan -->\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"margin-top:10px;\">\n          <tr>\n            <td>\n              ").concat(fieldLabel("PIC"), "\n              <p style=\"margin:0;font-size:13px;color:#334155;line-height:20px;\n                word-break:break-word;\">").concat(r.PIC || "—", "</p>\n            </td>\n          </tr>\n        </table>\n\n        <!-- Description / Solution -->\n        ").concat(descSolutionBlock, "\n\n      </td>\n    </tr>\n    ").concat(divider);
+        : `
+    <tr>
+      <td style="padding:0 18px;">
+        <div style="height:1px;background:#f1f5f9;"></div>
+      </td>
+    </tr>`;
+    return `
+    <tr>
+      <td style="padding:14px 18px ${bottomPad};">
+
+        <!-- Meta: status / dept / deadline -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td valign="top">
+              ${fieldLabel("Status")}
+              ${remarkBadge(r.STATUS)}
+            </td>
+            <td valign="top" style="padding-left:20px;">
+              ${fieldLabel("Departemen")}
+              <p style="margin:0;font-size:13px;color:#334155;font-weight:500;
+                line-height:20px;">${r.DEPARTMENT_NAME}</p>
+            </td>
+            <td valign="top" align="right" style="white-space:nowrap;">
+              ${fieldLabel("Deadline")}
+              <p style="margin:0;font-size:13px;color:#334155;font-weight:500;
+                line-height:20px;">${r.DEADLINE}</p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- PIC — full width agar nama panjang tidak tabrakan -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px;">
+          <tr>
+            <td>
+              ${fieldLabel("PIC")}
+              <p style="margin:0;font-size:13px;color:#334155;line-height:20px;
+                word-break:break-word;">${r.PIC || "—"}</p>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Description / Solution -->
+        ${descSolutionBlock}
+
+      </td>
+    </tr>
+    ${divider}`;
 };
-var buildProjectCard = function (group, appUrl) {
-    var remarkRows = group.remarks
-        .map(function (r, i) { return buildRemarkCard(r, i === group.remarks.length - 1); })
+const buildProjectCard = (group, appUrl) => {
+    const remarkRows = group.remarks
+        .map((r, i) => buildRemarkCard(r, i === group.remarks.length - 1))
         .join("\n");
-    return "\n    <tr>\n      <td style=\"border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;padding:0;\n        mso-border-alt:solid #e0e0e0 1px;\">\n        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n\n          <!-- Project header -->\n          <tr>\n            <td style=\"background:#f8fafc;padding:14px 18px;\n              border-bottom:1px solid #e9ecef;border-radius:12px 12px 0 0;\">\n              <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n                <tr>\n                  <td>\n                    <a href=\"".concat(appUrl, "/projects/").concat(group.project_id, "?tab=remarks\"\n                      target=\"_blank\"\n                      style=\"color:#1e293b;font-weight:700;font-size:16px;\n                        text-decoration:none;line-height:24px;\">\n                      ").concat(group.project_no, "\n                    </a>\n                  </td>\n                  <td style=\"padding-left:10px;\">\n                    ").concat(projectBadge(group.project_status), "\n                  </td>\n                </tr>\n              </table>\n              <p style=\"margin:5px 0 0;font-size:13px;color:#64748b;line-height:20px;\">\n                ").concat(group.project_name, "\n              </p>\n            </td>\n          </tr>\n\n          <!-- Remarks -->\n          ").concat(remarkRows, "\n\n        </table>\n      </td>\n    </tr>\n    <tr><td style=\"padding:6px 0;\"></td></tr>");
+    return `
+    <tr>
+      <td style="border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;padding:0;
+        mso-border-alt:solid #e0e0e0 1px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+
+          <!-- Project header -->
+          <tr>
+            <td style="background:#f8fafc;padding:14px 18px;
+              border-bottom:1px solid #e9ecef;border-radius:12px 12px 0 0;">
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <a href="${appUrl}/projects/${group.project_id}?tab=remarks"
+                      target="_blank"
+                      style="color:#1e293b;font-weight:700;font-size:16px;
+                        text-decoration:none;line-height:24px;">
+                      ${group.project_no}
+                    </a>
+                  </td>
+                  <td style="padding-left:10px;">
+                    ${projectBadge(group.project_status)}
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:5px 0 0;font-size:13px;color:#64748b;line-height:20px;">
+                ${group.project_name}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Remarks -->
+          ${remarkRows}
+
+        </table>
+      </td>
+    </tr>
+    <tr><td style="padding:6px 0;"></td></tr>`;
 };
 exports.emailServices = {
-    sendEmail: function (to, subject, text, html, from) { return __awaiter(void 0, void 0, void 0, function () {
-        var options, error_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    options = {
-                        from: 'Syikha Creative Production <noreply@ppic.syikha.it.com>',
-                        to: 'herfandazachariaputra@gmail.com',
-                        subject: subject,
-                        text: text,
-                        html: html,
-                    };
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 3, , 4]);
-                    return [4 /*yield*/, transporter.sendMail(options)];
-                case 2: return [2 /*return*/, _a.sent()];
-                case 3:
-                    error_1 = _a.sent();
-                    throw new Error("Failed to send email: ".concat(error_1.message));
-                case 4: return [2 /*return*/];
-            }
-        });
-    }); },
+    sendEmail: async (to, subject, text, html, from) => {
+        const options = {
+            from: 'Syikha Creative Production <noreply@ppic.syikha.it.com>',
+            to,
+            subject,
+            text,
+            html,
+        };
+        try {
+            return await transporter.sendMail(options);
+        }
+        catch (error) {
+            throw new Error(`Failed to send email: ${error.message}`);
+        }
+    },
     template: {
-        projectRemark: function (username, departmentName, data) {
-            var _a;
-            if (data === void 0) { data = []; }
-            var safeData = Array.isArray(data) ? data : [];
-            var appUrl = (_a = process.env.APP) !== null && _a !== void 0 ? _a : "";
-            var today = new Date().toLocaleDateString("id-ID", {
+        projectRemark: (username, departmentName, data = []) => {
+            const safeData = Array.isArray(data) ? data : [];
+            const appUrl = process.env.APP ?? "";
+            const today = new Date().toLocaleDateString("id-ID", {
                 day: "2-digit",
                 month: "long",
                 year: "numeric",
             });
             // Group by project, only include non-Closed remarks
-            var grouped = safeData.reduce(function (acc, item) {
+            const grouped = safeData.reduce((acc, item) => {
                 if (!acc[item.ID]) {
                     acc[item.ID] = {
                         project_id: item.ID,
@@ -163,11 +262,78 @@ exports.emailServices = {
                 }
                 return acc;
             }, {});
-            var projectCards = Object.values(grouped)
-                .filter(function (g) { return g.remarks.length > 0; })
-                .map(function (g) { return buildProjectCard(g, appUrl); })
+            const projectCards = Object.values(grouped)
+                .filter((g) => g.remarks.length > 0)
+                .map((g) => buildProjectCard(g, appUrl))
                 .join("\n");
-            return "\n        <center>\n          <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">\n            <tr>\n              <td align=\"center\" bgcolor=\"#f1f1f1\" style=\"padding:40px 0;\">\n                <table width=\"680\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"\n                  style=\"font-family:Inter,Arial,sans-serif;\n                    padding:48px 40px 60px;\n                    background:#ffffff;\n                    border:1px solid #e0e0e0;\n                    border-radius:16px;\">\n\n                  <!-- HEADER -->\n                  <tr>\n                    <td>\n                      <table cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\">\n                        <tr>\n                          <!-- Accent bar biru -->\n                          <td width=\"6\" style=\"background:#2563eb;border-radius:4px;\"></td>\n                          <td style=\"padding-left:14px;\">\n                            <h1 style=\"margin:0;font-size:22px;line-height:30px;\n                              color:#1a2233;font-weight:700;\">\n                              Halo, ".concat(username, "!\n                            </h1>\n                            <p style=\"margin:6px 0 0;font-size:14px;line-height:22px;color:#64748b;\">\n                              Dimohon untuk melakukan update status obstacle pada\n                              <strong style=\"color:#334155;\">PPIC Dashboard</strong>\n                              secara berkala.<br>\n                              Data ini diperbarui per tanggal\n                              <strong style=\"color:#334155;\">").concat(today, "</strong>.\n                            </p>\n                          </td>\n                        </tr>\n                      </table>\n                    </td>\n                  </tr>\n\n                  <!-- Divider -->\n                  <tr>\n                    <td style=\"padding:20px 0;\">\n                      <div style=\"height:1px;background:#e9ecef;\"></div>\n                    </td>\n                  </tr>\n\n                  <!-- PROJECT CARDS -->\n                  ").concat(projectCards, "\n\n                  <!-- Divider -->\n                  <tr>\n                    <td style=\"padding:14px 0 20px;\">\n                      <div style=\"height:1px;background:#e9ecef;\"></div>\n                    </td>\n                  </tr>\n\n                  <!-- FOOTER -->\n                  <tr>\n                    <td align=\"center\">\n                      <p style=\"margin:0;font-size:12px;color:#94a3b8;\">\n                        PPIC Dashboard &nbsp;&middot;&nbsp; &copy; ").concat(new Date().getFullYear(), " Syikha Akmal\n                      </p>\n                    </td>\n                  </tr>\n\n                </table>\n              </td>\n            </tr>\n          </table>\n        </center>");
+            return `
+        <center>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td align="center" bgcolor="#f1f1f1" style="padding:40px 0;">
+                <table width="680" cellpadding="0" cellspacing="0" border="0"
+                  style="font-family:Inter,Arial,sans-serif;
+                    padding:48px 40px 60px;
+                    background:#ffffff;
+                    border:1px solid #e0e0e0;
+                    border-radius:16px;">
+
+                  <!-- HEADER -->
+                  <tr>
+                    <td>
+                      <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                        <tr>
+                          <!-- Accent bar biru -->
+                          <td width="6" style="background:#2563eb;border-radius:4px;"></td>
+                          <td style="padding-left:14px;">
+                            <h1 style="margin:0;font-size:22px;line-height:30px;
+                              color:#1a2233;font-weight:700;">
+                              Halo, ${username}!
+                            </h1>
+                            <p style="margin:6px 0 0;font-size:14px;line-height:22px;color:#64748b;">
+                              Dimohon untuk melakukan update status obstacle pada
+                              <strong style="color:#334155;">PPIC Dashboard</strong>
+                              secara berkala.<br>
+                              Data ini diperbarui per tanggal
+                              <strong style="color:#334155;">${today}</strong>.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Divider -->
+                  <tr>
+                    <td style="padding:20px 0;">
+                      <div style="height:1px;background:#e9ecef;"></div>
+                    </td>
+                  </tr>
+
+                  <!-- PROJECT CARDS -->
+                  ${projectCards}
+
+                  <!-- Divider -->
+                  <tr>
+                    <td style="padding:14px 0 20px;">
+                      <div style="height:1px;background:#e9ecef;"></div>
+                    </td>
+                  </tr>
+
+                  <!-- FOOTER -->
+                  <tr>
+                    <td align="center">
+                      <p style="margin:0;font-size:12px;color:#94a3b8;">
+                        PPIC Dashboard &nbsp;&middot;&nbsp; &copy; ${new Date().getFullYear()} Syikha Akmal
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </center>`;
         },
     },
 };
