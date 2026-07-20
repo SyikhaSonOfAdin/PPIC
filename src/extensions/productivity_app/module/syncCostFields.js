@@ -16,6 +16,14 @@ const { PPIC } = require("../../../config/db");
  * yang sedang berjalan di onlyOne), kegagalan cuma di-log, tidak pernah
  * melempar ke caller.
  *
+ * Transaksi eksplisit sendiri (bukan asumsi autocommit) -- koneksi dari
+ * pool.getConnection() BUKAN jaminan bersih, bisa saja itu koneksi fisik
+ * yang sebelumnya dipakai handler lain yang lupa commit/rollback (lihat
+ * bug onlyOne yang menyebabkan Lock wait timeout). Dengan beginTransaction
+ * eksplisit di sini, UPDATE ini pasti dalam transaksi milik sendiri dan
+ * SELALU di-commit/rollback sebelum koneksi dilepas -- konsisten dengan
+ * pola yang sudah dipakai service function lain di codebase ini.
+ *
  * BUDGET pakai COALESCE -- summary.BUDGET bisa null kalau Productivity app
  * belum mengonfigurasi budget share untuk project_detail ini, dan itu BUKAN
  * berarti budget manual yang sudah ada harus dihapus.
@@ -25,6 +33,7 @@ async function syncCostFields(projectId, summary) {
   try {
     const conn = await PPIC.getConnection();
     try {
+      await conn.beginTransaction();
       await conn.query(
         `UPDATE project_detail SET
            BUDGET = COALESCE(?, BUDGET),
@@ -42,6 +51,10 @@ async function syncCostFields(projectId, summary) {
           projectId,
         ]
       );
+      await conn.commit();
+    } catch (err) {
+      await conn.rollback();
+      throw err;
     } finally {
       conn.release();
     }

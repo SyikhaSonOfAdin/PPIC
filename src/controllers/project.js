@@ -628,6 +628,15 @@ const projectControllers = {
             syncCostFields(projectId, productivityAppSummary);
           }
 
+          // WAJIB commit -- tanpa ini transaksi tetap terbuka di koneksi
+          // pool setelah release(), dan kalau koneksi yang sama kebetulan
+          // dipakai ulang untuk WRITE (mis. syncCostFields di atas, atau
+          // endpoint lain), write itu ikut terjebak transaksi menggantung
+          // ini -- row lock-nya tidak pernah lepas sampai koneksi itu
+          // di-beginTransaction() lagi, menyebabkan Lock wait timeout di
+          // endpoint lain yang mencoba UPDATE row yang sama.
+          await connection.commit();
+
           return res.status(200).json({
             message: "Get Project successfully",
             data: [
