@@ -10,6 +10,7 @@ const { progressPercentage } = require("../utils");
 const { generatePeriods, getIntervalDays } = require("../utils/periodGenerator");
 const { syncProject } = require("../extensions/productivity_app/module/syncProject");
 const { getCostSummary } = require("../extensions/productivity_app/module/getCostSummary");
+const { syncCostFields } = require("../extensions/productivity_app/module/syncCostFields");
 
 const projectControllers = {
   add: async (req, res, next) => {
@@ -598,10 +599,13 @@ const projectControllers = {
           const { percentage, deviation, actual, actualProgress } =
             await progressPercentage(projectId, connection);
 
-          // Pull (bukan push) dari Productivity & Budget app -- data manual
-          // di projectDetail TIDAK disentuh sama sekali, ini murni tambahan
-          // section terpisah supaya kedua sumber tetap terlihat berdampingan
-          // (bukan salah satu menimpa yang lain secara diam-diam).
+          // Pull dari Productivity & Budget app saat halaman detail dibuka.
+          // Kalau ada match, hasilnya juga di-write-through ke projectDetail
+          // (syncCostFields, fire-and-forget di bawah) -- BUDGET/COST/
+          // MAN_HOURS/PRODUCTIVITY/PRODUCTIVITY_COST projectDetail jadi
+          // mirror dari Productivity app, bukan murni manual lagi. Kalau
+          // tidak ada match (company/project ini belum terintegrasi),
+          // projectDetail TIDAK disentuh -- nilai manual tetap fallback.
           let productivityAppSummary = null;
           const targets = await getCostSummary({
             companyId: project.COMPANY_ID,
@@ -620,6 +624,8 @@ const projectControllers = {
               PRODUCTIVITY: productivity,
               PRODUCTIVITY_COST: productivity_cost,
             };
+            // Fire-and-forget -- tidak pernah menunda atau menggagalkan response GET ini.
+            syncCostFields(projectId, productivityAppSummary);
           }
 
           return res.status(200).json({
